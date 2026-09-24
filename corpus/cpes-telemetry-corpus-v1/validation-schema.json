@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cpes-telemetry-corpus-v1-validation-schema",
+  "title": "CPES M3 manual validation metadata",
+  "type": "object",
+  "$defs": {
+    "coverageObservation": {
+      "type": "object",
+      "required": [
+        "observation_id",
+        "technique_id",
+        "event_id",
+        "coverage_status",
+        "observation_timestamp",
+        "evidence_reference",
+        "reviewer"
+      ],
+      "properties": {
+        "observation_id": {"type": "string", "minLength": 1},
+        "technique_id": {"type": "string", "minLength": 1},
+        "event_id": {"type": "string", "minLength": 1},
+        "coverage_status": {
+          "enum": ["passed", "incomplete", "missing", "not-applicable"]
+        },
+        "observation_timestamp": {"type": "string", "format": "date-time"},
+        "evidence_reference": {"type": "string", "minLength": 1},
+        "incomplete_reason": {"type": "string"},
+        "reviewer": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    },
+    "labelAudit": {
+      "type": "object",
+      "required": [
+        "audit_id",
+        "run_id",
+        "recorded_label",
+        "audit_outcome",
+        "evidence_reference",
+        "reviewer",
+        "reviewed_at"
+      ],
+      "properties": {
+        "audit_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "recorded_label": {"type": "string", "minLength": 1},
+        "recorded_technique_id": {"type": ["string", "null"]},
+        "audit_outcome": {"type": "string", "minLength": 1},
+        "evidence_reference": {"type": "string", "minLength": 1},
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"}
+      }
+    },
+    "benignHardNegativeReview": {
+      "type": "object",
+      "required": [
+        "review_id",
+        "category",
+        "observed_status",
+        "evidence_reference",
+        "reviewer",
+        "reviewed_at"
+      ],
+      "properties": {
+        "review_id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "observed_status": {"type": "string", "minLength": 1},
+        "evidence_reference": {"type": "string", "minLength": 1},
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

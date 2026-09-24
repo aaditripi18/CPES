@@ -1,0 +1,39 @@
+# M2 execution-plan template. Populate only during approved laboratory work.
+corpus_version: cpes-telemetry-corpus-v1
+techniques:
+  - technique_id: T1548.002
+    technique_name: Bypass UAC
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null
+  - technique_id: T1134.001
+    technique_name: Token Theft
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null
+  - technique_id: T1134.002
+    technique_name: Create Process with Token
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null
+  - technique_id: T1543.003
+    technique_name: Windows Service
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null
+  - technique_id: T1546.003
+    technique_name: WMI Event Subscription
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null
+  - technique_id: T1055.001
+    technique_name: DLL Injection
+    atomic_test_id: null
+    prerequisites: []
+    variants: []
+    cleanup_notes: null

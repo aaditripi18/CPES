@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CPES Sysmon configuration v2
+  Basis: sysmon-config-v1.xml (frozen M1 scope, Bible Section 9.6) — UNCHANGED except
+  for the single addition documented below.
+
+  DELTA vs v1:
+    + PipeEvent (EID 17 PipeCreated, EID 18 PipeConnected) is now logged.
+      Rationale: named-pipe create/connect is the direct, technique-specific
+      evidence of T1134.001 named-pipe impersonation (token theft). It provides
+      an INDEPENDENT ground-truth channel for the token-theft escalation outcome
+      that CPES's structural signals (integrity, image, parent, EID 8) do not use,
+      which is required to break the label-circularity noted in the v2 evaluation
+      (docs/CPES-Corpus-v2-Evaluation-2026-09-01.md, section 5.2).
+
+  All other event types are byte-for-byte identical to v1. Corpora collected under
+  this file MUST be labelled "collected under config-v2" for reproducibility.
+
+  Volume note: PipeEvent is high-frequency on Windows. Keep the config-v2 collection
+  window short (the ~20-min re-export session), and rely on the recent-first export
+  (export_corpus_v2.py) to retain the attack-window pipe events under the per-EID cap.
+-->
+<Sysmon schemaversion="4.90">
+  <EventFiltering>
+    <!-- EID 1: Process creation; provides ProcessGUID, lineage, and command line. -->
+    <ProcessCreate onmatch="exclude" />
+
+    <!-- EID 6: Driver load; optional T1543.003 BYOVD observability. -->
+    <DriverLoad onmatch="exclude" />
+
+    <!-- EID 7: Image/module load. -->
+    <ImageLoad onmatch="exclude" />
+
+    <!-- EID 8: Remote-thread creation. -->
+    <CreateRemoteThread onmatch="exclude" />
+
+    <!-- EID 10: Process access. -->
+    <ProcessAccess onmatch="exclude" />
+
+    <!-- EID 11: File creation. -->
+    <FileCreate onmatch="exclude" />
+
+    <!--
+      EIDs 12 and 13 only. RegistryEvent also supports EID 14 (rename), so
+      the include filter admits the create/delete and value-set event types
+      while excluding rename activity.
+    -->
+    <RegistryEvent onmatch="include">
+      <EventType condition="is">CreateKey</EventType>
+      <EventType condition="is">DeleteKey</EventType>
+      <EventType condition="is">SetValue</EventType>
+      <EventType condition="is">DeleteValue</EventType>
+    </RegistryEvent>
+
+    <!--
+      NEW in v2. EID 17 (PipeCreated) and EID 18 (PipeConnected).
+      onmatch="exclude" with no child rules logs all named-pipe activity — the
+      independent token-theft (T1134.001) evidence channel. Collect only during
+      the bounded re-export session to keep volume manageable.
+    -->
+    <PipeEvent onmatch="exclude" />
+
+    <!-- EIDs 19, 20, and 21: WMI filter, consumer, and binding activity. -->
+    <WmiEvent onmatch="exclude" />
+  </EventFiltering>
+</Sysmon>

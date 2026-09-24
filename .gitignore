@@ -1,0 +1,40 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+
+# Local configuration, secrets, and generated experiment data
+.env
+.env.*
+!*.example
+data/
+outputs/
+*.log
+
+# Generated demonstration artifacts
+examples/demo-export.json
+examples/demo-evaluation.json
+
+# Local tool/session configuration (not part of the project)
+.claude/
+.agents/
+
+# Distribution/verification bundles (generated snapshots, not source of truth)
+*.zip
+/paper-package/
+/verify-bundle/
+/CPES-verify-bundle/
+
+# Personal working notes, raw AI session exports, and large corpus/analysis
+# working data — not part of the published project
+/Claude outputs/
+/analysis/
+

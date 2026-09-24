@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools==69.5.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpes"
+version = "0.1.0"
+description = "Contextual Privilege Escalation Scoring research implementation"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "elasticsearch==9.4.1",
+    "numpy==1.26.4",
+    "pandas==2.2.3",
+]
+
+[tool.setuptools.packages.find]
+include = ["cpes*"]

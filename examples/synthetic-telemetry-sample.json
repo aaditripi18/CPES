@@ -1,0 +1,67 @@
+[
+  {
+    "@timestamp": "2026-07-20T10:00:00Z",
+    "event": {"id": "ev-1", "code": "1"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-EXPLORER}",
+      "ProcessId": "1000",
+      "IntegrityLevel": "Medium",
+      "CommandLine": "C:\\Windows\\explorer.exe",
+      "Image": "C:\\Windows\\explorer.exe"
+    }}
+  },
+  {
+    "@timestamp": "2026-07-20T10:00:05Z",
+    "event": {"id": "ev-5", "code": "1"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-EXPLORER-2}",
+      "ProcessId": "1500",
+      "CommandLine": "C:\\Windows\\explorer.exe",
+      "Image": "C:\\Windows\\explorer.exe"
+    }}
+  },
+  {
+    "@timestamp": "2026-07-20T10:00:10Z",
+    "event": {"id": "ev-2", "code": "1"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-CMD}",
+      "ParentProcessGuid": "{GUID-EXPLORER}",
+      "ProcessId": "2000",
+      "IntegrityLevel": "Medium",
+      "CommandLine": "cmd.exe /c fodhelper.exe",
+      "Image": "C:\\Windows\\System32\\cmd.exe"
+    }}
+  },
+  {
+    "@timestamp": "2026-07-20T10:00:15Z",
+    "event": {"id": "ev-6", "code": "1"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-NOTEPAD}",
+      "ParentProcessGuid": "{GUID-EXPLORER-2}",
+      "ProcessId": "2500",
+      "CommandLine": "notepad.exe",
+      "Image": "C:\\Windows\\System32\\notepad.exe"
+    }}
+  },
+  {
+    "@timestamp": "2026-07-20T10:00:20Z",
+    "event": {"id": "ev-3", "code": "1"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-FODHELPER}",
+      "ParentProcessGuid": "{GUID-CMD}",
+      "ProcessId": "3000",
+      "IntegrityLevel": "High",
+      "CommandLine": "C:\\Windows\\System32\\fodhelper.exe",
+      "Image": "C:\\Windows\\System32\\fodhelper.exe"
+    }}
+  },
+  {
+    "@timestamp": "2026-07-20T10:00:21Z",
+    "event": {"id": "ev-4", "code": "13"},
+    "winlog": {"event_data": {
+      "ProcessGuid": "{GUID-FODHELPER}",
+      "ProcessId": "3000",
+      "TargetObject": "HKU\\Software\\Classes\\ms-settings\\Shell\\Open\\command\\(Default)"
+    }}
+  }
+]

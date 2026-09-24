@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CPES Sysmon configuration v1
+  Frozen M1 telemetry scope: Section 9.6 of CPES-Project-Bible-v1.0.md.
+  Sysmon configuration change events (EID 16) are emitted by Sysmon itself and
+  are not filterable; no CPES telemetry event type beyond the approved set is
+  explicitly enabled here.
+-->
+<Sysmon schemaversion="4.90">
+  <EventFiltering>
+    <!-- EID 1: Process creation; provides ProcessGUID, lineage, and command line. -->
+    <ProcessCreate onmatch="exclude" />
+
+    <!-- EID 6: Driver load; optional T1543.003 BYOVD observability. -->
+    <DriverLoad onmatch="exclude" />
+
+    <!-- EID 7: Image/module load. -->
+    <ImageLoad onmatch="exclude" />
+
+    <!-- EID 8: Remote-thread creation. -->
+    <CreateRemoteThread onmatch="exclude" />
+
+    <!-- EID 10: Process access. -->
+    <ProcessAccess onmatch="exclude" />
+
+    <!-- EID 11: File creation. -->
+    <FileCreate onmatch="exclude" />
+
+    <!--
+      EIDs 12 and 13 only. RegistryEvent also supports EID 14 (rename), so
+      the include filter admits the create/delete and value-set event types
+      while excluding rename activity.
+    -->
+    <RegistryEvent onmatch="include">
+      <EventType condition="is">CreateKey</EventType>
+      <EventType condition="is">DeleteKey</EventType>
+      <EventType condition="is">SetValue</EventType>
+      <EventType condition="is">DeleteValue</EventType>
+    </RegistryEvent>
+
+    <!-- EIDs 19, 20, and 21: WMI filter, consumer, and binding activity. -->
+    <WmiEvent onmatch="exclude" />
+  </EventFiltering>
+</Sysmon>

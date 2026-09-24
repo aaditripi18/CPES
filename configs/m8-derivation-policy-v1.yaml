@@ -1,0 +1,7 @@
+# Template only. Every value must be supplied before derivation.
+signal_specification_version: null
+fold_policy: null
+estimation_policy: null
+binning_policy: null
+threshold_selection_policy: null
+window_selection_policy: null
