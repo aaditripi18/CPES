@@ -32,6 +32,36 @@ Each stage accepts caller-supplied inputs and has no hidden defaults,
 fallbacks, or implicit I/O — see the per-milestone design docs in `docs/` for
 the contract each component implements.
 
+## Results
+
+Evaluated on a lab-collected Sysmon corpus (UAC, service-creation, thread
+injection, and token-theft privilege escalation, plus blind benign activity;
+corpus not included in this repository).
+
+| Detector | Precision | Recall | F1 |
+|---|---|---|---|
+| CPES (5-fold CV, blind corpus) | 0.989 | 1.000 | **0.995** |
+| Single-event baseline | — | — | 0.519 |
+| Signature baseline | — | — | 0.736 |
+
+- **Blind-validated precision:** 1 false positive across 2,074 benign
+  process-units evaluated independently of the signal set (FPR ≈ 0.0005).
+- **Generalization ablation:** with each technique's specific signal held
+  out, the generic "unexplained privilege gain" detector still catches
+  **33/33** UAC escalations from context alone, at a cost of ~1 false
+  positive on benign activity. It does not catch service/injection/token
+  escalations by construction — those techniques produce no integrity
+  edge for a generic test to see, which is why the technique-specific
+  signals exist.
+- **Honest-miss check:** three privilege-escalation techniques with no
+  implemented signal (scheduled task, Run-key persistence, WMI event
+  subscription) were executed and correctly produced zero detections —
+  i.e. CPES doesn't over-fire on nearby-but-unmodeled activity.
+
+Recall is favorable by construction (attack outcomes are labeled by their
+own mechanism signature at known attack times); the precision, ablation,
+and honest-miss results are the load-bearing evidence here.
+
 ## Prerequisites
 
 - A frozen Windows 11 lab VM; record its exact build.
