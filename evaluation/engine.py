@@ -71,8 +71,8 @@ def build_evidence(docs) -> tuple:
     return EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(mapper.map_document(d) for d in docs)
 
 
-def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 150.0) -> dict:
-    docs = documents()
+def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 150.0, docs=None, generic: bool = False) -> dict:
+    docs = documents() if docs is None else docs
     mapper = CanonicalEventMapper(load_mapping_configuration(MAPPING))
     events = [mapper.map_document(d) for d in docs]
     stamps = [datetime.fromisoformat(e.source_timestamp.replace("Z", "+00:00")) for e in events]
@@ -89,6 +89,17 @@ def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 15
                 window_anchors.append((observation.signal_id, tuple(r.process_guid for r in observation.source_references)))
                 for reference in observation.source_references:
                     flags[reference.process_guid].add(observation.signal_id)
+    generic_flags: set[str] = set()
+    if generic:
+        from cpes.detection.generic import GenericEscalationObservationGenerator
+
+        detector = GenericEscalationObservationGenerator("unexplained_privilege_gain", INTEGRITY_ORDER, make_resolver())
+        generic_flags = {
+            reference.process_guid
+            for window in context.detection_windows
+            for observation in detector.generate(window.event_group) if observation.is_present
+            for reference in observation.source_references
+        }
     baseline = SingleEventBaselineDetector(INTEGRITY_ORDER)
     baseline_flags = {g for item in context.window_observations for g in baseline.evaluate(item.detection_window.event_group).triggering_process_guids}
     chain_of = {guid: chain.lineage_chain_id for chain in context.lineage_chains for guid in chain.process_guids}
@@ -96,6 +107,7 @@ def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 15
         "flags": {guid: tuple(sorted(signals)) for guid, signals in flags.items()},
         "window_anchors": window_anchors,
         "single_event_package": baseline_flags,
+        "generic_flags": generic_flags,
         "chain_of": chain_of,
         "windows": len(context.detection_windows),
         "evidence": None if channels is None else {

@@ -160,6 +160,80 @@ CATALOG: list[dict[str, Any]] = [
         "parser": "results_json",
     },
     {
+        "id": "pkg_ext_evtx",
+        "module": "evaluation.run",
+        "script": "evaluation/external.py",
+        "args": ["ext-evtx-privesc"],
+        "title": "External generalisation: EVTX-ATTACK-SAMPLES (53 public Sysmon captures)",
+        "protocol": "sample file · shipped package engine · weights frozen from the lab corpus (held out) · per-file alerts with anchors",
+        "dataset": None,
+        "inputs": ["configs/external-datasets.json", "external/evtx-attack-samples/privesc"],
+        "role": "validity_check",
+        "role_note": "Never-seen attacks from other machines. Run `python scripts/fetch_external.py` first.",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_evasion",
+        "module": "evaluation.run",
+        "script": "evaluation/evasion.py",
+        "args": ["evasion-v3"],
+        "title": "Evasion robustness: renamed tools, unlisted binaries, random pipes, obfuscated command lines",
+        "protocol": "corpus-v3 variants V0–V5 (attack records only) · research signals, package engine, generic test, IOC, single-event",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "robustness",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_stream",
+        "module": "evaluation.run",
+        "script": "evaluation/streaming_eval.py",
+        "args": ["stream-replay-v3"],
+        "title": "Live scoring: replay as a stream, live-vs-hindsight agreement, time to alert",
+        "protocol": "cpes.streaming.StreamingScorer · window 300 s / advance 150 s · 30 s watermark ticks",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "validity_check",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_sigma_lab",
+        "module": "evaluation.run",
+        "script": "evaluation/sigma_eval.py",
+        "args": ["sigma-lab-v3"],
+        "title": "CPES vs SigmaHQ rules on the lab corpus (run level, alert noise)",
+        "protocol": "SigmaHQ r2026-07-01 core and all packs · ledger-time labels · alerts outside attack runs",
+        "dataset": "lab-corpus-v3",
+        "inputs": [*["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"], "external/sigma"],
+        "role": "adverse_result",
+        "role_note": "Sigma detects more attack runs than CPES on this corpus; reported as is.",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_sigma_ext",
+        "module": "evaluation.run",
+        "script": "evaluation/sigma_eval.py",
+        "args": ["sigma-ext-evtx"],
+        "title": "CPES vs SigmaHQ rules on EVTX-ATTACK-SAMPLES",
+        "protocol": "per sample file · Sigma core high+ and all any-level",
+        "dataset": None,
+        "inputs": [*["configs/external-datasets.json", "external/evtx-attack-samples/privesc"], "external/sigma"],
+        "role": "adverse_result",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_sigma_evasion",
+        "module": "evaluation.run",
+        "script": "evaluation/sigma_eval.py",
+        "args": ["sigma-evasion"],
+        "title": "Sigma on the evasion variants (V0, V1, V3)",
+        "protocol": "run level and outcome-process level, core and all packs",
+        "dataset": "lab-corpus-v3",
+        "inputs": [*["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"], "external/sigma"],
+        "role": "robustness",
+        "parser": "results_json",
+    },
+    {
         "id": "standalone_demo",
         "script": "demo/cpes_demo.py",
         "args": ["--no-color"],
@@ -273,6 +347,14 @@ def parse_results_file(path) -> dict[str, Any] | None:
     return {"detectors": detectors, "aggregation": "mean ± population std over folds (pooled TP/FP/FN attached)" if detectors else "run level (see raw)", "results_id": record["id"], "code_sha256": record["code_sha256"], "raw": result}
 
 
+def _input_record(path: str) -> dict[str, Any]:
+    target = REPO_ROOT / path
+    if target.is_dir():  # external datasets: each file is pinned in configs/external-datasets.json
+        files = [f for f in target.rglob("*") if f.is_file()]
+        return {"path": path, "sha256": None, "bytes": sum(f.stat().st_size for f in files), "note": f"directory of {len(files)} files, pinned by SHA-256 in configs/external-datasets.json"}
+    return {"path": path, "sha256": sha256_file(target), "bytes": target.stat().st_size}
+
+
 class ExperimentStore:
     @property
     def root(self):
@@ -324,7 +406,7 @@ class ExperimentStore:
             "started_ns": time.time_ns(),
             "kind": "research_experiment",
             "script_sha256": sha256_file(REPO_ROOT / entry["script"]),
-            "inputs": [{"path": path, "sha256": sha256_file(REPO_ROOT / path), "bytes": (REPO_ROOT / path).stat().st_size} for path in entry["inputs"]],
+            "inputs": [_input_record(path) for path in entry["inputs"]],
             "versions": {"python": sys.version.split()[0], **git_state()},
         }
         write_json(self.root / execution_id / "record.json", record)

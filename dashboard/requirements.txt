@@ -5,3 +5,6 @@ python-multipart==0.0.20
 # tests (fastapi.testclient)
 httpx==0.28.1
 pytest==9.1.1
+# .evtx uploads and the evaluation (EVTX parser, Sigma rule YAML)
+evtx==0.13.1
+PyYAML==6.0.3

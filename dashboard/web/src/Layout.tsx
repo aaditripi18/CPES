@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Database, FileSearch, GitBranch, Info, LayoutDashboard, ListTree, Play, Sigma } from "lucide-react";
+import { Activity, BarChart3, Database, FileSearch, GitBranch, Info, LayoutDashboard, ListTree, Play, Radio, Sigma } from "lucide-react";
 import { ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useApi } from "./lib/hooks";
@@ -16,6 +16,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: "/", label: "Overview", icon: <LayoutDashboard size={16} /> },
     { to: "/datasets", label: "Datasets", icon: <Database size={16} /> },
     { to: datasetId ? `/explore/${datasetId}` : "/explore", label: "Explorer", icon: <FileSearch size={16} /> },
+    { to: "/live", label: "Live", icon: <Radio size={16} /> },
     { to: "/runs", label: "Runs", icon: <Play size={16} /> },
     { to: runId ? `/runs/${runId}/detections` : "/detections", label: "Detections", icon: <Activity size={16} /> },
     { to: runId ? `/runs/${runId}/lineage` : "/lineage", label: "Lineage", icon: <GitBranch size={16} /> },

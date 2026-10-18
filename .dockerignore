@@ -16,3 +16,4 @@ dashboard/data/
 dashboard/web/node_modules/
 dashboard/web/dist/
 docs/CPES-*
+external/

@@ -43,14 +43,27 @@ from evaluation.engine import EVIDENCE_MAPPING, EVIDENCE_SETTINGS, RESOLVER_SETT
 SIGNAL_IDS = ("autoelevation_lolbin", "service_dropped_binary", "remote_thread_injection", "token_impersonation")
 
 
-def signal_wiring(evidence_enabled: bool) -> dict[str, dict[str, Any]]:
-    """What each signal reads in CpesPipeline, and whether it can fire in this run."""
+def signal_wiring(evidence_enabled: bool, evidence: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
+    """What each signal reads in CpesPipeline, and whether it can fire in this run.
 
+    ``evidence`` is the run's evidence-channel report; when given, the notes say
+    how much usable evidence this dataset actually supplied.
+    """
+
+    def usable(kind: str) -> str:
+        if not evidence or not evidence.get("enabled"):
+            return ""
+        count = evidence.get(f"{kind}_evidence", 0)
+        skipped = sum((evidence.get("skipped") or {}).values())
+        text = f" This dataset supplied {count} usable {kind.replace('_', '-')} record(s)"
+        return text + (f"; {skipped} evidence record(s) were skipped for missing fields (e.g. no User on pipe events)." if skipped else ".")
+
+    off = "Evidence channels are off for this run, so this signal cannot fire."
     return {
         "autoelevation_lolbin": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "Fires only when the auto-elevating binary and a hijack registry write fall in the same window (stricter than the research script, which needs no registry write)."},
         "service_dropped_binary": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "SYSTEM-integrity binary outside \\Windows\\ and \\Program Files. Unlike the documented research signal it does not require parent = services.exe (open decision; see docs/RESULTS.md)."},
-        "remote_thread_injection": {"wired": evidence_enabled, "reads": "RemoteThreadEvidence (Sysmon EID 8) via evidence channels", "note": ("Observes real CreateRemoteThread records only. corpus-v3 has none from mavinject.exe, so this cannot detect the recorded injections (the research signal is an image-name rule)." if evidence_enabled else "Evidence channels are off for this run, so this signal cannot fire.")},
-        "token_impersonation": {"wired": evidence_enabled, "reads": "PipeEvidence (Sysmon EID 17/18) via evidence channels", "note": ("User-created pipe connected by a SYSTEM shell inside the same window." if evidence_enabled else "Evidence channels are off for this run, so this signal cannot fire.")},
+        "remote_thread_injection": {"wired": evidence_enabled, "reads": "RemoteThreadEvidence (Sysmon EID 8) via evidence channels", "note": ("Observes real CreateRemoteThread records only." + usable("remote_thread")) if evidence_enabled else off},
+        "token_impersonation": {"wired": evidence_enabled, "reads": "PipeEvidence (Sysmon EID 17/18) via evidence channels", "note": ("User-created pipe connected by a SYSTEM shell inside the same window." + usable("pipe")) if evidence_enabled else off},
     }
 
 
@@ -226,7 +239,7 @@ class RunStore:
             },
             "threshold": str(params["threshold"]),
             "evidence_model": params["model"],
-            "signals": signal_wiring(bool(evidence_items)),
+            "signals": signal_wiring(bool(evidence_report.get("enabled")), evidence_report),
             "evidence_channels": evidence_report,
             "resolver": {key: list(value) for key, value in RESOLVER_SETTINGS.items()},
             "versions": {"cpes": cpes_version(), "dashboard": __version__, "python": platform.python_version(), **git_state()},
@@ -291,8 +304,10 @@ class RunStore:
         if not params["evidence_channels"]:
             return (), {"enabled": False, "reason": "turned off for this run"}
         spec = params["mapping_spec"]
+        if spec.get("preset") == "evtx-sysmon-field-mapping-v1":
+            return RunStore._evtx_evidence(parsed, record_indices)
         if spec.get("preset") != "elastic-sysmon-field-mapping-v1":
-            return (), {"enabled": False, "reason": "evidence mapping is defined for the Winlogbeat/ECS preset only"}
+            return (), {"enabled": False, "reason": "evidence mapping is defined for the Winlogbeat/ECS and raw EVTX presets only"}
         configuration = load_evidence_mapping(EVIDENCE_MAPPING)
         from_position = spec["event_id_from_position"]
         if from_position:
@@ -309,6 +324,33 @@ class RunStore:
         return channels.items, {
             "enabled": True,
             "mapping": configuration.version,
+            "settings": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()},
+            "pipe_evidence": len(channels.pipes),
+            "remote_thread_evidence": len(channels.remote_threads),
+            "skipped": dict(channels.skipped),
+            "records_not_mappable": unmapped,
+            "attachment_rule": "remote thread → chain of its source; pipe connect → chain of the connecting process; pipe create with the same name in the same window, from any chain",
+        }
+
+    @staticmethod
+    def _evtx_evidence(parsed, record_indices) -> tuple[tuple, dict[str, Any]]:
+        pipes = EvidenceRecordMapper(load_evidence_mapping(REPO_ROOT / "configs" / "evtx-sysmon-evidence-pipes-v1.yaml"))
+        threads = EvidenceRecordMapper(load_evidence_mapping(REPO_ROOT / "configs" / "evtx-sysmon-evidence-threads-v1.yaml"))
+        records, unmapped = [], 0
+        for index in record_indices:
+            document = parsed.document(index)
+            code = str(((document.get("Event") or {}).get("System") or {}).get("EventID"))
+            mapper = pipes if code in ("17", "18") else threads if code == "8" else None
+            if mapper is None:
+                continue
+            try:
+                records.append(mapper.map_document(document))
+            except (ValueError, TypeError):
+                unmapped += 1
+        channels = EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(records)
+        return channels.items, {
+            "enabled": True,
+            "mapping": "evtx-sysmon-evidence-pipes-v1 + evtx-sysmon-evidence-threads-v1",
             "settings": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()},
             "pipe_evidence": len(channels.pipes),
             "remote_thread_evidence": len(channels.remote_threads),

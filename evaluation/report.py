@@ -41,6 +41,135 @@ def _cv_table(record: dict) -> list[str]:
     return lines
 
 
+CATEGORY_NAMES = {
+    "uac_listed_lolbin": "UAC via a listed auto-elevating binary",
+    "uac_other_method": "UAC via other methods (UACME etc.)",
+    "token_impersonation": "Token impersonation (Potato family, PrintSpoofer, getsystem, RogueWinRM)",
+    "service_abuse": "Service abuse (unquoted path, PsExec)",
+    "other_exploit": "Other exploits (CVE, spooler, registry, handle inheritance)",
+    "not_applicable_no_sysmon": "No Sysmon events (Security/System only) — not applicable",
+}
+DETECTOR_NAMES = {
+    "cpes_research_signals": "CPES (research signals)",
+    "cpes_package": "CPES (package engine)",
+    "generic_unexplained_gain_package": "Generic 'unexplained privilege gain' (package, unweighted)",
+    "ioc_signature_research": "IOC / signature rule",
+    "single_event_research": "Single-event integrity rule",
+}
+
+
+def _external_section() -> list[str]:
+    record = _load("ext-evtx-privesc")
+    out = ["", "## 6. External generalisation — EVTX-ATTACK-SAMPLES (never seen by CPES)", "",
+           "Shipped package engine with frozen weights from the lab corpus (held out). Unit = published sample file; every file is an attack, so precision is not estimated. Pre-registered in [design/external-and-evasion-evaluation.md](design/external-and-evasion-evaluation.md).", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    out += [f"{r['dataset']} · execution `{record['id']}`", "",
+            "| Category | Files | CPES detected | Generic test fired | Single-event rule fired | CPES or generic |", "|---|---|---|---|---|---|"]
+    for key, row in r["summary_by_category"].items():
+        out.append(f"| {CATEGORY_NAMES.get(key, key)} | {row['files']} | {row['cpes_detected']} | {row['generic_fired']} | {row['single_event_fired']} | {row['cpes_or_generic']} |")
+    detected = [f for f in r["files"] if f.get("outcome") == "detected"]
+    out += ["", "Every CPES alert and the process it is anchored on:", ""]
+    out += [f"- `{f['file']}` — " + ", ".join(f["cpes_anchors"]) for f in detected]
+    skipped = sum(f.get("evidence", {}).get("skipped", {}).get("pipe_missing_field", 0) for f in r["files"])
+    out += ["", f"Pipe evidence records skipped because the capture has no `User` field on EID 17/18: {skipped}. The token signal therefore cannot fire on this dataset."]
+    return out
+
+
+def _evasion_section() -> list[str]:
+    record = _load("evasion-v3")
+    out = ["", "## 7. Evasion robustness — corpus-v3 with attacker-controlled changes", "",
+           "Each variant rewrites only attack-process records; labels unchanged. Cells: attack units detected (of 87) and recall for the technique the variant targets.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    variants = record["result"]["variants"]
+    target = {"V0": None, "V1": "T1055.001", "V2": "T1543.003", "V3": "T1548.002", "V4": "T1134.001", "V5": None}
+    detectors = list(next(iter(variants.values()))["detectors"])
+    out += ["| Variant | " + " | ".join(DETECTOR_NAMES.get(d, d) for d in detectors) + " |", "|---|" + "---|" * len(detectors)]
+    for name, body in variants.items():
+        cells = []
+        for d in detectors:
+            s = body["detectors"][d]
+            technique = target[name]
+            cells.append(s["attack_detected"] + (f" · {technique} {s['recall_by_technique'][technique]}" if technique else ""))
+        out.append(f"| **{name}** {body['transform']} | " + " | ".join(cells) + " |")
+    out += ["", "Benign units flagged are unchanged across variants (benign records are never modified)."]
+    return out
+
+
+def _streaming_section() -> list[str]:
+    record = _load("stream-replay-v3")
+    out = ["", "## 8. Live scoring — corpus-v3 replayed as a stream", "",
+           "`cpes.streaming.StreamingScorer` scores each window once, when the event-time watermark passes its end, using only what has arrived. Package engine with evidence channels, frozen weights.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    a, t, c, s = r["agreement"], r["time_to_alert_seconds"], r["cost"], r["settings"]
+    out += [
+        f"Replay of {s['events']:,} events · window {s['span_seconds']:.0f} s / advance {s['advance_seconds']:.0f} s · watermark tick {s['tick_seconds']:.0f} s · execution `{record['id']}`",
+        "",
+        "| Measure | Value |",
+        "|---|---|",
+        f"| Alerts raised live (window, signal, anchored process) | {a['live']} |",
+        f"| Alerts in the batch (hindsight) result | {a['batch']} |",
+        f"| Identical in both | {a['both']} |",
+        f"| Live-only / batch-only | {len(a['live_only'])} / {len(a['batch_only'])} |",
+        f"| Attack processes alerted live | {t['attack_units_alerted']} |",
+        f"| Time to alert, median / p95 / max (event time) | {t['median']:.0f} s / {t['p95']:.0f} s / {t['max']:.0f} s |",
+        f"| Scoring cost per tick, median / max (wall time) | {c['median_tick_seconds'] * 1000:.1f} ms / {c['max_tick_seconds'] * 1000:.0f} ms over {c['ticks']} ticks |",
+        "",
+        f"Chain IDs differ between live and batch for {a['chain_keyed_counts']['live_windows'] - a['chain_keyed_counts']['same_chain_id']} live window(s): a chain's root changes when an earlier ancestor's events arrive, so alerts are compared on what they point at, not on chain names. {t['note']}",
+    ]
+    return out
+
+
+def _sigma_section() -> list[str]:
+    lab, ext, eva = _load("sigma-lab-v3"), _load("sigma-ext-evtx"), _load("sigma-evasion")
+    out = ["", "## 9. CPES vs SigmaHQ rules (release r2026-07-01)", "",
+           "Every Sysmon-category Windows rule in the *core* (curated) and *all* packs, evaluated by `evaluation/sigma.py` (unit-tested Sigma semantics; unsupported features skipped and counted). Pre-registered in [design/external-and-evasion-evaluation.md](design/external-and-evasion-evaluation.md) Part C.", ""]
+    if lab:
+        r = lab["result"]
+        ref = r.get("cpes_reference", {})
+        out += ["### 9.1 Lab corpus — run level (labels from the execution ledger only)", "",
+                "| Detector | Rules evaluated | Runs, technique-consistent | Alerts outside any run | Processes alerted outside runs |", "|---|---|---|---|---|"]
+        for key, label in (("cpes_research_signals", "CPES (research signals)"), ("cpes_package_with_evidence", "CPES (package engine)")):
+            if key in ref:
+                out.append(f"| {label} | 4 signals | {ref[key]['modelled_runs_detected_consistent']} | — | {ref[key]['false_alarm_processes']} |")
+        for pack, body in r["packs"].items():
+            for level in ("high_or_critical", "any_level"):
+                rl = body[level]["run_level"]
+                out.append(f"| Sigma {pack}, {level.replace('_', ' ')} | {body['rules_evaluated']} | {rl['runs_consistent']} | {rl['outside_runs']['alerts']} | {rl['outside_runs']['processes']} |")
+        core = r["packs"]["core"]["high_or_critical"]
+        out += ["", f"Rules that test registry `Details` are excluded on this corpus because Winlogbeat re-encodes that field ({r['packs']['core']['rules_dropped_details']} core, {r['packs']['all']['rules_dropped_details']} all).",
+                "", "Which process gets flagged (attack *outcome* processes, i.e. the process that ended up elevated):", "",
+                "| Detector | Injection | Token | Service binary | UAC elevated process |", "|---|---|---|---|---|"]
+        out.append("| Sigma core, high+ | " + " | ".join(core["unit_level"]["by_technique"].get(t, "—") for t in ("T1055.001", "T1134", "T1543.003", "T1548.002")) + " |")
+        rg = _load("research-grouped")
+        if rg:
+            rt = rg["result"]["detectors"]["cpes"]["recall_by_technique"]
+            out.append("| CPES (research signals) | " + " | ".join(rt.get(t, "—") for t in ("T1055.001", "T1134.001", "T1543.003", "T1548.002")) + " |")
+        out += ["", "Sigma mostly alerts on the actor (`reg.exe` writing the hijack key, `sc.exe` creating the service); CPES attributes the alert to the process that gained privilege and states how. The CPES row is in-sample against labels its own signals helped define (§1), so this table shows *which process* each approach points at, not detection quality — the run-level table above is the fair comparison."]
+    if ext:
+        r = ext["result"]
+        out += ["", "### 9.2 EVTX-ATTACK-SAMPLES — files with at least one alert", "",
+                "| Category | Files | CPES | CPES or generic test | Sigma core, high+ | Sigma all, any level |", "|---|---|---|---|---|---|"]
+        for key in CATEGORY_NAMES:
+            row = r["summary_by_category"].get(key)
+            if row:
+                out.append(f"| {CATEGORY_NAMES[key]} | {row['files']} | {row.get('cpes_detected', '—')} | {row.get('cpes_or_generic', '—')} | {row['core_high']} | {row['all_any']} |")
+        out += ["", "Caveat: some SigmaHQ rules were written with this public dataset in view (3 of the 46 core rules that fired here cite the dataset or its author). The overlap is limited but cannot be excluded."]
+    if eva:
+        v = eva["result"]["variants"]
+        out += ["", "### 9.3 Evasion — Sigma on the same variants", "",
+                "| Variant | Sigma core high+: runs consistent | Sigma core high+: outcome processes flagged |", "|---|---|---|"]
+        for name, body in v.items():
+            h = body["packs"]["core"]["high_or_critical"]
+            out.append(f"| {name} | {h['runs_consistent']} | {h['unit_level']['attack_units']} |")
+        out += ["", "V1: Sigma's injection rules match the PE `OriginalFileName`, which a renamed copy keeps, so renaming does not evade them (the CPES research injection signal and the image-name IOC drop to 0/18). V3: WSReset is itself a documented UAC-bypass binary with a dedicated Sigma rule, so Sigma's per-binary coverage catches the substitution; CPES's four-name list does not, and CPES's generic test does (§7)."]
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -82,6 +211,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 

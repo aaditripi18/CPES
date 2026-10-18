@@ -15,6 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Res
 from . import __version__
 from .evidence import available_models
 from .experiments import METHOD_NOTES, ExperimentStore
+from .live import LiveStore, elastic_settings
 from .ingest import (
     CANONICAL_FIELDS,
     FORMATS,
@@ -36,6 +37,7 @@ app = FastAPI(title="CPES research dashboard", version=__version__)
 datasets = DatasetStore()
 runs = RunStore(datasets)
 experiments = ExperimentStore()
+live = LiveStore(datasets)
 
 
 @app.exception_handler(KeyError)
@@ -120,6 +122,8 @@ def system() -> dict[str, Any]:
             "Lineage chains on real telemetry can be very large (one chain held 1,346 of 2,219 processes in corpus-v3), which makes chain-level metrics coarse.",
             "The frozen evidence model is in-sample for corpus-v3; detection runs on corpus-v3 are not held-out tests.",
             "Base rate: the robustness script shows precision falling from 0.996 at a 10% attack prior to 0.172 at 0.01%.",
+            "Breadth: on 53 public Sysmon attack captures (EVTX-ATTACK-SAMPLES) CPES alone flags 9 and CPES with its generic test 26; SigmaHQ core rules flag 42 (docs/RESULTS.md §6, §9). CPES's auto-elevation signal names four binaries and does not generalise to other UAC methods.",
+            "Renaming the injector defeats the research injection signal (an image-name rule); signals that read structure (service location, pipe pairing) are unaffected (docs/RESULTS.md §7).",
             "Uploads have no ground-truth channel in this version, so no metric is computed for them.",
         ],
         "data_availability": [
@@ -155,14 +159,14 @@ async def upload(
 ) -> dict[str, Any]:
     fmt = detect_format(file.filename or "")
     if fmt is None:
-        raise ValueError(f"unsupported file type '{file.filename}'. Supported: .csv, .json, .jsonl, .ndjson.")
+        raise ValueError(f"unsupported file type '{file.filename}'. Supported: .csv, .json, .jsonl, .ndjson, .evtx.")
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise ValueError(f"file exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB upload limit.")
     if not data.strip():
         raise ValueError("file is empty.")
     meta = datasets.upload(file.filename or "upload", data, fmt, name=name, declared_source=declared_source, declared_synthetic=declared_synthetic)
-    meta["validation_report"] = _validation(meta["id"], None)
+    meta["validation_report"] = _validation(meta["id"], _default_spec(meta["id"]))
     return meta
 
 
@@ -529,6 +533,30 @@ def experiment_notes() -> list[dict[str, Any]]:
 @app.get("/api/experiments/{execution_id}")
 def experiment_get(execution_id: str) -> dict[str, Any]:
     return experiments.get(execution_id)
+
+
+# ------------------------------------------------------------------- live
+
+
+@app.get("/api/live")
+def live_sessions() -> dict[str, Any]:
+    settings = elastic_settings()
+    return {"sessions": live.list(), "elasticsearch": {k: settings[k] for k in ("configured", "url", "index", "how")}}
+
+
+@app.post("/api/live")
+def live_start(body: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    return live.start(body)
+
+
+@app.get("/api/live/{session_id}")
+def live_get(session_id: str, since: int = Query(0, ge=0)) -> dict[str, Any]:
+    return live.get(session_id, since)
+
+
+@app.post("/api/live/{session_id}/stop")
+def live_stop(session_id: str) -> dict[str, Any]:
+    return live.stop(session_id)
 
 
 # ------------------------------------------------------------------- overview

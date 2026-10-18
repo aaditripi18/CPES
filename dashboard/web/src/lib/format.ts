@@ -25,6 +25,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   research_telemetry: "Research telemetry",
   synthetic: "Synthetic",
   user_upload: "User upload",
+  public_dataset: "Public dataset",
 };
 
 export function eventCodeLabel(code: string | number | null | undefined): string {

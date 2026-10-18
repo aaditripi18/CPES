@@ -25,6 +25,16 @@ PREFERRED_COLUMNS = (
     "registry.path",
     "file.name",
     "winlog.record_id",
+    # raw .evtx records
+    "Event.System.TimeCreated.#attributes.SystemTime",
+    "Event.System.EventID",
+    "Event.System.Computer",
+    "Event.EventData.Image",
+    "Event.EventData.IntegrityLevel",
+    "Event.EventData.User",
+    "Event.EventData.CommandLine",
+    "Event.EventData.TargetObject",
+    "Event.EventData.PipeName",
 )
 FACET_CANDIDATES = (
     "event.code",
@@ -35,8 +45,13 @@ FACET_CANDIDATES = (
     "process.name",
     "process.executable",
     "winlog.channel",
+    "Event.System.Channel",
+    "Event.System.EventID",
+    "Event.System.Computer",
+    "Event.EventData.User",
+    "Event.EventData.IntegrityLevel",
 )
-TIMESTAMP_FIELDS = ("@timestamp", "timestamp", "source_timestamp", "time")
+TIMESTAMP_FIELDS = ("@timestamp", "timestamp", "source_timestamp", "time", "Event.System.TimeCreated.#attributes.SystemTime")
 MAX_CELL = 400
 
 

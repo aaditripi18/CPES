@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from . import data, engine, protocols
 
 RESULTS = data.ROOT / "results"
-PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time")
+PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion")
 
 
 def _code_fingerprint() -> str:
@@ -114,6 +114,22 @@ def run_protocol(name: str) -> dict:
             "cpes_package_with_evidence": package["flags"],
             "single_event_package": {g: ("integrity_edge",) for g in package["single_event_package"]},
         }) | {"note": "E-c: unit = logged run; CPES decision = OR of signals (every research weight exceeds the 0.50 threshold)."}
+    if name == "ext-evtx-privesc":
+        from . import external
+
+        return external.run()
+    if name == "evasion-v3":
+        from . import evasion
+
+        return evasion.run()
+    if name in ("sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion"):
+        from . import sigma_eval
+
+        return {"sigma-lab-v3": sigma_eval.run_lab, "sigma-ext-evtx": sigma_eval.run_external, "sigma-evasion": sigma_eval.run_evasion}[name]()
+    if name == "stream-replay-v3":
+        from . import streaming_eval
+
+        return streaming_eval.run()
     raise ValueError(f"unknown protocol {name!r}; choose from {', '.join(PROTOCOLS)}")
 
 
@@ -123,8 +139,13 @@ def main() -> None:
     args = parser.parse_args()
     names = PROTOCOLS if args.protocols == ["all"] else tuple(args.protocols)
     RESULTS.mkdir(exist_ok=True)
-    inputs = data.inputs_manifest()
     for name in names:
+        if name.startswith("ext-") or name == "sigma-ext-evtx":
+            from . import external
+
+            inputs = external.verify_manifest()
+        else:
+            inputs = data.inputs_manifest()
         started = time.perf_counter()
         result = run_protocol(name)
         record = {
@@ -139,7 +160,10 @@ def main() -> None:
             "design": "docs/design/evidence-channels-and-package-evaluation.md",
         }
         (RESULTS / f"{name}.json").write_text(json.dumps({**record, "result": result}, indent=2, default=str) + "\n", encoding="utf-8")
-        summary = {d: v.get("fold_mean", {}).get("f1") if "fold_mean" in v else v.get("modelled_runs_detected_any") for d, v in result["detectors"].items()}
+        if "detectors" in result:
+            summary = {d: v.get("fold_mean", {}).get("f1") if "fold_mean" in v else v.get("modelled_runs_detected_any") for d, v in result["detectors"].items()}
+        else:
+            summary = result.get("summary_by_category") or result.get("summary")
         with (RESULTS / "ledger.jsonl").open("a", encoding="utf-8") as ledger:
             ledger.write(json.dumps({**record, "summary": summary}, default=str) + "\n")
         print(f"{name}: {json.dumps(summary)}")

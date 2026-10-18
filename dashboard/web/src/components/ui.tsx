@@ -72,7 +72,7 @@ export function StatusPill({ status }: { status: ValidationStatus | string | nul
 }
 
 export function CategoryBadge({ category, isPrivate }: { category: Category | string; isPrivate?: boolean }) {
-  const tone: Tone = category === "synthetic" ? "warn" : category === "research_telemetry" ? "info" : "neutral";
+  const tone: Tone = category === "synthetic" ? "warn" : category === "research_telemetry" ? "info" : category === "public_dataset" ? "ok" : "neutral";
   return (
     <span className="inline-flex items-center gap-1">
       <Pill tone={tone}>

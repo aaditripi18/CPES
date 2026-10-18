@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from .explorer import DatasetIndex
-from .ingest import ParsedDataset, parse_file, sha256_file, validate
+from .ingest import DEFAULT_PRESET_BY_FORMAT, ParsedDataset, parse_file, sha256_file, validate
 from .paths import REPO_ROOT, data_root
 
 _lock = threading.RLock()
@@ -148,6 +148,27 @@ BUILTIN: list[dict[str, Any]] = [
     },
 ]
 
+PUBLIC_SAMPLES = [
+    ("public-uac-eventvwr", "Sysmon_13_1_UAC_Bypass_EventVwrBypass.evtx", "UAC bypass via eventvwr.exe registry hijack"),
+    ("public-roguepotato", "privesc_roguepotato_sysmon_17_18.evtx", "RoguePotato token impersonation (SeImpersonate to SYSTEM)"),
+    ("public-uacme-56", "Sysmon_UACME_56.evtx", "UACME method 56 (WSReset) — elevation through a binary CPES does not list"),
+]
+for _id, _file, _what in PUBLIC_SAMPLES:
+    BUILTIN.append({
+        "id": _id,
+        "name": f"Public sample: {_what}",
+        "path": f"external/evtx-attack-samples/privesc/{_file}",
+        "format": "evtx",
+        "category": "public_dataset",
+        "source": "EVTX-ATTACK-SAMPLES (github.com/sbousseaden, commit 4ceed2f), GPL-3.0. A published attack capture from a different machine; never used to build CPES.",
+        "contents": _what,
+        "ground_truth": {"available": False, "unit": "file", "source": None, "how": "The whole file is a published attack sample; there is no per-record label."},
+        "private": False,
+        "notes": "Fetched by scripts/fetch_external.py into external/ (not committed). Raw Windows event log records.",
+        "suggested_mapping": {"preset": "evtx-sysmon-field-mapping-v1"},
+        "experiments": ["pkg_ext_evtx", "pkg_sigma_ext"],
+    })
+
 ARTIFACTS: list[dict[str, Any]] = [
     {"name": "Labelled process-instance feature table", "path": "Claude outputs/cpes_privilege_escalation_dataset.csv", "category": "derived_labels", "description": "2,161 rows (87 attack, 2,074 benign) with four signal flags and labels, derived from corpus-v3. Source of the frozen evidence model and of corpus-v3 ground truth."},
     {"name": "Atomic execution ledger v3", "path": "analysis/cpes-atomic-log-v3.csv", "category": "ground_truth_source", "description": "126 logged Atomic Red Team executions (time, technique, test). Used by the research labelling."},
@@ -253,6 +274,7 @@ class DatasetStore:
             "uploaded_at": now(),
             "uploaded_ns": time.time_ns(),
             "category": "synthetic" if declared_synthetic else "user_upload",
+            **({"suggested_mapping": {"preset": DEFAULT_PRESET_BY_FORMAT[fmt]}} if fmt in DEFAULT_PRESET_BY_FORMAT else {}),
             "source": declared_source or "Declared by uploader: not provided.",
             "ground_truth": {"available": False, "unit": None, "source": None, "how": "Uploads carry no ground truth in this version; metrics that need labels are not computed."},
             "private": True,

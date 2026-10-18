@@ -9,6 +9,7 @@ import { Detections, NoRun } from "./pages/Detections";
 import { Evaluation, ExperimentPage } from "./pages/Evaluation";
 import { Explorer, ExplorerIndex } from "./pages/Explorer";
 import { Lineage } from "./pages/Lineage";
+import { Live } from "./pages/Live";
 import { Overview } from "./pages/Overview";
 import { RunDetail, Runs } from "./pages/Runs";
 import { System } from "./pages/System";
@@ -42,6 +43,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/runs/:id/lineage" element={<Keyed>{(id) => <Lineage key={id} />}</Keyed>} />
             <Route path="/detections" element={<NoRun what="detections" />} />
             <Route path="/lineage" element={<NoRun what="lineage" />} />
+            <Route path="/live" element={<Live />} />
             <Route path="/evaluation" element={<Evaluation />} />
             <Route path="/experiments/:id" element={<ExperimentPage />} />
             <Route path="/system" element={<System />} />

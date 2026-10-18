@@ -44,3 +44,5 @@
 }
 
 .react-flow__attribution { display: none; }
+
+@keyframes fadein { from { opacity: 0; transform: translateY(-4px); background: #3a1d1b; } to { opacity: 1; transform: none; background: transparent; } }

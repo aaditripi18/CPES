@@ -1,4 +1,4 @@
-export type Category = "research_telemetry" | "synthetic" | "user_upload";
+export type Category = "research_telemetry" | "synthetic" | "user_upload" | "public_dataset";
 
 export interface GroundTruth {
   available: boolean;

@@ -35,7 +35,7 @@ from cpes.orchestration.translation import CanonicalEventTranslator
 
 from .paths import CONFIGS
 
-FORMATS = ("jsonl", "json", "csv")
+FORMATS = ("jsonl", "json", "csv", "evtx")
 MAX_UPLOAD_BYTES = 256 * 1024 * 1024
 CANONICAL_FIELDS = tuple(CanonicalEvent.__dataclass_fields__)
 REQUIRED_FIELDS = ("source_timestamp", "source_event_id")
@@ -48,12 +48,15 @@ KNOWN_INTEGRITY_LEVELS = ("Untrusted", "Low", "Medium", "High", "System")
 
 MAPPING_PRESETS = {
     "elastic-sysmon-field-mapping-v1": CONFIGS / "elastic-sysmon-field-mapping-v1.yaml",
+    "evtx-sysmon-field-mapping-v1": CONFIGS / "evtx-sysmon-field-mapping-v1.yaml",
 }
+# The mapping a freshly uploaded file of each format is validated with first.
+DEFAULT_PRESET_BY_FORMAT = {"evtx": "evtx-sysmon-field-mapping-v1"}
 
 
 def detect_format(filename: str) -> str | None:
     suffix = Path(filename).suffix.lower()
-    return {".jsonl": "jsonl", ".ndjson": "jsonl", ".json": "json", ".csv": "csv"}.get(suffix)
+    return {".jsonl": "jsonl", ".ndjson": "jsonl", ".json": "json", ".csv": "csv", ".evtx": "evtx"}.get(suffix)
 
 
 def sha256_file(path: Path) -> str:
@@ -101,9 +104,27 @@ def parse_file(path: Path, fmt: str) -> ParsedDataset:
         _parse_jsonl(path, parsed)
     elif fmt == "json":
         _parse_json(path, parsed)
+    elif fmt == "evtx":
+        _parse_evtx(path, parsed)
     else:
         _parse_csv(path, parsed)
     return parsed
+
+
+def _parse_evtx(path: Path, parsed: ParsedDataset) -> None:
+    """Windows event log export: every record kept (all channels), parsed, never executed."""
+
+    try:
+        from evaluation.evtx_source import records
+    except ImportError as error:  # the optional `evtx` parser is not installed
+        parsed.structure_errors.append(f"EVTX support needs the 'evtx' package ({error}). pip install -r dashboard/requirements.txt")
+        return
+    try:
+        for number, document in enumerate(records(path), start=1):
+            parsed.originals.append(json.dumps(document, ensure_ascii=False))
+            parsed.locations.append(number)
+    except Exception as error:  # corrupt or non-EVTX file
+        parsed.structure_errors.append(f"not a readable .evtx file: {error}")
 
 
 def _excerpt(text: str, limit: int = 160) -> str:

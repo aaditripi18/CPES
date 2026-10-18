@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+
+import pytest
 
 from conftest import jsonl, upload
 
@@ -69,3 +72,39 @@ def test_system_reports_signal_wiring(client):
     wiring = {s["signal_id"]: s["wired"] for s in system["signals"]}
     assert wiring == {"autoelevation_lolbin": True, "service_dropped_binary": True, "remote_thread_injection": True, "token_impersonation": True}
     assert any("Single endpoint" in item for item in system["limitations"])
+
+
+EVTX_SAMPLE = Path(__file__).resolve().parents[2] / "external" / "evtx-attack-samples" / "privesc" / "Sysmon_13_1_UAC_Bypass_EventVwrBypass.evtx"
+
+
+@pytest.mark.skipif(not EVTX_SAMPLE.exists(), reason="external samples not fetched (python scripts/fetch_external.py)")
+def test_evtx_upload_validates_and_detects(client):
+    meta = upload(client, "eventvwr.evtx", EVTX_SAMPLE.read_bytes()).json()
+    assert meta["format"] == "evtx" and meta["suggested_mapping"]["preset"] == "evtx-sysmon-field-mapping-v1"
+    assert meta["validation_report"]["status"] == "valid" and meta["validation_report"]["accepted"] > 0
+    run = client.post("/api/runs", json={"dataset_id": meta["id"]}).json()
+    status = client.get(f"/api/runs/{run['id']}").json()
+    assert status["state"] == "completed", status.get("traceback")
+    assert status["summary"]["signals_fired"].get("autoelevation_lolbin", 0) >= 1
+    rows = client.get(f"/api/datasets/{meta['id']}/records", params={"f.Event.System.EventID": "13"}).json()
+    assert rows["total"] >= 1
+
+
+def test_live_replay_session_streams_alerts(client, uac_documents):
+    import time
+
+    meta = upload(client, "uac.jsonl", jsonl(uac_documents)).json()
+    session = client.post("/api/live", json={"source": "replay", "dataset_id": meta["id"], "speed": "max", "span_seconds": 60, "advance_seconds": 30}).json()
+    for _ in range(100):
+        snap = client.get(f"/api/live/{session['id']}").json()
+        if snap["state"] in ("completed", "failed"):
+            break
+        time.sleep(0.05)
+    assert snap["state"] == "completed", snap.get("error")
+    assert snap["events"] == len(uac_documents)
+    assert snap["alert_count"] >= 1
+    first = snap["alerts"][0]
+    assert first["contributions"][0]["signal_id"] == "autoelevation_lolbin"
+    assert any("re-associated" in line for line in first["explanation"])
+    assert client.get(f"/api/live/{session['id']}", params={"since": snap["alert_count"]}).json()["alerts"] == []
+    assert client.post("/api/live", json={"source": "elasticsearch"}).status_code == 400  # not configured in tests

@@ -8,7 +8,7 @@ import { useApi } from "../lib/hooks";
 import type { DatasetMeta, ValidationReport } from "../types";
 import { useWorkspace } from "../Workspace";
 
-const ACCEPTED = [".csv", ".json", ".jsonl", ".ndjson"];
+const ACCEPTED = [".csv", ".json", ".jsonl", ".ndjson", ".evtx"];
 const MAX_BYTES = 256 * 1024 * 1024;
 
 interface Inventory {
@@ -92,7 +92,7 @@ function UploadPanel({ onUploaded }: { onUploaded: () => void }) {
   };
 
   return (
-    <Panel title="Upload a dataset" eyebrow="csv · json · jsonl / ndjson · ≤ 256 MB">
+    <Panel title="Upload a dataset" eyebrow="evtx · csv · json · jsonl / ndjson · ≤ 256 MB">
       <div className="grid lg:grid-cols-[1fr_360px] gap-5">
         <div
           onDragOver={(event) => {
@@ -119,7 +119,7 @@ function UploadPanel({ onUploaded }: { onUploaded: () => void }) {
             <>
               <div className="mt-3 text-ink">Drop a telemetry file here, or click to choose</div>
               <div className="text-2xs text-muted mt-1 max-w-md leading-relaxed">
-                Winlogbeat/ECS exports map automatically. Other schemas can be mapped field by field after upload. Nothing is changed in the file; records that fail validation are listed, never silently dropped.
+                Windows event-log exports (.evtx, e.g. Sysmon saved from Event Viewer) and Winlogbeat/ECS exports map automatically. Other schemas can be mapped field by field after upload. Nothing is changed in the file; records that fail validation are listed, never silently dropped.
               </div>
             </>
           )}

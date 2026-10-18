@@ -133,8 +133,28 @@ What these numbers do and do not show:
   CPES doesn't over-fire on nearby-but-unmodeled activity (expansion corpus v4;
   not re-run in this checkout because that corpus is only archived).
 
-Reproduce the grouped-CV table, the package evaluation and the corrective
-experiments (requires the private corpus):
+### Beyond the lab: external data, evasion, live scoring, Sigma
+
+Each test below was written down with its expected outcome before it ran
+([design notes](docs/design/external-and-evasion-evaluation.md)); full tables in
+[docs/RESULTS.md](docs/RESULTS.md) §6–9.
+
+| Question | Result |
+|---|---|
+| **Does it work on attacks it has never seen?** 53 public Sysmon captures ([EVTX-ATTACK-SAMPLES](https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES)), weights frozen from the lab | CPES alone: **9/53**. CPES + its generic "unexplained privilege gain" test: **26/53**. The list-based UAC signal does not generalise (2/33 UAC methods). The *structural* service signal (a SYSTEM process running from a user-writable path) caught 5 of 7 Potato/PrintSpoofer-style token attacks it was never designed for. |
+| **Does renaming tools evade it?** Attacker-controlled changes to the lab telemetry | Renamed injector: the research injection signal and the IOC rule drop 18/18 → **0/18** (both are name rules). Renamed service binary, random pipe names, obfuscated command lines: **no change**. Switching to an unlisted auto-elevating binary: CPES UAC 33/33 → **0/33**, while the generic test rises to **32/33**. |
+| **Can it run live?** Lab corpus replayed as a stream | Live alerts equal the hindsight result exactly (**160/160**). Time to alert: median **83 s**, max 151 s of event time. Under 1 s of compute per closed window. |
+| **How does it compare with SigmaHQ?** 850 core / 1,927 total Sysmon rules on the same data | Sigma detects **more**: 106/126 lab runs (CPES 98/126) and 42/53 external files, with similar noise outside attack runs. Sigma alerts on the *actor* (`reg.exe`, `sc.exe`). CPES names the process that **gained** privilege and shows the mechanism (Sigma flags 0/33 elevated UAC processes and 0/28 service binaries). |
+
+**Positioning, stated plainly:** CPES does not out-detect a mature community
+rule set on breadth. It complements one: it tells an analyst *which process
+ended up elevated, by which mechanism, with the evidence chain*, and its generic
+unexplained-gain test covers elevation through binaries no rule names. Combining
+the specific signals with a weighted generic test is the next design, to be
+evaluated on data it was not tuned on.
+
+Reproduce everything (lab protocols need the private corpus; external data is
+public — `python scripts/fetch_external.py` downloads and verifies it):
 
 ```powershell
 python -m evaluation.run all
