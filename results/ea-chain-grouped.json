@@ -1,0 +1,325 @@
+{
+  "id": "ea-chain-grouped-20261018T113955Z",
+  "protocol": "ea-chain-grouped",
+  "recorded_at": "2026-10-18T11:39:55+00:00",
+  "duration_seconds": 0.04,
+  "code_sha256": "50409727c6264d2e52037451f95ad8a3462500bb575a2609fc5019f04341799a",
+  "git": {
+    "commit": "48352f6ed905fd5ce475aa448516cf8c16d1f22e",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "units": 2161,
+    "attack": 87,
+    "benign": 2074,
+    "folds": 5,
+    "skipped_folds_without_attack": [],
+    "detectors": {
+      "cpes": {
+        "fold_mean": {
+          "precision": 0.992,
+          "precision_std": 0.016000000000000014,
+          "recall": 1.0,
+          "recall_std": 0.0,
+          "fpr": 0.000851063829787234,
+          "fpr_std": 0.001702127659574468,
+          "f1": 0.9959183673469387,
+          "f1_std": 0.008163265306122458
+        },
+        "pooled": {
+          "precision": 0.9886363636363636,
+          "recall": 1.0,
+          "fpr": 0.00048216007714561236,
+          "f1": 0.9942857142857142,
+          "tp": 87,
+          "fp": 1,
+          "tn": 2073,
+          "fn": 0
+        },
+        "per_fold": [
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 14,
+            "fp": 0,
+            "tn": 1502,
+            "fn": 0,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 26,
+            "fp": 0,
+            "tn": 82,
+            "fn": 0,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 13,
+            "fp": 0,
+            "tn": 183,
+            "fn": 0,
+            "fold": 2
+          },
+          {
+            "precision": 0.96,
+            "recall": 1.0,
+            "fpr": 0.00425531914893617,
+            "f1": 0.9795918367346939,
+            "tp": 24,
+            "fp": 1,
+            "tn": 234,
+            "fn": 0,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 10,
+            "fp": 0,
+            "tn": 72,
+            "fn": 0,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "18/18",
+          "T1134.001": "8/8",
+          "T1543.003": "28/28",
+          "T1548.002": "33/33"
+        }
+      },
+      "single_event_research": {
+        "fold_mean": {
+          "precision": 0.9818181818181818,
+          "precision_std": 0.036363636363636376,
+          "recall": 0.40362637362637366,
+          "recall_std": 0.16286796837861434,
+          "fpr": 0.00013315579227696407,
+          "fpr_std": 0.00026631158455392814,
+          "f1": 0.5512605042016807,
+          "f1_std": 0.13640599539392775
+        },
+        "pooled": {
+          "precision": 0.9705882352941176,
+          "recall": 0.3793103448275862,
+          "fpr": 0.00048216007714561236,
+          "f1": 0.5454545454545454,
+          "tp": 33,
+          "fp": 1,
+          "tn": 2073,
+          "fn": 54
+        },
+        "per_fold": [
+          {
+            "precision": 0.9090909090909091,
+            "recall": 0.7142857142857143,
+            "fpr": 0.0006657789613848203,
+            "f1": 0.8,
+            "tp": 10,
+            "fp": 1,
+            "tn": 1501,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.34615384615384615,
+            "fpr": 0.0,
+            "f1": 0.5142857142857142,
+            "tp": 9,
+            "fp": 0,
+            "tn": 82,
+            "fn": 17,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.3076923076923077,
+            "fpr": 0.0,
+            "f1": 0.47058823529411764,
+            "tp": 4,
+            "fp": 0,
+            "tn": 183,
+            "fn": 9,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.25,
+            "fpr": 0.0,
+            "f1": 0.4,
+            "tp": 6,
+            "fp": 0,
+            "tn": 235,
+            "fn": 18,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 72,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "0/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "33/33"
+        }
+      },
+      "ioc_signature_research": {
+        "fold_mean": {
+          "precision": 1.0,
+          "precision_std": 0.0,
+          "recall": 0.5670879120879121,
+          "recall_std": 0.1943359601379249,
+          "fpr": 0.0,
+          "fpr_std": 0.0,
+          "f1": 0.7050459482038429,
+          "f1_std": 0.1511100026304138
+        },
+        "pooled": {
+          "precision": 1.0,
+          "recall": 0.5862068965517241,
+          "fpr": 0.0,
+          "f1": 0.7391304347826086,
+          "tp": 51,
+          "fp": 0,
+          "tn": 2074,
+          "fn": 36
+        },
+        "per_fold": [
+          {
+            "precision": 1.0,
+            "recall": 0.7142857142857143,
+            "fpr": 0.0,
+            "f1": 0.8333333333333333,
+            "tp": 10,
+            "fp": 0,
+            "tn": 1502,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.38461538461538464,
+            "fpr": 0.0,
+            "f1": 0.5555555555555556,
+            "tp": 10,
+            "fp": 0,
+            "tn": 82,
+            "fn": 16,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.46153846153846156,
+            "fpr": 0.0,
+            "f1": 0.631578947368421,
+            "tp": 6,
+            "fp": 0,
+            "tn": 183,
+            "fn": 7,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.875,
+            "fpr": 0.0,
+            "f1": 0.9333333333333333,
+            "tp": 21,
+            "fp": 0,
+            "tn": 235,
+            "fn": 3,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 72,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "18/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "33/33"
+        }
+      }
+    },
+    "weights_by_fold": {
+      "0": {
+        "autoelevation_lolbin": 5.896968225220628,
+        "remote_thread_injection": 5.6577385361547945,
+        "service_dropped_binary": 4.840028632953087,
+        "token_impersonation": 4.880033967566786
+      },
+      "1": {
+        "autoelevation_lolbin": 7.36208223327833,
+        "remote_thread_injection": 7.025609996657117,
+        "service_dropped_binary": 5.805636850984739,
+        "token_impersonation": 5.868157207966074
+      },
+      "2": {
+        "autoelevation_lolbin": 7.305439079981233,
+        "remote_thread_injection": 6.724409197541993,
+        "service_dropped_binary": 6.099581260959526,
+        "token_impersonation": 5.173811785130827
+      },
+      "3": {
+        "autoelevation_lolbin": 7.365970952475831,
+        "remote_thread_injection": 5.304547916298673,
+        "service_dropped_binary": 7.2904633999676856,
+        "token_impersonation": 6.1918511112995755
+      },
+      "4": {
+        "autoelevation_lolbin": 7.323229952881946,
+        "remote_thread_injection": 6.856610421620451,
+        "service_dropped_binary": 5.953742710078436,
+        "token_impersonation": 6.078905853032443
+      }
+    },
+    "note": "E-a: benign units grouped by lineage chain (cpes.lineage) instead of one group per process.",
+    "benign_groups": 54
+  }
+}

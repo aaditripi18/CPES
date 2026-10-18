@@ -1,0 +1,324 @@
+{
+  "id": "research-grouped-20261018T113950Z",
+  "protocol": "research-grouped",
+  "recorded_at": "2026-10-18T11:39:50+00:00",
+  "duration_seconds": 1.65,
+  "code_sha256": "50409727c6264d2e52037451f95ad8a3462500bb575a2609fc5019f04341799a",
+  "git": {
+    "commit": "48352f6ed905fd5ce475aa448516cf8c16d1f22e",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "units": 2161,
+    "attack": 87,
+    "benign": 2074,
+    "folds": 5,
+    "skipped_folds_without_attack": [],
+    "detectors": {
+      "cpes": {
+        "fold_mean": {
+          "precision": 0.9857142857142858,
+          "precision_std": 0.02857142857142856,
+          "recall": 1.0,
+          "recall_std": 0.0,
+          "fpr": 0.0004716981132075472,
+          "fpr_std": 0.0009433962264150943,
+          "f1": 0.9925925925925926,
+          "f1_std": 0.014814814814814791
+        },
+        "pooled": {
+          "precision": 0.9886363636363636,
+          "recall": 1.0,
+          "fpr": 0.00048216007714561236,
+          "f1": 0.9942857142857142,
+          "tp": 87,
+          "fp": 1,
+          "tn": 2073,
+          "fn": 0
+        },
+        "per_fold": [
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 14,
+            "fp": 0,
+            "tn": 392,
+            "fn": 0,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 26,
+            "fp": 0,
+            "tn": 424,
+            "fn": 0,
+            "fold": 1
+          },
+          {
+            "precision": 0.9285714285714286,
+            "recall": 1.0,
+            "fpr": 0.0023584905660377358,
+            "f1": 0.962962962962963,
+            "tp": 13,
+            "fp": 1,
+            "tn": 423,
+            "fn": 0,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 24,
+            "fp": 0,
+            "tn": 422,
+            "fn": 0,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 1.0,
+            "fpr": 0.0,
+            "f1": 1.0,
+            "tp": 10,
+            "fp": 0,
+            "tn": 412,
+            "fn": 0,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "18/18",
+          "T1134.001": "8/8",
+          "T1543.003": "28/28",
+          "T1548.002": "33/33"
+        }
+      },
+      "single_event_research": {
+        "fold_mean": {
+          "precision": 0.9818181818181818,
+          "precision_std": 0.036363636363636376,
+          "recall": 0.40362637362637366,
+          "recall_std": 0.16286796837861434,
+          "fpr": 0.000510204081632653,
+          "fpr_std": 0.001020408163265306,
+          "f1": 0.5512605042016807,
+          "f1_std": 0.13640599539392775
+        },
+        "pooled": {
+          "precision": 0.9705882352941176,
+          "recall": 0.3793103448275862,
+          "fpr": 0.00048216007714561236,
+          "f1": 0.5454545454545454,
+          "tp": 33,
+          "fp": 1,
+          "tn": 2073,
+          "fn": 54
+        },
+        "per_fold": [
+          {
+            "precision": 0.9090909090909091,
+            "recall": 0.7142857142857143,
+            "fpr": 0.002551020408163265,
+            "f1": 0.8,
+            "tp": 10,
+            "fp": 1,
+            "tn": 391,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.34615384615384615,
+            "fpr": 0.0,
+            "f1": 0.5142857142857142,
+            "tp": 9,
+            "fp": 0,
+            "tn": 424,
+            "fn": 17,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.3076923076923077,
+            "fpr": 0.0,
+            "f1": 0.47058823529411764,
+            "tp": 4,
+            "fp": 0,
+            "tn": 424,
+            "fn": 9,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.25,
+            "fpr": 0.0,
+            "f1": 0.4,
+            "tp": 6,
+            "fp": 0,
+            "tn": 422,
+            "fn": 18,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 412,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "0/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "33/33"
+        }
+      },
+      "ioc_signature_research": {
+        "fold_mean": {
+          "precision": 1.0,
+          "precision_std": 0.0,
+          "recall": 0.5670879120879121,
+          "recall_std": 0.1943359601379249,
+          "fpr": 0.0,
+          "fpr_std": 0.0,
+          "f1": 0.7050459482038429,
+          "f1_std": 0.1511100026304138
+        },
+        "pooled": {
+          "precision": 1.0,
+          "recall": 0.5862068965517241,
+          "fpr": 0.0,
+          "f1": 0.7391304347826086,
+          "tp": 51,
+          "fp": 0,
+          "tn": 2074,
+          "fn": 36
+        },
+        "per_fold": [
+          {
+            "precision": 1.0,
+            "recall": 0.7142857142857143,
+            "fpr": 0.0,
+            "f1": 0.8333333333333333,
+            "tp": 10,
+            "fp": 0,
+            "tn": 392,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.38461538461538464,
+            "fpr": 0.0,
+            "f1": 0.5555555555555556,
+            "tp": 10,
+            "fp": 0,
+            "tn": 424,
+            "fn": 16,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.46153846153846156,
+            "fpr": 0.0,
+            "f1": 0.631578947368421,
+            "tp": 6,
+            "fp": 0,
+            "tn": 424,
+            "fn": 7,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.875,
+            "fpr": 0.0,
+            "f1": 0.9333333333333333,
+            "tp": 21,
+            "fp": 0,
+            "tn": 422,
+            "fn": 3,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 412,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "18/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "33/33"
+        }
+      }
+    },
+    "weights_by_fold": {
+      "0": {
+        "autoelevation_lolbin": 6.974415702696695,
+        "remote_thread_injection": 6.735186013630861,
+        "service_dropped_binary": 5.917476110429154,
+        "token_impersonation": 5.957481445042852
+      },
+      "1": {
+        "autoelevation_lolbin": 7.173822356985663,
+        "remote_thread_injection": 6.83735012036445,
+        "service_dropped_binary": 5.617376974692073,
+        "token_impersonation": 5.679897331673407
+      },
+      "2": {
+        "autoelevation_lolbin": 7.169185774289537,
+        "remote_thread_injection": 6.588155891850298,
+        "service_dropped_binary": 7.06194024393594,
+        "token_impersonation": 5.037558479439131
+      },
+      "3": {
+        "autoelevation_lolbin": 7.258797199693824,
+        "remote_thread_injection": 5.197374163516666,
+        "service_dropped_binary": 6.084677358517569,
+        "token_impersonation": 6.084677358517569
+      },
+      "4": {
+        "autoelevation_lolbin": 7.137207096409055,
+        "remote_thread_injection": 6.67058756514756,
+        "service_dropped_binary": 5.767719853605546,
+        "token_impersonation": 5.892882996559552
+      }
+    },
+    "note": "Replication of analysis/corpus_eval_grouped.py; must equal its printed figures."
+  }
+}
