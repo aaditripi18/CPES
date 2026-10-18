@@ -1,0 +1,67 @@
+{
+  "id": "stream-replay-v3-20261018T155905Z",
+  "protocol": "stream-replay-v3",
+  "recorded_at": "2026-10-18T15:59:05+00:00",
+  "duration_seconds": 11.73,
+  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
+  "git": {
+    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "settings": {
+      "span_seconds": 300.0,
+      "advance_seconds": 150.0,
+      "tick_seconds": 30.0,
+      "events": 35345
+    },
+    "agreement": {
+      "unit": "alert = (window start, signal, anchored process); chain IDs are not compared because a chain's root, and so its ID, can change as more of the tree arrives",
+      "live": 160,
+      "batch": 160,
+      "both": 160,
+      "live_only": [],
+      "batch_only": [],
+      "chain_keyed_counts": {
+        "live_windows": 110,
+        "batch_windows": 68,
+        "same_chain_id": 51
+      }
+    },
+    "time_to_alert_seconds": {
+      "attack_units_alerted": 51,
+      "median": 83.119,
+      "p95": 147.368,
+      "max": 150.701,
+      "note": "Event time from the attack process's creation to the watermark of its first live alert. With overlapping windows the earliest window containing an event closes at most `advance` seconds after it, plus up to one tick of watermark granularity, so the bound is advance + tick."
+    },
+    "cost": {
+      "ticks": 327,
+      "median_tick_seconds": 3.6999699659645557e-06,
+      "max_tick_seconds": 0.9156527000013739,
+      "total_seconds": 7.455890100507531
+    },
+    "summary": {
+      "live_alerts": 160,
+      "batch_alerts": 160,
+      "agree": 160,
+      "median_time_to_alert_s": 83.119
+    }
+  }
+}

@@ -1,11 +1,11 @@
 {
-  "id": "ea-chain-grouped-20261018T113955Z",
+  "id": "ea-chain-grouped-20261018T155833Z",
   "protocol": "ea-chain-grouped",
-  "recorded_at": "2026-10-18T11:39:55+00:00",
-  "duration_seconds": 0.04,
-  "code_sha256": "50409727c6264d2e52037451f95ad8a3462500bb575a2609fc5019f04341799a",
+  "recorded_at": "2026-10-18T15:58:33+00:00",
+  "duration_seconds": 0.03,
+  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
   "git": {
-    "commit": "48352f6ed905fd5ce475aa448516cf8c16d1f22e",
+    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
     "dirty": false
   },
   "python": "3.12.10",

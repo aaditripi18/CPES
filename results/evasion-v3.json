@@ -1,0 +1,406 @@
+{
+  "id": "evasion-v3-20261018T155853Z",
+  "protocol": "evasion-v3",
+  "recorded_at": "2026-10-18T15:58:53+00:00",
+  "duration_seconds": 18.36,
+  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
+  "git": {
+    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "summary": {
+      "V0": {
+        "cpes_research_signals": "87/87",
+        "cpes_package": "51/87",
+        "generic_unexplained_gain_package": "18/87",
+        "ioc_signature_research": "51/87",
+        "single_event_research": "33/87"
+      },
+      "V1": {
+        "cpes_research_signals": "69/87",
+        "cpes_package": "51/87",
+        "generic_unexplained_gain_package": "18/87",
+        "ioc_signature_research": "33/87",
+        "single_event_research": "33/87"
+      },
+      "V2": {
+        "cpes_research_signals": "87/87",
+        "cpes_package": "51/87",
+        "generic_unexplained_gain_package": "18/87",
+        "ioc_signature_research": "51/87",
+        "single_event_research": "33/87"
+      },
+      "V3": {
+        "cpes_research_signals": "54/87",
+        "cpes_package": "36/87",
+        "generic_unexplained_gain_package": "32/87",
+        "ioc_signature_research": "18/87",
+        "single_event_research": "33/87"
+      },
+      "V4": {
+        "cpes_research_signals": "87/87",
+        "cpes_package": "51/87",
+        "generic_unexplained_gain_package": "18/87",
+        "ioc_signature_research": "51/87",
+        "single_event_research": "33/87"
+      },
+      "V5": {
+        "cpes_research_signals": "87/87",
+        "cpes_package": "51/87",
+        "generic_unexplained_gain_package": "18/87",
+        "ioc_signature_research": "51/87",
+        "single_event_research": "33/87"
+      }
+    },
+    "note": "CPES decisions are the OR of signals (every research weight exceeds the 0.5 threshold); in-sample labels; the question is change under transformation, not absolute accuracy.",
+    "variants": {
+      "V0": {
+        "transform": "none (gate: must equal the published table)",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "87/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "15/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "18/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      },
+      "V1": {
+        "transform": "renamed injector: mavinject.exe \u2192 msupdhlp.exe (all mavinject processes are attack processes)",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "69/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "15/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "18/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      },
+      "V2": {
+        "transform": "renamed dropped service binary: ['atomicservice.exe'] \u2192 svchost_update.exe",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "87/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "15/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "18/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      },
+      "V3": {
+        "transform": "unlisted auto-elevating binary: ['computerdefaults.exe', 'eventvwr.exe', 'fodhelper.exe', 'sdclt.exe'] \u2192 wsreset.exe on the elevated attack processes",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "0/33"
+            },
+            "attack_detected": "54/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "0/33"
+            },
+            "attack_detected": "36/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "32/33"
+            },
+            "attack_detected": "32/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "0/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      },
+      "V4": {
+        "transform": "random but consistent pipe names (bijection over every pipe name)",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "87/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "15/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "18/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      },
+      "V5": {
+        "transform": "caret-obfuscated command lines on attack processes",
+        "detectors": {
+          "cpes_research_signals": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "87/87",
+            "benign_flagged": 1
+          },
+          "cpes_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "8/8",
+              "T1543.003": "28/28",
+              "T1548.002": "15/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 12
+          },
+          "generic_unexplained_gain_package": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "18/33"
+            },
+            "attack_detected": "18/87",
+            "benign_flagged": 1
+          },
+          "ioc_signature_research": {
+            "recall_by_technique": {
+              "T1055.001": "18/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "51/87",
+            "benign_flagged": 0
+          },
+          "single_event_research": {
+            "recall_by_technique": {
+              "T1055.001": "0/18",
+              "T1134.001": "0/8",
+              "T1543.003": "0/28",
+              "T1548.002": "33/33"
+            },
+            "attack_detected": "33/87",
+            "benign_flagged": 1
+          }
+        }
+      }
+    }
+  }
+}
