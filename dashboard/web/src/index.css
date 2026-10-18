@@ -1,0 +1,46 @@
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/hanken-grotesk.woff2") format("woff2");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { color-scheme: dark; }
+  body { @apply bg-bg text-ink font-sans antialiased; font-size: 14px; }
+  ::selection { background: #a78bfa55; }
+  :focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: #2e3747 transparent; }
+}
+
+@layer components {
+  .panel { @apply bg-panel border border-line rounded-md; }
+  .panel-head { @apply flex items-center justify-between gap-3 px-4 py-3 border-b border-line; }
+  .eyebrow { @apply font-mono text-2xs uppercase tracking-[0.08em] text-muted; }
+  .btn { @apply inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-[13px] font-medium border border-line-strong bg-raised text-ink hover:bg-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors; }
+  .btn-primary { @apply bg-accent text-[#160f2e] border-accent hover:bg-[#b9a2fc]; }
+  .btn-ghost { @apply border-transparent bg-transparent hover:bg-hover; }
+  .input { @apply bg-bg border border-line-strong rounded px-2.5 py-1.5 text-[13px] text-ink placeholder:text-faint focus:border-accent focus:outline-none; }
+  .tbl { @apply w-full text-[13px]; }
+  .tbl th { @apply text-left font-mono text-2xs uppercase tracking-[0.06em] text-muted font-medium px-3 py-2 border-b border-line whitespace-nowrap; }
+  .tbl td { @apply px-3 py-2 border-b border-line/70 align-top; }
+  .tbl tr.row-link { @apply cursor-pointer hover:bg-hover; }
+  .tbl tr.row-active { @apply bg-accent-dim/60; }
+  .link { @apply text-accent hover:underline underline-offset-2; }
+  .mono { @apply font-mono; }
+  .chip { @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-mono border; }
+}
+
+.react-flow__attribution { display: none; }

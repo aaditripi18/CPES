@@ -132,10 +132,25 @@ with no external dependencies. See [demo/README.md](demo/README.md).
 python demo/cpes_demo.py
 ```
 
+## Research dashboard
+
+`dashboard/` is a local web application over the unchanged package: upload
+and validate telemetry, explore raw records, run `CpesPipeline`, trace each
+detection to its signals, weights and source records, inspect process lineage,
+and re-run the `analysis/` evaluation scripts with recorded provenance. See
+[dashboard/README.md](dashboard/README.md).
+
+```powershell
+pip install -r dashboard/requirements.txt
+cd dashboard/web; npm ci; npm run build; cd ../..
+python dashboard/run_server.py      # http://127.0.0.1:8790
+```
+
 ## Tests
 
 ```powershell
-pytest
+pytest tests
+pytest dashboard/tests
 ```
 
 ## Reproducibility records

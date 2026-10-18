@@ -1,0 +1,301 @@
+"""Reproduce the recorded research experiments by running ``analysis/`` scripts unchanged.
+
+Each execution gets its own directory with stdout, stderr, exit code, duration,
+and SHA-256 of the script and every input file, so a figure on screen can be
+traced to the exact bytes that produced it. Parsing only extracts numbers that
+the script itself printed; nothing is recomputed here.
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+import sys
+import threading
+import time
+from typing import Any
+
+from .ingest import sha256_file
+from .paths import ANALYSIS, REPO_ROOT, data_root
+from .runner import git_state
+from .storage import new_id, now, read_json, write_json
+
+CATALOG: list[dict[str, Any]] = [
+    {
+        "id": "grouped_cv",
+        "script": "analysis/corpus_eval_grouped.py",
+        "title": "Grouped 5-fold CV — all three detectors",
+        "protocol": "process instance · 5 folds grouped by attack run · weights re-derived on each training fold · threshold 0.50 · mean ± std over folds",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "canonical",
+        "role_note": "Named canonical in docs/CPES-Friend-Reply-2026-09-06.md and the paper hand-off.",
+        "parser": "detector_table",
+    },
+    {
+        "id": "ungrouped_cv_v3",
+        "script": "analysis/corpus_eval_v3.py",
+        "title": "Ungrouped 5-fold CV + pooled confusion (v3)",
+        "protocol": "process instance · 5 folds, not grouped by run · token signal design ablation (old heuristic vs pipe-grounded)",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "supporting",
+        "role_note": "Source of the README headline (0.995 / 0.519 / 0.736). The docs call these supporting, not headline, figures.",
+        "parser": "v3_table",
+        "needs_package": True,
+    },
+    {
+        "id": "independent_channel",
+        "script": "analysis/corpus_eval_independent.py",
+        "title": "Non-circular recall (label channel ≠ signal channel)",
+        "protocol": "run level · detonation confirmed from channels CPES does not score · injection has no independent channel",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "validity_check",
+        "parser": None,
+    },
+    {
+        "id": "generic_ablation",
+        "script": "analysis/corpus_eval_generic.py",
+        "title": "Generic 'unexplained privilege gain' with each specific signal held out",
+        "protocol": "process instance · ablation, no CV",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "ablation",
+        "parser": None,
+    },
+    {
+        "id": "partial_evidence",
+        "script": "analysis/corpus_eval_partial.py",
+        "title": "Weight-of-evidence vs plain OR with a weak signal",
+        "protocol": "process instance · in-sample · different label set (79 attack)",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "ablation",
+        "parser": None,
+    },
+    {
+        "id": "robustness",
+        "script": "analysis/corpus_eval_robustness.py",
+        "title": "Robustness: grouped CV, leave-one-technique-out, OR vs WoE, base rate, learned baseline",
+        "protocol": "process instance · several protocols in one script (see output)",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "robustness",
+        "parser": None,
+        "needs_package": True,
+    },
+    {
+        "id": "provenance",
+        "script": "analysis/corpus_eval_provenance.py",
+        "title": "Provenance-labelled run-level detection (combined corpus)",
+        "protocol": "run level · labels from runner-root provenance, independent of CPES features · 5-fold by run id",
+        "dataset": "lab-corpus-combined",
+        "inputs": ["analysis/corpus-combined.ndjson", "analysis/cpes-atomic-log-combined.csv"],
+        "role": "adverse_result",
+        "role_note": "Much lower recall than the v3 figures (CPES F1 ≈ 0.5). Not in the README; shown here so it is not hidden.",
+        "parser": "provenance_table",
+        "needs_package": True,
+    },
+    {
+        "id": "expansion_v4",
+        "script": "analysis/corpus_eval_v4.py",
+        "title": "Expansion corpus (v4) checks",
+        "protocol": "see script",
+        "dataset": None,
+        "inputs": ["analysis/corpus-v4.ndjson"],
+        "role": "unavailable",
+        "role_note": "Needs analysis/corpus-v4.ndjson, which exists only inside cpes-corpus-v4.zip (1.1 GB). Not runnable until extracted.",
+        "parser": None,
+    },
+    {
+        "id": "standalone_demo",
+        "script": "demo/cpes_demo.py",
+        "args": ["--no-color"],
+        "cwd": "demo",
+        "title": "Standalone live demo (pooled, in-sample)",
+        "protocol": "process instance · weights estimated on the whole corpus · pooled confusion (no CV)",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv"],
+        "role": "demo",
+        "role_note": "Prints pooled in-sample figures; section 7 'Extended validation' prints fixed text from the v4 analysis rather than computing it.",
+        "parser": "demo_table",
+    },
+]
+
+# README statements and where they come from. "expected" is what the README says.
+PUBLISHED_CLAIMS = [
+    {"claim": "CPES precision (README)", "expected": 0.989, "experiment": "ungrouped_cv_v3", "metric": ("CPES sharp token-pipe", "precision")},
+    {"claim": "CPES recall (README)", "expected": 1.000, "experiment": "ungrouped_cv_v3", "metric": ("CPES sharp token-pipe", "recall")},
+    {"claim": "CPES F1 (README)", "expected": 0.995, "experiment": "ungrouped_cv_v3", "metric": ("CPES sharp token-pipe", "f1")},
+    {"claim": "Single-event baseline F1 (README)", "expected": 0.519, "experiment": "ungrouped_cv_v3", "metric": ("baseline1 (integrity edge)", "f1")},
+    {"claim": "Signature baseline F1 (README)", "expected": 0.736, "experiment": "ungrouped_cv_v3", "metric": ("baseline2 (IOC/signature)", "f1")},
+    {"claim": "CPES F1, grouped CV (paper hand-off, canonical)", "expected": 0.993, "experiment": "grouped_cv", "metric": ("CPES (context WoE)", "f1")},
+    {"claim": "Single-event F1, grouped CV (canonical)", "expected": 0.551, "experiment": "grouped_cv", "metric": ("Single-event (integrity)", "f1")},
+    {"claim": "IOC/signature F1, grouped CV (canonical)", "expected": 0.705, "experiment": "grouped_cv", "metric": ("IOC / signature", "f1")},
+]
+
+# Findings of the dashboard's review of the evaluation scripts. These are
+# concerns, not changes: the published method is untouched, and corrective
+# experiments are proposed in docs/dashboard/EVALUATION-NOTES.md.
+METHOD_NOTES = [
+    {"topic": "Label construction", "severity": "high", "where": "corpus_eval_grouped.py, corpus_eval_v3.py, demo/cpes_demo.py",
+     "finding": "A process is labelled an attack only if one of the four CPES signals fires within 150 s of a logged Atomic execution. CPES recall is 1.0 by construction, and an attack process the signals miss is counted as benign (so it can only hurt the baselines).",
+     "mitigation_in_repo": "corpus_eval_independent.py confirms detonations through channels CPES does not score (UAC, service, token; injection has no independent channel)."},
+    {"topic": "Grouping of benign units", "severity": "medium", "where": "corpus_eval_grouped.py",
+     "finding": "Attack units are grouped by run, but every benign process is its own group, so benign processes from one session or one lineage chain fall into different folds.",
+     "mitigation_in_repo": "Weights depend only on per-class signal frequencies, so the effect on CPES is likely small; not measured."},
+    {"topic": "Fold aggregation", "severity": "low", "where": "corpus_eval_grouped.py, corpus_eval_v3.py",
+     "finding": "Folds without an attack unit are skipped; precision with no positive call is set to 1.0; reported figures are fold means, not pooled.",
+     "mitigation_in_repo": "Pooled confusion is printed by corpus_eval_v3.py and agrees in direction."},
+    {"topic": "Headline choice", "severity": "medium", "where": "README.md",
+     "finding": "The README headline (F1 0.995, baselines 0.519 / 0.736) is the ungrouped CV. The project's own notes call the grouped figures (0.993 / 0.551 / 0.705) canonical.",
+     "mitigation_in_repo": "None yet; README unchanged pending your decision."},
+    {"topic": "Adverse result", "severity": "high", "where": "corpus_eval_provenance.py",
+     "finding": "Provenance-labelled run-level evaluation on the combined corpus gives CPES F1 ≈ 0.5 (recall ≈ 0.36). It uses a different corpus, unit and label source, so it is not directly comparable, but it is not mentioned in the README.",
+     "mitigation_in_repo": "None; listed here and in the experiment catalog."},
+    {"topic": "Two engines", "severity": "high", "where": "analysis/ vs cpes/",
+     "finding": "Published metrics come from stdlib scripts at the process-instance level. The cpes package scores (chain × window) units and does not yet wire the token and injection signals. Package runs reproduce the UAC/service behaviour only.",
+     "mitigation_in_repo": "The dashboard reports both and never mixes them."},
+    {"topic": "Weighting adds nothing measurable", "severity": "info", "where": "corpus_eval_robustness.py",
+     "finding": "On this corpus weight-of-evidence and a plain OR of the four signals give identical results, and a learned logistic regression on the same signals matches CPES.",
+     "mitigation_in_repo": "Stated by the script itself; corpus_eval_partial.py shows a case where weighting matters."},
+]
+
+_NUM = r"([0-9]+\.[0-9]+)"
+_PM = r"[±�]|\+/-"
+
+
+def parse_output(parser: str | None, stdout: str) -> dict[str, Any] | None:
+    if parser is None:
+        return None
+    rows: dict[str, dict[str, float]] = {}
+    if parser == "detector_table":
+        pattern = re.compile(rf"^\s{{2}}(.+?)\s+{_NUM}(?:{_PM}){_NUM}\s+{_NUM}(?:{_PM}){_NUM}\s+{_NUM}(?:{_PM}){_NUM}\s+{_NUM}(?:{_PM}){_NUM}\s*$", re.M)
+        for match in pattern.finditer(stdout):
+            name = match.group(1).strip()
+            values = [float(v) for v in match.groups()[1:]]
+            rows[name] = {"precision": values[0], "precision_std": values[1], "recall": values[2], "recall_std": values[3], "fpr": values[4], "fpr_std": values[5], "f1": values[6], "f1_std": values[7]}
+        header = re.search(r"units=(\d+) attack=(\d+) benign=(\d+)", stdout)
+        units = {"units": int(header.group(1)), "attack": int(header.group(2)), "benign": int(header.group(3))} if header else None
+        return {"detectors": rows, "units": units, "aggregation": "mean ± population std over folds"}
+    if parser in ("v3_table", "provenance_table"):
+        pattern = re.compile(rf"^\s{{2}}(.+?)\s+P={_NUM}(?:{_PM}){_NUM}\s+R={_NUM}(?:{_PM}){_NUM}\s+FPR={_NUM}(?:{_PM}){_NUM}\s+F1={_NUM}(?:{_PM}){_NUM}\s*$", re.M)
+        for match in pattern.finditer(stdout):
+            name = match.group(1).strip()
+            values = [float(v) for v in match.groups()[1:]]
+            rows[name] = {"precision": values[0], "precision_std": values[1], "recall": values[2], "recall_std": values[3], "fpr": values[4], "fpr_std": values[5], "f1": values[6], "f1_std": values[7]}
+        pooled = {}
+        for match in re.finditer(r"^\s{2}(.+?)\s+TP=(\d+) FP=(\d+) TN=(\d+) FN=(\d+)\s*$", stdout, re.M):
+            pooled[match.group(1).strip()] = {"tp": int(match.group(2)), "fp": int(match.group(3)), "tn": int(match.group(4)), "fn": int(match.group(5))}
+        return {"detectors": rows, "pooled_confusion": pooled or None, "aggregation": "mean ± population std over folds"}
+    if parser == "demo_table":
+        pattern = re.compile(rf"^\s+(Single-event \(integrity\)|IOC / signature rule|CPES \(context WoE\))\s+{_NUM}\s+{_NUM}\s+{_NUM}\s+{_NUM}\s+(\d+)/(\d+)/(\d+)\s*$", re.M)
+        for match in pattern.finditer(stdout):
+            p, r, fpr, f1 = (float(v) for v in match.groups()[1:5])
+            tp, fp, fn = (int(v) for v in match.groups()[5:8])
+            rows[match.group(1)] = {"precision": p, "recall": r, "fpr": fpr, "f1": f1, "tp": tp, "fp": fp, "fn": fn}
+        weights = {m.group(1): float(m.group(2)) for m in re.finditer(r"^\s+(autoelevation_lolbin|service_dropped_binary|remote_thread_injection|token_impersonation)\s+([+-][0-9.]+)", stdout, re.M)}
+        return {"detectors": rows, "weights": weights, "aggregation": "pooled, in-sample"}
+    return None
+
+
+class ExperimentStore:
+    @property
+    def root(self):
+        directory = data_root() / "experiments"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
+
+    def catalog(self) -> list[dict[str, Any]]:
+        items = []
+        for entry in CATALOG:
+            item = dict(entry)
+            missing = [path for path in [entry["script"], *entry["inputs"]] if not (REPO_ROOT / path).exists()]
+            item["runnable"] = not missing
+            item["missing_inputs"] = missing
+            latest = next((run for run in self.list() if run["experiment_id"] == entry["id"]), None)
+            item["latest"] = latest
+            items.append(item)
+        return items
+
+    def list(self) -> list[dict[str, Any]]:
+        records = [record for directory in self.root.iterdir() if (record := read_json(directory / "record.json"))]
+        records.sort(key=lambda record: (record.get("started_ns", 0), record["id"]), reverse=True)
+        return [{k: v for k, v in record.items() if k not in ("stdout", "stderr")} for record in records]
+
+    def get(self, execution_id: str) -> dict[str, Any]:
+        record = read_json(self.root / execution_id / "record.json")
+        if record is None:
+            raise KeyError(execution_id)
+        return record
+
+    def start(self, experiment_id: str, *, background: bool = True) -> dict[str, Any]:
+        entry = next((item for item in CATALOG if item["id"] == experiment_id), None)
+        if entry is None:
+            raise KeyError(experiment_id)
+        missing = [path for path in [entry["script"], *entry["inputs"]] if not (REPO_ROOT / path).exists()]
+        if missing:
+            raise ValueError("cannot run: missing " + ", ".join(missing))
+        execution_id = new_id("exp")
+        record = {
+            "id": execution_id,
+            "experiment_id": experiment_id,
+            "title": entry["title"],
+            "script": entry["script"],
+            "protocol": entry["protocol"],
+            "role": entry["role"],
+            "dataset": entry["dataset"],
+            "state": "running",
+            "started_at": now(),
+            "started_ns": time.time_ns(),
+            "kind": "research_experiment",
+            "script_sha256": sha256_file(REPO_ROOT / entry["script"]),
+            "inputs": [{"path": path, "sha256": sha256_file(REPO_ROOT / path), "bytes": (REPO_ROOT / path).stat().st_size} for path in entry["inputs"]],
+            "versions": {"python": sys.version.split()[0], **git_state()},
+        }
+        write_json(self.root / execution_id / "record.json", record)
+        if background:
+            threading.Thread(target=self._execute, args=(execution_id, entry), daemon=True).start()
+        else:
+            self._execute(execution_id, entry)
+        return self.get(execution_id)
+
+    def _execute(self, execution_id: str, entry: dict[str, Any]) -> None:
+        path = self.root / execution_id / "record.json"
+        record = read_json(path)
+        environment = dict(os.environ)
+        environment["PYTHONIOENCODING"] = "utf-8"
+        environment["PYTHONPATH"] = str(REPO_ROOT)
+        cwd = REPO_ROOT / entry.get("cwd", "analysis")
+        started = time.perf_counter()
+        try:
+            completed = subprocess.run(
+                [sys.executable, str(REPO_ROOT / entry["script"]), *entry.get("args", [])],
+                cwd=cwd, env=environment, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
+            )
+            record.update(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr[-20000:])
+            record["state"] = "completed" if completed.returncode == 0 else "failed"
+        except subprocess.TimeoutExpired as error:
+            record.update(state="failed", exit_code=None, stdout=error.stdout or "", stderr="timed out after 1800 s")
+        record["duration_seconds"] = round(time.perf_counter() - started, 2)
+        record["completed_at"] = now()
+        record["parsed"] = parse_output(entry.get("parser"), record.get("stdout", "")) if record["state"] == "completed" else None
+        write_json(path, record)
+
+    def claims(self) -> list[dict[str, Any]]:
+        latest: dict[str, dict[str, Any]] = {}
+        for run in self.list():
+            if run["state"] == "completed" and run["experiment_id"] not in latest:
+                latest[run["experiment_id"]] = run
+        out = []
+        for claim in PUBLISHED_CLAIMS:
+            run = latest.get(claim["experiment"])
+            detector, metric = claim["metric"]
+            observed = None
+            if run and run.get("parsed"):
+                observed = (run["parsed"].get("detectors") or {}).get(detector, {}).get(metric)
+            status = "not_reproduced_yet" if run is None else ("unparsed" if observed is None else ("matches" if abs(observed - claim["expected"]) < 0.0005 else "differs"))
+            out.append({"claim": claim["claim"], "expected": claim["expected"], "experiment": claim["experiment"], "detector": detector, "metric": metric, "observed": observed, "status": status, "execution_id": run["id"] if run else None})
+        return out
