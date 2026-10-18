@@ -22,9 +22,10 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=8790)
+    parser.add_argument("--host", default="127.0.0.1", help="interface to bind; keep 127.0.0.1 outside containers")
     parser.add_argument("--reload", action="store_true", help="auto-reload on code changes (development)")
     args = parser.parse_args()
-    uvicorn.run("cpes_dashboard.app:app", host="127.0.0.1", port=args.port, reload=args.reload, reload_dirs=[str(HERE / "cpes_dashboard")] if args.reload else None)
+    uvicorn.run("cpes_dashboard.app:app", host=args.host, port=args.port, reload=args.reload, reload_dirs=[str(HERE / "cpes_dashboard")] if args.reload else None)
 
 
 if __name__ == "__main__":

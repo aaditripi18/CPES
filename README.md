@@ -63,10 +63,10 @@ flowchart LR
 
 | Stage | Package | Role |
 |---|---|---|
-| Retrieval | `cpes.adapters` | Elasticsearch adapter and canonical event mapping |
+| Retrieval | `cpes.adapters` | Elasticsearch adapter, canonical event mapping, and evidence-record mapping for named pipes (EID 17/18) and remote threads (EID 8) |
 | Lineage | `cpes.lineage` | Structural process-lineage reconstruction |
 | Context | `cpes.context` | Cross-channel context building and resolution |
-| Windowing | `cpes.windowing` | Time/window management over context |
+| Windowing | `cpes.windowing` | Time/window management over context; attaches cross-channel evidence to windows |
 | Detection | `cpes.detection` | Generic and technique-scoped signal emission |
 | Scoring | `cpes.scoring` | Deterministic, additive signed-evidence scoring |
 | Derivation | `cpes.derivation` | Evidence, fold, tuning, and validation policy |
@@ -80,15 +80,43 @@ contract each component implements.
 
 ## Results
 
-Evaluated on a lab-collected Sysmon corpus (UAC, service-creation, thread
-injection, and token-theft privilege escalation, plus blind benign activity;
-corpus not included in this repository).
+Evaluated on a lab-collected Sysmon corpus from one Windows 11 endpoint (UAC,
+service-creation, thread injection, and token-theft privilege escalation, plus
+blind benign activity; corpus not included in this repository). 2,161 process
+instances: 87 attack outcomes, 2,074 benign. Full generated tables:
+[docs/RESULTS.md](docs/RESULTS.md).
+
+**Leakage-free grouped 5-fold CV** (folds split by attack run), mean ± sd over folds:
 
 | Detector | Precision | Recall | F1 |
 |---|:---:|:---:|:---:|
-| **CPES** (5-fold CV, blind corpus) | 0.989 | 1.000 | **0.995** |
-| Single-event baseline | — | — | 0.519 |
-| Signature baseline | — | — | 0.736 |
+| **CPES** | 0.986 ± 0.029 | 1.000 ± 0.000 | **0.993 ± 0.015** |
+| Single-event integrity-edge baseline | 0.982 ± 0.036 | 0.404 ± 0.163 | 0.551 ± 0.136 |
+| IOC / signature baseline | 1.000 ± 0.000 | 0.567 ± 0.194 | 0.705 ± 0.151 |
+
+Ungrouped 5-fold CV gives CPES 0.995, baselines 0.519 / 0.736 (supporting
+figures). Grouping benign activity by lineage chain as well changes CPES to
+0.996 ± 0.008 (no leakage effect).
+
+What these numbers do and do not show:
+
+- **Recall is favourable by construction.** Attack outcomes are labelled by
+  their own mechanism signal at known attack times. With labels taken only
+  from the execution log times, CPES flags a technique-consistent process in
+  **98 of 126** logged runs with one false-alarm process.
+- **The injection signal is an image rule on this corpus.** No
+  `CreateRemoteThread` was recorded from `mavinject.exe`; the signal fires on
+  the `mavinject.exe` image itself, as the IOC baseline does.
+- **Two engines.** The figures above come from the research analysis scripts.
+  The `cpes` package engine, with the new evidence channels, reaches grouped-CV
+  F1 **0.684** on the same folds (injection 0/18, UAC 15/33 because the corpus
+  export capped registry events, 12 benign service flags from a rule
+  difference). Details and the pre-registered expectations:
+  [docs/design/evidence-channels-and-package-evaluation.md](docs/design/evidence-channels-and-package-evaluation.md).
+- **Provenance-labelled run-level evaluation** on the combined corpus gives
+  CPES F1 0.505 ± 0.104: lineage provenance loses the outcome processes the OS
+  re-parents (services under `services.exe`), which is the problem CPES's
+  cross-channel re-association addresses and also a limit of that label.
 
 - **Blind-validated precision** — 1 false positive across 2,074 benign
   process-units evaluated independently of the signal set (FPR ≈ 0.0005).
@@ -102,11 +130,16 @@ corpus not included in this repository).
 - **Honest-miss check** — three privilege-escalation techniques with no
   implemented signal (scheduled task, Run-key persistence, WMI event
   subscription) were executed and correctly produced zero detections, i.e.
-  CPES doesn't over-fire on nearby-but-unmodeled activity.
+  CPES doesn't over-fire on nearby-but-unmodeled activity (expansion corpus v4;
+  not re-run in this checkout because that corpus is only archived).
 
-Recall is favorable by construction (attack outcomes are labeled by their
-own mechanism signature at known attack times); the precision, ablation, and
-honest-miss results are the load-bearing evidence here.
+Reproduce the grouped-CV table, the package evaluation and the corrective
+experiments (requires the private corpus):
+
+```powershell
+python -m evaluation.run all
+python -m evaluation.report      # regenerates docs/RESULTS.md
+```
 
 ## Prerequisites
 
@@ -125,8 +158,11 @@ pip install -r requirements.txt
 
 ## Running the demo
 
-`demo/cpes_demo.py` runs the pipeline end-to-end against synthetic telemetry
-with no external dependencies. See [demo/README.md](demo/README.md).
+`demo/cpes_demo.py` prints a terminal report computed from the lab corpus
+(`analysis/corpus-v3.ndjson`, private, not in the repository) with the
+standard library only; its figures are pooled and in-sample. See
+[demo/README.md](demo/README.md). Without the corpus, use the research
+dashboard with the synthetic sample.
 
 ```powershell
 python demo/cpes_demo.py

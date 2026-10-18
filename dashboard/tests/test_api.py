@@ -64,8 +64,8 @@ def test_upload_with_runs_cannot_be_deleted(client, uac_documents):
     assert client.delete("/api/datasets/lab-corpus-v3").status_code == 400
 
 
-def test_system_states_unwired_signals(client):
+def test_system_reports_signal_wiring(client):
     system = client.get("/api/system").json()
     wiring = {s["signal_id"]: s["wired"] for s in system["signals"]}
-    assert wiring == {"autoelevation_lolbin": True, "service_dropped_binary": True, "remote_thread_injection": False, "token_impersonation": False}
+    assert wiring == {"autoelevation_lolbin": True, "service_dropped_binary": True, "remote_thread_injection": True, "token_impersonation": True}
     assert any("Single endpoint" in item for item in system["limitations"])

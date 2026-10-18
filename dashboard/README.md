@@ -10,11 +10,12 @@ The dashboard computes no scores, signals or metrics of its own:
 | What you see | Where it comes from |
 |---|---|
 | Validation results | `CanonicalEventMapper.map_document` + `CanonicalEventTranslator.translate`, called per record |
-| Detections, scores, contributions | `cpes.orchestration.CpesPipeline` → `cpes.exporting.ResultExporter` (stored verbatim as `export.json`) |
+| Detections, scores, contributions | `cpes.orchestration.CpesPipeline` (with optional pipe / remote-thread evidence channels) → `cpes.exporting.ResultExporter` (stored verbatim as `export.json`) |
 | Resolver explanations | `cpes.context.ContextResolver.resolve` on the window's recorded event group |
 | Baseline on a run | `cpes.baseline.SingleEventBaselineDetector` on the identical windows |
 | Metrics on a run | `cpes.evaluation.EvaluationHarness`, only when the dataset has ground truth |
 | Published figures | `analysis/*.py` and `demo/cpes_demo.py`, executed unchanged; stdout stored with script and input SHA-256 |
+| Versioned protocols | `python -m evaluation.run <protocol>` (replication, package engine, E-a, E-c); `results/*.json` |
 | Evidence weights | `dashboard/models/research-v3-full-table.json`, derived with `cpes.derivation.derive_evidence_model` by `dashboard/scripts/derive_evidence_model.py` |
 
 ## Run it
@@ -30,6 +31,13 @@ python dashboard/run_server.py
 Open http://127.0.0.1:8790. The server binds to localhost only, because the lab
 corpora contain the lab host and account names.
 
+Docker (no private data is copied into the image; see the Dockerfile header to mount it read-only):
+
+```powershell
+docker build -t cpes-dashboard .
+docker run --rm -p 127.0.0.1:8790:8790 cpes-dashboard
+```
+
 Frontend development with hot reload (API still on 8790):
 
 ```powershell
@@ -40,8 +48,8 @@ cd dashboard/web; npm run dev     # http://localhost:5173, proxies /api
 Tests:
 
 ```powershell
-pytest dashboard/tests     # 29 tests; two skip without the private corpus
-pytest tests               # the package's own suite, unchanged
+pytest dashboard/tests     # tests needing the private corpus skip on a clean clone
+pytest tests               # the package's suite (incl. evidence channels, replication check)
 ```
 
 ## Where things are stored

@@ -121,3 +121,46 @@ def test_lineage_graph_contains_only_reconstructed_edges(client, uac_documents):
     assert chains["{ORPHAN}"]["is_truncated"] is True
     process = client.get(f"/api/runs/{run['id']}/processes/{{ORPHAN}}").json()
     assert process["parent_in_telemetry"] is False
+
+
+def _pipe_docs():
+    # Hand-written test fixture: a SYSTEM cmd.exe (child of services.exe) connects to a
+    # pipe created by a user process in another chain, inside one window.
+    def doc(record_id, ts, code, guid, *, parent=None, image=None, integrity=None, user=None, pipe=None):
+        d = {"@timestamp": ts, "event": {"code": code}, "winlog": {"record_id": str(record_id), "event_data": {}}, "process": {"entity_id": guid}}
+        if parent:
+            d["process"]["parent"] = {"entity_id": parent}
+        if image:
+            d["process"]["executable"] = image
+        if integrity:
+            d["winlog"]["event_data"]["IntegrityLevel"] = integrity
+        if user:
+            d["user"] = {"name": user}
+        if pipe:
+            d["file"] = {"name": pipe}
+        return d
+
+    return [
+        doc(1, "2026-07-20T10:00:00Z", "1", "{USER}", image=r"C:\Users\u\evil.exe", integrity="Medium"),
+        doc(2, "2026-07-20T10:00:01Z", "1", "{SCM}", image=r"C:\Windows\System32\services.exe", integrity="System"),
+        doc(3, "2026-07-20T10:00:02Z", "1", "{SHELL}", parent="{SCM}", image=r"C:\Windows\System32\cmd.exe", integrity="System"),
+        doc(4, "2026-07-20T10:00:03Z", "17", "{USER}", image=r"C:\Users\u\evil.exe", user="u", pipe=r"\evilpipe"),
+        doc(5, "2026-07-20T10:00:04Z", "18", "{SHELL}", image=r"C:\Windows\System32\cmd.exe", user="SYSTEM", pipe=r"\evilpipe"),
+    ]
+
+
+def test_evidence_channels_make_token_impersonation_detectable(client):
+    dataset = upload(client, "pipes.jsonl", jsonl(_pipe_docs())).json()
+    on = start(client, dataset["id"], span_seconds=60, advance_seconds=30)
+    off = start(client, dataset["id"], span_seconds=60, advance_seconds=30, evidence_channels=False)
+    on_status = client.get(f"/api/runs/{on['id']}").json()
+    assert on_status["summary"]["signals_fired"] == {"token_impersonation": on_status["summary"]["detected_windows"]} and on_status["summary"]["detected_windows"] > 0
+    assert on_status["config"]["evidence_channels"]["pipe_evidence"] == 2
+    assert on_status["config"]["signals"]["token_impersonation"]["wired"] is True
+    off_status = client.get(f"/api/runs/{off['id']}").json()
+    assert off_status["summary"]["detected_windows"] == 0
+    assert off_status["config"]["signals"]["token_impersonation"]["wired"] is False
+    window = client.get(f"/api/runs/{on['id']}/windows", params={"detected": True}).json()["rows"][0]
+    resolved = client.get(f"/api/runs/{on['id']}/windows/{window['window_index']}").json()["audit"]["resolved"][0]
+    assert (resolved["anchor_kind"], resolved["anchor_process_guid"], resolved["actor_process_guid"]) == ("token_impersonation", "{SHELL}", "{USER}")
+    assert set(resolved["evidence_event_ids"]) == {"4", "5"}

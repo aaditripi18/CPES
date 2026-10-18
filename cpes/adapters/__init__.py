@@ -2,6 +2,7 @@
 
 from .contracts import CanonicalEventStream
 from .elastic import ElasticRetrievalAdapter
+from .evidence import EvidenceRecord, EvidenceRecordMapper, load_evidence_mapping
 from .mapping import (
     CanonicalEventMapper,
     load_mapping_configuration,
@@ -14,8 +15,11 @@ __all__ = [
     "CanonicalEventMapper",
     "CanonicalEventStream",
     "ElasticRetrievalAdapter",
+    "EvidenceRecord",
+    "EvidenceRecordMapper",
     "FieldMapping",
     "MappingConfiguration",
+    "load_evidence_mapping",
     "load_mapping_configuration",
     "parse_mapping_configuration",
 ]

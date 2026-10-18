@@ -208,6 +208,7 @@ export interface RunConfig {
   resolver: Record<string, string[]>;
   versions: Record<string, string | boolean | null>;
   engine: string;
+  evidence_channels?: { enabled: boolean; reason?: string; mapping?: string; pipe_evidence?: number; remote_thread_evidence?: number; skipped?: Record<string, number>; records_not_mappable?: number; attachment_rule?: string };
 }
 
 export interface WindowRow {
@@ -413,6 +414,9 @@ export interface ExperimentRecord {
     pooled_confusion?: Record<string, { tp: number; fp: number; tn: number; fn: number }> | null;
     weights?: Record<string, number>;
     aggregation: string;
+    raw?: Record<string, unknown>;
+    results_id?: string;
+    code_sha256?: string;
   } | null;
 }
 

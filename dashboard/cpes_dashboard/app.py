@@ -109,12 +109,13 @@ def system() -> dict[str, Any]:
             {"technique": "T1053.005 Scheduled task", "evidence": "README honest-miss check: executed, 0 detections (no signal implemented)."},
             {"technique": "T1547.001 Registry Run key", "evidence": "README honest-miss check: executed, 0 detections."},
             {"technique": "T1546.003 WMI event subscription", "evidence": "README honest-miss check: executed, 0 detections."},
+            {"technique": "T1055.001 injection without CreateRemoteThread", "evidence": "mavinject.exe produced no Sysmon EID 8 in corpus-v3; the package observes remote threads only, so it cannot see these injections."},
             {"technique": "Any technique without an implemented signal", "evidence": "CPES scores only its four mechanism signals; the generic 'unexplained privilege gain' test exists only as an ablation script."},
         ],
         "limitations": [
             "Single endpoint: every telemetry record comes from one lab Windows 11 VM; no multi-host or organic-traffic evaluation exists in the repository.",
             "Two engines: published metrics come from the analysis scripts (process-instance unit); dashboard detection runs use cpes.CpesPipeline (lineage-chain × window unit). Their numbers are not interchangeable.",
-            "Token-impersonation and injection signals are implemented in the resolver but not wired through CpesPipeline windowing, so package runs cannot detect them.",
+            "Package engine vs research scripts (docs/RESULTS.md): with evidence channels the package reaches grouped-CV F1 0.684 on corpus-v3 against the research 0.993 — injection 0/18 (no mavinject remote threads in the data; the research signal is an image-name rule), UAC 15/33 (capped registry export), and 12 benign service flags because the package rule does not require parent = services.exe.",
             "Research labels are defined partly by the signals themselves (recall favourable by construction); corpus_eval_independent.py is the non-circular check and has no independent channel for injection.",
             "Lineage chains on real telemetry can be very large (one chain held 1,346 of 2,219 processes in corpus-v3), which makes chain-level metrics coarse.",
             "The frozen evidence model is in-sample for corpus-v3; detection runs on corpus-v3 are not held-out tests.",
@@ -592,5 +593,5 @@ def frontend(path: str) -> Response:
         return PlainTextResponse("Frontend not built. Run `npm run build` in dashboard/web, or use the Vite dev server.", status_code=503)
     target = (WEB_DIST / path).resolve()
     if path and target.is_file() and WEB_DIST.resolve() in target.parents:
-        return FileResponse(target)
-    return FileResponse(WEB_DIST / "index.html")
+        return FileResponse(target)  # hashed asset names: safe to cache
+    return FileResponse(WEB_DIST / "index.html", headers={"Cache-Control": "no-cache"})

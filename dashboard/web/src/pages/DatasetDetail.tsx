@@ -476,6 +476,7 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
   const [advance, setAdvance] = useState("150");
   const [threshold, setThreshold] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [evidenceChannels, setEvidenceChannels] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const invalid = report.status === "invalid";
@@ -483,7 +484,7 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
     setBusy(true);
     setError(null);
     try {
-      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note });
+      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note, evidence_channels: evidenceChannels });
       setRunId(run.id);
       navigate(`/runs/${run.id}`);
     } catch (reason) {
@@ -521,6 +522,12 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
           <input className="input w-full mt-1" value={note} onChange={(event) => setNote(event.target.value)} placeholder="optional" />
         </label>
       </div>
+      <label className="flex items-start gap-2 text-[13px] mt-3">
+        <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" checked={evidenceChannels} onChange={(event) => setEvidenceChannels(event.target.checked)} />
+        <span>
+          Attach cross-channel evidence (named pipes EID 17/18, remote threads EID 8) so the token-impersonation and injection signals can fire. Untick to reproduce the package as it was before evidence channels.
+        </span>
+      </label>
       {model && (
         <div className="mt-3 text-2xs text-muted leading-relaxed">
           Evidence model <span className="font-mono text-ink">{model.id}</span>: weights {model.terms.map((t) => `${t.signal_id} ${Number(t.signed_log_likelihood).toFixed(2)}`).join(", ")}; prior applied {model.prior_applied} (derived prior {Number(model.prior_log_odds_derived).toFixed(3)} recorded, not applied — {model.prior_note}) {model.scope_note}

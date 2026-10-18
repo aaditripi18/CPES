@@ -63,7 +63,7 @@ from cpes.exporting import ResultExporter
 from cpes.replay.driver import ReplayDriver
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
-_MAPPING_PATH = _REPO_ROOT / "configs" / "elastic-sysmon-field-mapping-v1.yaml"
+_MAPPING_PATH = _REPO_ROOT / "configs" / "synthetic-sample-field-mapping-v1.yaml"
 _SAMPLE_PATH = Path(__file__).resolve().parent / "synthetic-telemetry-sample.json"
 
 _SPAN_SECONDS = 180.0

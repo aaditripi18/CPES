@@ -110,6 +110,56 @@ CATALOG: list[dict[str, Any]] = [
         "parser": None,
     },
     {
+        "id": "pkg_research_grouped",
+        "module": "evaluation.run",
+        "script": "evaluation/run.py",
+        "args": ["research-grouped"],
+        "title": "Versioned replication of the grouped CV",
+        "protocol": "process instance · grouped 5-fold · weights via cpes.derivation · must equal corpus_eval_grouped.py",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "validity_check",
+        "role_note": "Validates the versioned fold code before any package result is trusted.",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_package_grouped",
+        "module": "evaluation.run",
+        "script": "evaluation/run.py",
+        "args": ["package-grouped"],
+        "title": "Package engine (CpesPipeline + evidence channels), grouped CV",
+        "protocol": "process instance · signals observed by cpes.CpesPipeline · same folds and labels as the research protocol",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "adverse_result",
+        "role_note": "Pre-registered in docs/design/evidence-channels-and-package-evaluation.md. Lower than the research figure for reasons stated there.",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_ea_chain_grouped",
+        "module": "evaluation.run",
+        "script": "evaluation/run.py",
+        "args": ["ea-chain-grouped"],
+        "title": "E-a: benign units grouped by lineage chain",
+        "protocol": "process instance · grouped 5-fold, benign groups = lineage chains",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "robustness",
+        "parser": "results_json",
+    },
+    {
+        "id": "pkg_ec_ledger_time",
+        "module": "evaluation.run",
+        "script": "evaluation/run.py",
+        "args": ["ec-ledger-time"],
+        "title": "E-c: run-level detection, labels from the execution ledger only",
+        "protocol": "logged run · detected if a flagged process is within ±150 s · technique-consistent variant · no fitting",
+        "dataset": "lab-corpus-v3",
+        "inputs": ["analysis/corpus-v3.ndjson", "analysis/cpes-atomic-log-v3.csv", "Claude outputs/cpes_privilege_escalation_dataset.csv"],
+        "role": "validity_check",
+        "parser": "results_json",
+    },
+    {
         "id": "standalone_demo",
         "script": "demo/cpes_demo.py",
         "args": ["--no-color"],
@@ -141,23 +191,29 @@ PUBLISHED_CLAIMS = [
 # experiments are proposed in docs/dashboard/EVALUATION-NOTES.md.
 METHOD_NOTES = [
     {"topic": "Label construction", "severity": "high", "where": "corpus_eval_grouped.py, corpus_eval_v3.py, demo/cpes_demo.py",
-     "finding": "A process is labelled an attack only if one of the four CPES signals fires within 150 s of a logged Atomic execution. CPES recall is 1.0 by construction, and an attack process the signals miss is counted as benign (so it can only hurt the baselines).",
-     "mitigation_in_repo": "corpus_eval_independent.py confirms detonations through channels CPES does not score (UAC, service, token; injection has no independent channel)."},
-    {"topic": "Grouping of benign units", "severity": "medium", "where": "corpus_eval_grouped.py",
-     "finding": "Attack units are grouped by run, but every benign process is its own group, so benign processes from one session or one lineage chain fall into different folds.",
-     "mitigation_in_repo": "Weights depend only on per-class signal frequencies, so the effect on CPES is likely small; not measured."},
+     "finding": "A process is labelled an attack only if one of the four CPES signals fires within 150 s of a logged Atomic execution, so CPES recall is 1.0 by construction.",
+     "mitigation_in_repo": "Tested by E-c (labels from ledger times only): research CPES flags a technique-consistent process in 98/126 runs with one false alarm. See docs/RESULTS.md."},
+    {"topic": "Grouping of benign units", "severity": "low", "where": "corpus_eval_grouped.py",
+     "finding": "Every benign process was its own CV group.",
+     "mitigation_in_repo": "Tested by E-a (benign groups = lineage chains): no measurable effect (CPES F1 0.996 vs 0.993)."},
     {"topic": "Fold aggregation", "severity": "low", "where": "corpus_eval_grouped.py, corpus_eval_v3.py",
-     "finding": "Folds without an attack unit are skipped; precision with no positive call is set to 1.0; reported figures are fold means, not pooled.",
-     "mitigation_in_repo": "Pooled confusion is printed by corpus_eval_v3.py and agrees in direction."},
-    {"topic": "Headline choice", "severity": "medium", "where": "README.md",
-     "finding": "The README headline (F1 0.995, baselines 0.519 / 0.736) is the ungrouped CV. The project's own notes call the grouped figures (0.993 / 0.551 / 0.705) canonical.",
-     "mitigation_in_repo": "None yet; README unchanged pending your decision."},
-    {"topic": "Adverse result", "severity": "high", "where": "corpus_eval_provenance.py",
-     "finding": "Provenance-labelled run-level evaluation on the combined corpus gives CPES F1 ≈ 0.5 (recall ≈ 0.36). It uses a different corpus, unit and label source, so it is not directly comparable, but it is not mentioned in the README.",
-     "mitigation_in_repo": "None; listed here and in the experiment catalog."},
+     "finding": "Folds without an attack are skipped; precision with no positive call is 1.0; figures are fold means.",
+     "mitigation_in_repo": "Versioned protocols report fold mean ± sd, pooled confusion and skipped folds (0)."},
     {"topic": "Two engines", "severity": "high", "where": "analysis/ vs cpes/",
-     "finding": "Published metrics come from stdlib scripts at the process-instance level. The cpes package scores (chain × window) units and does not yet wire the token and injection signals. Package runs reproduce the UAC/service behaviour only.",
-     "mitigation_in_repo": "The dashboard reports both and never mixes them."},
+     "finding": "Published metrics come from stdlib scripts; the package engine with evidence channels reaches grouped-CV F1 0.684 on the same folds.",
+     "mitigation_in_repo": "Measured and pre-registered: docs/design/evidence-channels-and-package-evaluation.md, docs/RESULTS.md."},
+    {"topic": "Injection signal is an image IOC", "severity": "high", "where": "corpus_eval_grouped.py (remote_thread_injection)",
+     "finding": "corpus-v3 has no CreateRemoteThread from mavinject.exe; the research signal fires on image == mavinject.exe, the same rule the IOC baseline uses. The package, which observes real remote threads, finds none of the 18 injections.",
+     "mitigation_in_repo": "Open: wording in the paper should reflect this."},
+    {"topic": "Service rule differs between engines", "severity": "medium", "where": "cpes/context/resolver.py vs research signal 520",
+     "finding": "The package rule omits parent = services.exe; all 12 benign package flags (MpCmdRun.exe, winlogbeat.exe) come from it.",
+     "mitigation_in_repo": "Open decision; found after seeing results, so any alignment must be reported as post hoc and confirmed on new data."},
+    {"topic": "Unit blind spot", "severity": "medium", "where": "process-instance unit definition",
+     "finding": "Processes without a ProcessCreate in the capture are not units, so alerts anchored on them are never counted (35 csrss/dwm remote-thread windows in the package run).",
+     "mitigation_in_repo": "Now counted and printed in docs/RESULTS.md."},
+    {"topic": "Adverse result", "severity": "medium", "where": "corpus_eval_provenance.py",
+     "finding": "Provenance-labelled run-level evaluation gives CPES F1 ≈ 0.5 (lineage provenance loses re-parented outcomes).",
+     "mitigation_in_repo": "Reported in the README and the experiment catalog."},
     {"topic": "Weighting adds nothing measurable", "severity": "info", "where": "corpus_eval_robustness.py",
      "finding": "On this corpus weight-of-evidence and a plain OR of the four signals give identical results, and a learned logistic regression on the same signals matches CPES.",
      "mitigation_in_repo": "Stated by the script itself; corpus_eval_partial.py shows a case where weighting matters."},
@@ -199,6 +255,22 @@ def parse_output(parser: str | None, stdout: str) -> dict[str, Any] | None:
         weights = {m.group(1): float(m.group(2)) for m in re.finditer(r"^\s+(autoelevation_lolbin|service_dropped_binary|remote_thread_injection|token_impersonation)\s+([+-][0-9.]+)", stdout, re.M)}
         return {"detectors": rows, "weights": weights, "aggregation": "pooled, in-sample"}
     return None
+
+
+def parse_results_file(path) -> dict[str, Any] | None:
+    """Read a versioned evaluation result (results/<protocol>.json) into the catalog shape."""
+
+    import json
+
+    if not path.exists():
+        return None
+    record = json.loads(path.read_text(encoding="utf-8"))
+    result = record["result"]
+    detectors = {}
+    for name, value in result.get("detectors", {}).items():
+        if "fold_mean" in value:
+            detectors[name] = {**value["fold_mean"], "tp": value["pooled"]["tp"], "fp": value["pooled"]["fp"], "fn": value["pooled"]["fn"]}
+    return {"detectors": detectors, "aggregation": "mean ± population std over folds (pooled TP/FP/FN attached)" if detectors else "run level (see raw)", "results_id": record["id"], "code_sha256": record["code_sha256"], "raw": result}
 
 
 class ExperimentStore:
@@ -272,8 +344,8 @@ class ExperimentStore:
         started = time.perf_counter()
         try:
             completed = subprocess.run(
-                [sys.executable, str(REPO_ROOT / entry["script"]), *entry.get("args", [])],
-                cwd=cwd, env=environment, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
+                ([sys.executable, "-m", entry["module"]] if entry.get("module") else [sys.executable, str(REPO_ROOT / entry["script"])]) + list(entry.get("args", [])),
+                cwd=REPO_ROOT if entry.get("module") else cwd, env=environment, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
             )
             record.update(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr[-20000:])
             record["state"] = "completed" if completed.returncode == 0 else "failed"
@@ -281,7 +353,12 @@ class ExperimentStore:
             record.update(state="failed", exit_code=None, stdout=error.stdout or "", stderr="timed out after 1800 s")
         record["duration_seconds"] = round(time.perf_counter() - started, 2)
         record["completed_at"] = now()
-        record["parsed"] = parse_output(entry.get("parser"), record.get("stdout", "")) if record["state"] == "completed" else None
+        if record["state"] != "completed":
+            record["parsed"] = None
+        elif entry.get("parser") == "results_json":
+            record["parsed"] = parse_results_file(REPO_ROOT / "results" / f"{entry['args'][0]}.json")
+        else:
+            record["parsed"] = parse_output(entry.get("parser"), record.get("stdout", ""))
         write_json(path, record)
 
     def claims(self) -> list[dict[str, Any]]:

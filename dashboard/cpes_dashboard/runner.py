@@ -21,61 +21,43 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from cpes.baseline import SingleEventBaselineDetector
-from cpes.context.resolver import ContextResolver
 from cpes.evaluation import EvaluationHarness, LabeledChainDecision
 from cpes.evaluation.metrics import evaluate as evaluate_decisions
 from cpes.exporting import ResultExporter
-from cpes.orchestration import CompositeObservationGenerator, CpesPipeline, PipelineConfiguration
-from cpes.orchestration.resolved_observations import ResolvedSignalObservationGenerator
+from cpes.adapters.evidence import EvidenceRecordMapper, load_evidence_mapping
+from cpes.adapters.models import FieldMapping, MappingConfiguration
+from cpes.orchestration import CpesPipeline, PipelineConfiguration
+from cpes.orchestration.evidence import EvidenceChannelBuilder
 from cpes.windowing.models import SlidingWindowParameters
 
 from . import __version__
 from .evidence import LABEL_TABLE, load_model, read_label_table, to_evidence_model
-from .ingest import KNOWN_INTEGRITY_LEVELS, map_records, mapping_table, resolve_mapping
+from .ingest import KNOWN_INTEGRITY_LEVELS, POSITION_KEY, map_records, mapped_document, mapping_table, resolve_mapping
 from .paths import REPO_ROOT, data_root
 from .storage import DatasetStore, new_id, now, read_json, write_json
 
+# Resolver discriminators and evidence-channel settings have one source of truth,
+# shared with the versioned evaluation (evaluation/engine.py).
+from evaluation.engine import EVIDENCE_MAPPING, EVIDENCE_SETTINGS, RESOLVER_SETTINGS, make_generator, make_resolver  # noqa: E402
+
 SIGNAL_IDS = ("autoelevation_lolbin", "service_dropped_binary", "remote_thread_injection", "token_impersonation")
-# Same discriminators as demo/cpes_demo.py and analysis/corpus_eval_grouped.py.
-RESOLVER_SETTINGS = {
-    "integrity_order": KNOWN_INTEGRITY_LEVELS,
-    "auto_elevating_images": ("fodhelper.exe", "eventvwr.exe", "sdclt.exe", "computerdefaults.exe"),
-    "hijack_registry_tokens": ("ms-settings", "mscfile", "\\shell\\open\\command"),
-    "elevated_levels": ("high", "system"),
-    "system_path_tokens": ("\\windows\\", "\\program files"),
-    "service_registry_tokens": ("\\services\\",),
-    "interactive_shell_images": ("cmd.exe", "powershell.exe", "pwsh.exe"),
-}
-# Wiring status inside CpesPipeline, established by reading the package (see
-# cpes/context/resolver.py docstring and cpes/windowing/manager.py).
-SIGNAL_WIRING = {
-    "autoelevation_lolbin": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "Fires only when the auto-elevating binary and a hijack registry write fall in the same window (stricter than the research script, which needs no registry write)."},
-    "service_dropped_binary": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "SYSTEM-integrity binary outside \\Windows\\ and \\Program Files; a service registry write in the window is recorded as corroboration."},
-    "remote_thread_injection": {"wired": False, "reads": "RemoteThreadEvidence (EID 8)", "note": "WindowManager never populates EventGroup.remote_thread_evidence, so this signal cannot fire through CpesPipeline yet."},
-    "token_impersonation": {"wired": False, "reads": "PipeEvidence (EID 17/18)", "note": "WindowManager never populates EventGroup.pipe_evidence and CanonicalEvent has no pipe or user field, so this signal cannot fire through CpesPipeline yet."},
-}
+
+
+def signal_wiring(evidence_enabled: bool) -> dict[str, dict[str, Any]]:
+    """What each signal reads in CpesPipeline, and whether it can fire in this run."""
+
+    return {
+        "autoelevation_lolbin": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "Fires only when the auto-elevating binary and a hijack registry write fall in the same window (stricter than the research script, which needs no registry write)."},
+        "service_dropped_binary": {"wired": True, "reads": "image_path, integrity_level, registry_object", "note": "SYSTEM-integrity binary outside \\Windows\\ and \\Program Files. Unlike the documented research signal it does not require parent = services.exe (open decision; see docs/RESULTS.md)."},
+        "remote_thread_injection": {"wired": evidence_enabled, "reads": "RemoteThreadEvidence (Sysmon EID 8) via evidence channels", "note": ("Observes real CreateRemoteThread records only. corpus-v3 has none from mavinject.exe, so this cannot detect the recorded injections (the research signal is an image-name rule)." if evidence_enabled else "Evidence channels are off for this run, so this signal cannot fire.")},
+        "token_impersonation": {"wired": evidence_enabled, "reads": "PipeEvidence (Sysmon EID 17/18) via evidence channels", "note": ("User-created pipe connected by a SYSTEM shell inside the same window." if evidence_enabled else "Evidence channels are off for this run, so this signal cannot fire.")},
+    }
+
+
+SIGNAL_WIRING = signal_wiring(True)
 STAGES = ("queued", "loading", "mapping", "pipeline", "export", "baseline", "evaluation", "indexing", "completed")
 
 _run_lock = threading.Lock()
-
-
-def make_resolver() -> ContextResolver:
-    settings = RESOLVER_SETTINGS
-    return ContextResolver(
-        settings["integrity_order"],
-        settings["auto_elevating_images"],
-        settings["hijack_registry_tokens"],
-        elevated_levels=settings["elevated_levels"],
-        system_path_tokens=settings["system_path_tokens"],
-        service_registry_tokens=settings["service_registry_tokens"],
-        interactive_shell_images=settings["interactive_shell_images"],
-    )
-
-
-def make_generator(resolver: ContextResolver) -> CompositeObservationGenerator:
-    return CompositeObservationGenerator(
-        tuple(ResolvedSignalObservationGenerator(signal, resolver, signal) for signal in SIGNAL_IDS)
-    )
 
 
 def git_state() -> dict[str, Any]:
@@ -159,7 +141,7 @@ class RunStore:
         }
         directory = self.root / run_id
         write_json(directory / "status.json", status)
-        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration}
+        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration, "evidence_channels": bool(request.get("evidence_channels", True))}
         if background:
             threading.Thread(target=self._execute, args=(run_id, params), daemon=True).start()
         else:
@@ -217,6 +199,7 @@ class RunStore:
         resolver = make_resolver()
         evidence_model = to_evidence_model(params["model"], SIGNAL_IDS)
         configuration = PipelineConfiguration(window_parameters, evidence_model, params["threshold"], make_generator(resolver))
+        evidence_items, evidence_report = self._evidence(parsed, mapped.record_indices, params)
 
         config = {
             "run_id": run_id,
@@ -243,7 +226,8 @@ class RunStore:
             },
             "threshold": str(params["threshold"]),
             "evidence_model": params["model"],
-            "signals": {signal: SIGNAL_WIRING[signal] for signal in SIGNAL_IDS},
+            "signals": signal_wiring(bool(evidence_items)),
+            "evidence_channels": evidence_report,
             "resolver": {key: list(value) for key, value in RESOLVER_SETTINGS.items()},
             "versions": {"cpes": cpes_version(), "dashboard": __version__, "python": platform.python_version(), **git_state()},
             "engine": "cpes.orchestration.CpesPipeline (unchanged package code)",
@@ -252,7 +236,7 @@ class RunStore:
         write_json(directory / "rejections.json", mapped.rejections)
 
         stage("pipeline")
-        context = CpesPipeline().run(events, configuration)
+        context = CpesPipeline().run(events, configuration, evidence=evidence_items)
 
         stage("export")
         labels = self._process_labels(meta)
@@ -298,6 +282,40 @@ class RunStore:
             },
             dataset_sha256=meta.get("sha256"),
         )
+
+    # ------------------------------------------------------------------ evidence
+    @staticmethod
+    def _evidence(parsed, record_indices, params) -> tuple[tuple, dict[str, Any]]:
+        """Pipe / remote-thread evidence for accepted records (preset mapping only)."""
+
+        if not params["evidence_channels"]:
+            return (), {"enabled": False, "reason": "turned off for this run"}
+        spec = params["mapping_spec"]
+        if spec.get("preset") != "elastic-sysmon-field-mapping-v1":
+            return (), {"enabled": False, "reason": "evidence mapping is defined for the Winlogbeat/ECS preset only"}
+        configuration = load_evidence_mapping(EVIDENCE_MAPPING)
+        from_position = spec["event_id_from_position"]
+        if from_position:
+            fields = tuple(FieldMapping(POSITION_KEY, f.destination_field, False) if f.destination_field == "source_event_id" else f for f in configuration.fields)
+            configuration = MappingConfiguration(configuration.version + "+position-ids", fields)
+        mapper = EvidenceRecordMapper(configuration)
+        records, unmapped = [], 0
+        for index in record_indices:
+            try:
+                records.append(mapper.map_document(mapped_document(parsed.document(index), index, from_position)))
+            except (ValueError, TypeError):
+                unmapped += 1
+        channels = EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(records)
+        return channels.items, {
+            "enabled": True,
+            "mapping": configuration.version,
+            "settings": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()},
+            "pipe_evidence": len(channels.pipes),
+            "remote_thread_evidence": len(channels.remote_threads),
+            "skipped": dict(channels.skipped),
+            "records_not_mappable": unmapped,
+            "attachment_rule": "remote thread → chain of its source; pipe connect → chain of the connecting process; pipe create with the same name in the same window, from any chain",
+        }
 
     # ------------------------------------------------------------------ labels
     @staticmethod

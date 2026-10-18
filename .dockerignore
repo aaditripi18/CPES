@@ -1,0 +1,18 @@
+# Never ship private research data or local state in the image.
+analysis/
+Claude outputs/
+*.zip
+paper-package/
+verify-bundle/
+CPES-verify-bundle/
+corpus/cpes-telemetry-corpus-v1/telemetry/
+results/
+.venv/
+.git/
+.claude/
+**/__pycache__/
+.pytest_cache/
+dashboard/data/
+dashboard/web/node_modules/
+dashboard/web/dist/
+docs/CPES-*

@@ -371,21 +371,28 @@ export function ExperimentPage() {
               ))}
             </ul>
           </Panel>
+        </div>
+        <div className="space-y-4 min-w-0">
           {data.parsed && Object.keys(data.parsed.detectors).length > 0 && (
             <Panel title="Numbers parsed from the output" eyebrow={data.parsed.aggregation}>
               <DetectorBars detectors={data.parsed.detectors} />
             </Panel>
           )}
-        </div>
-        <Panel title="Standard output (verbatim)" eyebrow="nothing below is recomputed by the dashboard">
-          <pre className="font-mono text-[12px] leading-5 whitespace-pre-wrap text-ink/90 overflow-x-auto">{data.stdout || (data.state === "running" ? "running…" : "(empty)")}</pre>
-          {data.stderr && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-2xs text-muted">stderr</summary>
-              <pre className="font-mono text-2xs whitespace-pre-wrap text-detect/90 mt-2">{data.stderr}</pre>
-            </details>
+          <Panel title="Standard output (verbatim)" eyebrow="nothing below is recomputed by the dashboard">
+            <pre className="font-mono text-[12px] leading-5 whitespace-pre-wrap text-ink/90 overflow-x-auto">{data.stdout || (data.state === "running" ? "running…" : "(empty)")}</pre>
+            {data.stderr && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-2xs text-muted">stderr</summary>
+                <pre className="font-mono text-2xs whitespace-pre-wrap text-detect/90 mt-2">{data.stderr}</pre>
+              </details>
+            )}
+          </Panel>
+          {data.parsed?.raw && (
+            <Panel title="Recorded result file" eyebrow={`results/${data.parsed.results_id ?? ""} · code ${String(data.parsed.code_sha256 ?? "").slice(0, 12)}`}>
+              <pre className="font-mono text-2xs whitespace-pre-wrap max-h-[480px] overflow-y-auto text-ink/85">{JSON.stringify(Object.fromEntries(Object.entries(data.parsed.raw).filter(([key]) => key !== "weights_by_fold")), null, 2)}</pre>
+            </Panel>
           )}
-        </Panel>
+        </div>
       </div>
     </>
   );

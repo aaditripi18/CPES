@@ -153,6 +153,16 @@ export function RunDetail() {
                 ["mapping", <span className="font-mono text-2xs">{config.mapping.version}{config.mapping.spec.event_id_from_position ? " · event id derived from position" : ""}</span>],
                 ["window", <span className="font-mono text-2xs">span {config.window.span_seconds}s · advance {config.window.advance_seconds}s · {time(config.window.start_at)} → {time(config.window.horizon_end_at)}</span>],
                 ["threshold", <span className="font-mono">{config.threshold}</span>],
+                [
+                  "evidence channels",
+                  config.evidence_channels?.enabled ? (
+                    <span className="font-mono text-2xs">
+                      on · {config.evidence_channels.pipe_evidence} pipe, {config.evidence_channels.remote_thread_evidence} remote-thread records · {config.evidence_channels.mapping}
+                    </span>
+                  ) : (
+                    <span className="text-2xs text-muted">off{config.evidence_channels?.reason ? ` — ${config.evidence_channels.reason}` : " (run predates evidence channels)"}</span>
+                  ),
+                ],
                 ["evidence model", <span className="font-mono text-2xs">{config.evidence_model.id} (prior applied {config.evidence_model.prior_applied})</span>],
                 ["versions", <span className="font-mono text-2xs">cpes {String(config.versions.cpes)} · dashboard {String(config.versions.dashboard)} · python {String(config.versions.python)}</span>],
                 ["git commit", <span className="font-mono text-2xs">{String(config.versions.commit ?? "unknown").slice(0, 12)}{config.versions.cpes_package_modified ? " · cpes/ had uncommitted changes" : ""}</span>],
