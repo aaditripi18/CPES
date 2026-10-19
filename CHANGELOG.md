@@ -1,0 +1,33 @@
+# Changelog
+
+Versions follow `MAJOR.MINOR.PATCH`; while the major version is 0, a minor
+release may change signals, weights and report fields. Every evaluation and its
+expected outcome are pre-registered in [docs/design/](docs/design); results are
+generated into [docs/RESULTS.md](docs/RESULTS.md).
+
+## 0.2.0 — 2026-10-19
+
+- **Dashboard** (`dashboard/`): upload Sysmon JSONL / CSV / raw `.evtx` with
+  record-level validation, dataset explorer, CPES runs with score
+  decomposition, process-lineage graph, live replay and Elasticsearch polling,
+  evaluation workbench, light and dark themes.
+- **Incidents and analyst outputs**: CPES alerts joined with SigmaHQ matches
+  (`cpes.correlation`); Markdown incident report, MITRE ATT&CK Navigator layer,
+  ECS alert export.
+- **Package**: named-pipe and remote-thread evidence channels, streaming scorer
+  (`cpes.streaming`), Elasticsearch polling source, optional own-image signature
+  suppressor (off by default).
+- **Evaluation** (`python -m evaluation.run`): 14 versioned protocols with a
+  ledger of commit, code fingerprint and input hashes — grouped CV, package
+  engine, ledger-time labels, 53 public captures, evasion variants, live
+  replay, SigmaHQ comparison, held-out OTRF test of CPES v2 (not adopted),
+  incident correlation, and a service-rule fix tested on 100 unused captures
+  (not adopted).
+- Public data fetched and SHA-256 verified by `scripts/fetch_external.py`, never
+  redistributed. CI on Linux and Windows, plus the Docker image. MIT license.
+
+## 0.1.0 — 2026-09-24
+
+First publication: the `cpes` package (mapping, lineage, context resolver,
+windowing, signals, additive signed-evidence scoring, derivation, evaluation
+harness, replay, export), its tests, configurations and milestone design docs.
