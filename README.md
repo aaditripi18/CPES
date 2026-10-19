@@ -11,7 +11,7 @@ privilege-escalation detection on a single Windows endpoint.
 ![Python](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)
 ![ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-TA0004%20privilege%20escalation-red)
 ![Status](https://img.shields.io/badge/status-active--research-orange)
-![License](https://img.shields.io/badge/license-private-lightgrey)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-windows%2011-0078D6?logo=windows&logoColor=white)
 
 </div>
@@ -250,13 +250,21 @@ The `cpes/` package intentionally contains only architecture-aligned
 modules; configuration lives in `configs/`, and reproducibility scaffolding
 for a named telemetry corpus lives in `corpus/`.
 
-## Status
+## Third-party data
 
-<div align="center">
+Nothing below is redistributed in this repository; `scripts/fetch_external.py`
+downloads each input from its source and verifies it against the SHA-256 pins in
+`configs/external-datasets.json`.
 
-**Private research repository — active development**
+| Input | Source | License |
+|---|---|---|
+| Windows attack captures | [EVTX-ATTACK-SAMPLES](https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES) (Samir Bousseaden) | GPL-3.0 |
+| Held-out and test captures | [OTRF Security-Datasets](https://github.com/OTRF/Security-Datasets) (Open Threat Research Forge) | MIT |
+| Detection rules | [SigmaHQ](https://github.com/SigmaHQ/sigma) release r2026-07-01 | Detection Rule License 1.1 |
 
-Generated telemetry, evaluation corpora, and internal working notes are
-kept outside version control.
+The lab corpora behind the lab results were recorded on a private VM and are
+not published: they contain host and account identifiers.
 
-</div>
+## License
+
+Code and documentation: [MIT](LICENSE).
