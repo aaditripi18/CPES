@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   CPES Sysmon configuration v1
-  Frozen M1 telemetry scope: Section 9.6 of CPES-Project-Bible-v1.0.md.
+  Frozen M1 telemetry scope; event choices justified in docs/m1-sysmon-eid-justification.md.
   Sysmon configuration change events (EID 16) are emitted by Sysmon itself and
   are not filterable; no CPES telemetry event type beyond the approved set is
   explicitly enabled here.

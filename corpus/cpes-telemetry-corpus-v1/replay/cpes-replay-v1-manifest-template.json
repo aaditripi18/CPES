@@ -1,8 +1,0 @@
-{
-  "replay_version": "cpes-replay-v1",
-  "status": "template",
-  "source_corpus_version": "cpes-telemetry-corpus-v1",
-  "source_manifest": null,
-  "frozen_input_reference": null,
-  "frozen_input_sha256": null
-}

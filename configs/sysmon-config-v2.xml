@@ -18,7 +18,7 @@
 
   Volume note: PipeEvent is high-frequency on Windows. Keep the config-v2 collection
   window short (the ~20-min re-export session), and rely on the recent-first export
-  (export_corpus_v2.py) to retain the attack-window pipe events under the per-EID cap.
+  (examples/export_corpus_v3.py) to retain the attack-window pipe events under the per-EID cap.
 -->
 <Sysmon schemaversion="4.90">
   <EventFiltering>
