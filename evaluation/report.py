@@ -229,6 +229,24 @@ def _incidents_section() -> list[str]:
     return out
 
 
+def _service_signature_section() -> list[str]:
+    record = _load("service-signature-v1")
+    out = ["", "## 12. Service rule + signature suppressor (S1) on 100 unused OTRF captures", "",
+           "S1 skips the service-location anchor when Sysmon recorded the process's own image as validly signed (EID 7). Pre-registered in [design/service-signature-suppressor.md](design/service-signature-suppressor.md); test set = every OTRF Windows host archive at `d9d40ef` not used before.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    t, n = r["test_set"], r["non_regression"]
+    out += [f"execution `{record['id']}`", "", "| | S0 (current) | S1 |", "|---|---|---|",
+            f"| Service anchors on T | {t['s0_anchors']} | {t['s1_anchors']} |",
+            f"| … vendor (Defender / Azure paths) | {t['s0_vendor']} | {t['s1_vendor']} |",
+            f"| … other | {t['s0_other']} | {t['s1_other']} |", "",
+            f"Archives: {t['archives']} ({', '.join(f'{k} {v}' for k, v in t['outcomes'].items())}); {t['archives_with_own_image_signature_records']} contain own-image signature records. "
+            f"Non-regression: EVTX files changed {len(n['evtx_files_changed'])}/{n['evtx_files']}; lab corpus changed: {n['lab_changed']}. "
+            f"Verdict: **{'adopted' if r['verdict']['adopt_s1'] else 'not adopted'}** (safety held: {r['verdict']['safety_held']}; rule: {r['verdict']['rule']})."]
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -270,7 +288,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 

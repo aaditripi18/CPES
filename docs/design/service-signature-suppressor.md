@@ -62,6 +62,27 @@ S1 becomes the default resolver setting (dashboard runs and future protocols)
 and leaves the non-regression sets unchanged. Otherwise it is not adopted and
 S0 stays. Either way the outcome is recorded below.
 
-## Outcome
+## Outcome (recorded 2026-10-19, after the run; ../RESULTS.md §12)
 
-_To be recorded after the run._
+Execution `service-signature-v1-20261019T075145Z` at clean commit `3642180`.
+
+| Expectation | Outcome |
+|---|---|
+| S1 removes only Defender binaries; small reduction | **Did not hold — no reduction at all.** S0 raised 7 service anchors on T, all vendor (Azure agents: `CollectGuestLogs.exe`, `WaAppAgent.exe`, `WindowsAzureGuestAgent.exe`, `WindowsAzureNetAgent.exe`, `NetworkWatcherAgent.exe`); S1 removed **0**. No Defender binary alerted on T. |
+| S1 removes no other anchor on T | **Held** (S0 raised no non-vendor service anchor on T). |
+| No change on the lab corpus or EVTX samples | **Held** (0/66 EVTX files changed; lab anchors unchanged — `AtomicService.exe` is recorded unsigned, `MpCmdRun.exe` has no own-image record). |
+
+**Verdict (pre-registered rule): S1 is not adopted;** the service rule stays S0.
+
+Why, checked afterwards on one alerting archive (`collection__msf_record_mic.zip`;
+descriptive, not part of the protocol): the capture has hundreds of image-load
+records for ordinary processes but **none** for the alerting
+`CollectGuestLogs.exe` process, so S1 had nothing to act on. 86 of the 100
+archives contain own-image signature records (protocol output). The suppressor
+is safe but did not touch the false alarms that actually occur.
+
+Also visible on T: every service alert was a vendor agent; none was on an
+attack. On cloud-hosted
+Windows VMs this rule's precision is poor, and fixing it needs evidence these
+captures do not carry (service-install events naming the binary, or unfiltered
+image loads) — see [service-rule-feasibility.md](service-rule-feasibility.md).

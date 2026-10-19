@@ -124,6 +124,7 @@ def system() -> dict[str, Any]:
             "Base rate: the robustness script shows precision falling from 0.996 at a 10% attack prior to 0.172 at 0.01%.",
             "Breadth: on 53 public Sysmon attack captures (EVTX-ATTACK-SAMPLES) CPES alone flags 9 and CPES with its generic test 26; SigmaHQ core rules flag 42 (docs/RESULTS.md §6, §9). CPES's auto-elevation signal names four binaries and does not generalise to other UAC methods.",
             "Renaming the injector defeats the research injection signal (an image-name rule); signals that read structure (service location, pipe pairing) are unaffected (docs/RESULTS.md §7).",
+            "Service rule precision on cloud VMs is poor: on 100 unused OTRF captures all 7 of its alerts were Azure agents, and a pre-registered signature suppressor removed none (no image-load records for those agents). Not adopted (docs/RESULTS.md §12).",
             "Uploads have no ground-truth channel in this version, so no metric is computed for them.",
         ],
         "data_availability": [

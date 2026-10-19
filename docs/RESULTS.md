@@ -239,6 +239,20 @@ Items an analyst opens: 167 with both tools separately, 146 fused (12.6% fewer).
 
 Example fused incident `INC-0113`: cpes: CPES autoelevation_lolbin; sigma: Bypass UAC via Fodhelper.exe
 
+## 12. Service rule + signature suppressor (S1) on 100 unused OTRF captures
+
+S1 skips the service-location anchor when Sysmon recorded the process's own image as validly signed (EID 7). Pre-registered in [design/service-signature-suppressor.md](design/service-signature-suppressor.md); test set = every OTRF Windows host archive at `d9d40ef` not used before.
+
+execution `service-signature-v1-20261019T075145Z`
+
+| | S0 (current) | S1 |
+|---|---|---|
+| Service anchors on T | 7 | 7 |
+| … vendor (Defender / Azure paths) | 7 | 7 |
+| … other | 0 | 0 |
+
+Archives: 100 (scored 94, not_applicable_no_sysmon 4, pipeline_refused 2); 86 contain own-image signature records. Non-regression: EVTX files changed 0/66; lab corpus changed: False. Verdict: **not adopted** (safety held: True; rule: adopt iff S1 removes >= 1 vendor anchor on T, removes no other anchor on T, and leaves the non-regression sets unchanged (pre-registered)).
+
 ## Reading these results
 
 See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.
