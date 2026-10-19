@@ -1,0 +1,39 @@
+# Mapping for examples/synthetic-telemetry-sample.json (hand-written, legacy
+# raw Sysmon field names). The ECS mapping (elastic-sysmon-field-mapping-v1) was
+# reconciled to real Winlogbeat output on 2026-08-23 and no longer matches this
+# sample. Values are copied directly; no transformation.
+version: synthetic-sample-field-mapping-v1
+fields:
+  - source_field: "@timestamp"
+    destination_field: source_timestamp
+    optional: false
+  - source_field: event.id
+    destination_field: source_event_id
+    optional: false
+  - source_field: event.code
+    destination_field: event_code
+    optional: true
+  - source_field: winlog.event_data.ProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: winlog.event_data.ParentProcessGuid
+    destination_field: parent_process_guid
+    optional: true
+  - source_field: winlog.event_data.ProcessId
+    destination_field: process_id
+    optional: true
+  - source_field: winlog.event_data.IntegrityLevel
+    destination_field: integrity_level
+    optional: true
+  - source_field: winlog.event_data.CommandLine
+    destination_field: command_line
+    optional: true
+  - source_field: winlog.event_data.TargetObject
+    destination_field: registry_object
+    optional: true
+  - source_field: winlog.event_data.Image
+    destination_field: image_path
+    optional: true
+  - source_field: winlog.event_data.ImageLoaded
+    destination_field: module_path
+    optional: true

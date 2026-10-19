@@ -1,0 +1,391 @@
+{
+  "id": "package-grouped-noevidence-20261019T071203Z",
+  "protocol": "package-grouped-noevidence",
+  "recorded_at": "2026-10-19T07:12:03+00:00",
+  "duration_seconds": 1.88,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "units": 2161,
+    "attack": 87,
+    "benign": 2074,
+    "folds": 5,
+    "skipped_folds_without_attack": [],
+    "detectors": {
+      "cpes": {
+        "fold_mean": {
+          "precision": 0.7694660894660894,
+          "precision_std": 0.12130562599733238,
+          "recall": 0.5225457875457876,
+          "recall_std": 0.225205209799159,
+          "fpr": 0.005717093179075114,
+          "fpr_std": 0.003480192849819959,
+          "f1": 0.6046038483305036,
+          "f1_std": 0.20479579629559738
+        },
+        "pooled": {
+          "precision": 0.7818181818181819,
+          "recall": 0.4942528735632184,
+          "fpr": 0.0057859209257473485,
+          "f1": 0.6056338028169014,
+          "tp": 43,
+          "fp": 12,
+          "tn": 2062,
+          "fn": 44
+        },
+        "per_fold": [
+          {
+            "precision": 0.9,
+            "recall": 0.6428571428571429,
+            "fpr": 0.002551020408163265,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 1,
+            "tn": 391,
+            "fn": 5,
+            "fold": 0
+          },
+          {
+            "precision": 0.7727272727272727,
+            "recall": 0.6538461538461539,
+            "fpr": 0.01179245283018868,
+            "f1": 0.7083333333333333,
+            "tp": 17,
+            "fp": 5,
+            "tn": 419,
+            "fn": 9,
+            "fold": 1
+          },
+          {
+            "precision": 0.5714285714285714,
+            "recall": 0.3076923076923077,
+            "fpr": 0.007075471698113208,
+            "f1": 0.4,
+            "tp": 4,
+            "fp": 3,
+            "tn": 421,
+            "fn": 9,
+            "fold": 2
+          },
+          {
+            "precision": 0.7142857142857143,
+            "recall": 0.20833333333333334,
+            "fpr": 0.004739336492890996,
+            "f1": 0.3225806451612903,
+            "tp": 5,
+            "fp": 2,
+            "tn": 420,
+            "fn": 19,
+            "fold": 3
+          },
+          {
+            "precision": 0.8888888888888888,
+            "recall": 0.8,
+            "fpr": 0.0024271844660194173,
+            "f1": 0.8421052631578948,
+            "tp": 8,
+            "fp": 1,
+            "tn": 411,
+            "fn": 2,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "0/18",
+          "T1134.001": "0/8",
+          "T1543.003": "28/28",
+          "T1548.002": "15/33"
+        }
+      },
+      "single_event_package": {
+        "fold_mean": {
+          "precision": 0.9818181818181818,
+          "precision_std": 0.036363636363636376,
+          "recall": 0.39593406593406594,
+          "recall_std": 0.16627343216718793,
+          "fpr": 0.000510204081632653,
+          "fpr_std": 0.001020408163265306,
+          "f1": 0.5425210084033614,
+          "f1_std": 0.13985132380092888
+        },
+        "pooled": {
+          "precision": 0.9696969696969697,
+          "recall": 0.367816091954023,
+          "fpr": 0.00048216007714561236,
+          "f1": 0.5333333333333333,
+          "tp": 32,
+          "fp": 1,
+          "tn": 2073,
+          "fn": 55
+        },
+        "per_fold": [
+          {
+            "precision": 0.9090909090909091,
+            "recall": 0.7142857142857143,
+            "fpr": 0.002551020408163265,
+            "f1": 0.8,
+            "tp": 10,
+            "fp": 1,
+            "tn": 391,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.3076923076923077,
+            "fpr": 0.0,
+            "f1": 0.47058823529411764,
+            "tp": 8,
+            "fp": 0,
+            "tn": 424,
+            "fn": 18,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.3076923076923077,
+            "fpr": 0.0,
+            "f1": 0.47058823529411764,
+            "tp": 4,
+            "fp": 0,
+            "tn": 424,
+            "fn": 9,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.25,
+            "fpr": 0.0,
+            "f1": 0.4,
+            "tp": 6,
+            "fp": 0,
+            "tn": 422,
+            "fn": 18,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 412,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "0/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "32/33"
+        }
+      },
+      "ioc_signature_research": {
+        "fold_mean": {
+          "precision": 1.0,
+          "precision_std": 0.0,
+          "recall": 0.5670879120879121,
+          "recall_std": 0.1943359601379249,
+          "fpr": 0.0,
+          "fpr_std": 0.0,
+          "f1": 0.7050459482038429,
+          "f1_std": 0.1511100026304138
+        },
+        "pooled": {
+          "precision": 1.0,
+          "recall": 0.5862068965517241,
+          "fpr": 0.0,
+          "f1": 0.7391304347826086,
+          "tp": 51,
+          "fp": 0,
+          "tn": 2074,
+          "fn": 36
+        },
+        "per_fold": [
+          {
+            "precision": 1.0,
+            "recall": 0.7142857142857143,
+            "fpr": 0.0,
+            "f1": 0.8333333333333333,
+            "tp": 10,
+            "fp": 0,
+            "tn": 392,
+            "fn": 4,
+            "fold": 0
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.38461538461538464,
+            "fpr": 0.0,
+            "f1": 0.5555555555555556,
+            "tp": 10,
+            "fp": 0,
+            "tn": 424,
+            "fn": 16,
+            "fold": 1
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.46153846153846156,
+            "fpr": 0.0,
+            "f1": 0.631578947368421,
+            "tp": 6,
+            "fp": 0,
+            "tn": 424,
+            "fn": 7,
+            "fold": 2
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.875,
+            "fpr": 0.0,
+            "f1": 0.9333333333333333,
+            "tp": 21,
+            "fp": 0,
+            "tn": 422,
+            "fn": 3,
+            "fold": 3
+          },
+          {
+            "precision": 1.0,
+            "recall": 0.4,
+            "fpr": 0.0,
+            "f1": 0.5714285714285715,
+            "tp": 4,
+            "fp": 0,
+            "tn": 412,
+            "fn": 6,
+            "fold": 4
+          }
+        ],
+        "recall_by_technique": {
+          "T1055.001": "18/18",
+          "T1134.001": "0/8",
+          "T1543.003": "0/28",
+          "T1548.002": "33/33"
+        }
+      }
+    },
+    "weights_by_fold": {
+      "0": {
+        "autoelevation_lolbin": 6.168790538710059,
+        "remote_thread_injection": 3.124268100986636,
+        "service_dropped_binary": 3.880594183168113,
+        "token_impersonation": 3.124268100986636
+      },
+      "1": {
+        "autoelevation_lolbin": 6.417496274804186,
+        "remote_thread_injection": 3.2820020588750363,
+        "service_dropped_binary": 4.0079390622579725,
+        "token_impersonation": 3.2820020588750363
+      },
+      "2": {
+        "autoelevation_lolbin": 6.3874851963881465,
+        "remote_thread_injection": 3.0916483303838174,
+        "service_dropped_binary": 4.117501264769499,
+        "token_impersonation": 3.0916483303838174
+      },
+      "3": {
+        "autoelevation_lolbin": 6.547300880465682,
+        "remote_thread_injection": 3.2514640144613525,
+        "service_dropped_binary": 4.138767209462255,
+        "token_impersonation": 3.2514640144613525
+      },
+      "4": {
+        "autoelevation_lolbin": 6.355506518507665,
+        "remote_thread_injection": 3.059669652503336,
+        "service_dropped_binary": 3.730837926344506,
+        "token_impersonation": 3.059669652503336
+      }
+    },
+    "engine": {
+      "windows": 6336,
+      "evidence": null,
+      "settings": {
+        "span_seconds": 300.0,
+        "advance_seconds": 150.0,
+        "resolver": {
+          "integrity_order": [
+            "Untrusted",
+            "Low",
+            "Medium",
+            "High",
+            "System"
+          ],
+          "auto_elevating_images": [
+            "fodhelper.exe",
+            "eventvwr.exe",
+            "sdclt.exe",
+            "computerdefaults.exe"
+          ],
+          "hijack_registry_tokens": [
+            "ms-settings",
+            "mscfile",
+            "\\shell\\open\\command"
+          ],
+          "elevated_levels": [
+            "high",
+            "system"
+          ],
+          "system_path_tokens": [
+            "\\windows\\",
+            "\\program files"
+          ],
+          "service_registry_tokens": [
+            "\\services\\"
+          ],
+          "interactive_shell_images": [
+            "cmd.exe",
+            "powershell.exe",
+            "pwsh.exe"
+          ]
+        },
+        "evidence": null
+      }
+    },
+    "signal_firings_on_units": {
+      "autoelevation_lolbin": {
+        "attack": 15,
+        "benign": 0
+      },
+      "service_dropped_binary": {
+        "attack": 28,
+        "benign": 12
+      },
+      "remote_thread_injection": {
+        "attack": 0,
+        "benign": 0
+      },
+      "token_impersonation": {
+        "attack": 0,
+        "benign": 0
+      }
+    },
+    "flags_outside_units": {
+      "processes": 0,
+      "by_signal_and_image": {},
+      "windows_with_signal_anchored_only_outside_units": {}
+    }
+  }
+}

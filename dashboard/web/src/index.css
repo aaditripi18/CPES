@@ -1,0 +1,92 @@
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/hanken-grotesk.woff2") format("woff2");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --c-bg: 11 14 19;
+    --c-panel: 17 21 28;
+    --c-raised: 22 27 36;
+    --c-hover: 27 33 44;
+    --c-line: 34 42 54;
+    --c-line-strong: 46 55 71;
+    --c-ink: 228 232 239;
+    --c-muted: 138 148 166;
+    --c-faint: 93 103 120;
+    --c-accent: 167 139 250;
+    --c-accent-dim: 42 35 71;
+    --c-detect: 255 123 107;
+    --c-detect-dim: 58 29 27;
+    --c-warn: 242 184 75;
+    --c-warn-dim: 58 45 18;
+    --c-ok: 127 209 168;
+    --c-ok-dim: 21 48 31;
+    --c-info: 124 183 255;
+    --c-info-dim: 19 34 53;
+    color-scheme: dark;
+  }
+  html.light {
+    --c-bg: 245 246 248;
+    --c-panel: 255 255 255;
+    --c-raised: 240 242 245;
+    --c-hover: 233 236 241;
+    --c-line: 225 229 235;
+    --c-line-strong: 203 210 220;
+    --c-ink: 20 25 34;
+    --c-muted: 89 98 115;
+    --c-faint: 141 150 165;
+    --c-accent: 109 79 216;
+    --c-accent-dim: 235 229 253;
+    --c-detect: 209 69 58;
+    --c-detect-dim: 253 233 230;
+    --c-warn: 168 111 5;
+    --c-warn-dim: 251 240 217;
+    --c-ok: 29 132 86;
+    --c-ok-dim: 224 243 233;
+    --c-info: 44 107 192;
+    --c-info-dim: 227 238 251;
+    color-scheme: light;
+  }
+  body { @apply bg-bg text-ink font-sans antialiased; font-size: 14px; transition: background-color 0.15s ease; }
+  ::selection { background: rgb(var(--c-accent) / 0.3); }
+  :focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: rgb(var(--c-line-strong)) transparent; }
+}
+
+@layer components {
+  .panel { @apply bg-panel border border-line rounded-md; }
+  .panel-head { @apply flex items-center justify-between gap-3 px-4 py-3 border-b border-line; }
+  .eyebrow { @apply font-mono text-2xs uppercase tracking-[0.08em] text-muted; }
+  .btn { @apply inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-[13px] font-medium border border-line-strong bg-raised text-ink hover:bg-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors; }
+  .btn-primary { @apply bg-accent text-[#160f2e] border-accent hover:brightness-110; }
+  html.light .btn-primary { @apply text-white; }
+  .btn-ghost { @apply border-transparent bg-transparent hover:bg-hover; }
+  .input { @apply bg-bg border border-line-strong rounded px-2.5 py-1.5 text-[13px] text-ink placeholder:text-faint focus:border-accent focus:outline-none; }
+  .tbl { @apply w-full text-[13px]; }
+  .tbl th { @apply text-left font-mono text-2xs uppercase tracking-[0.06em] text-muted font-medium px-3 py-2 border-b border-line whitespace-nowrap; }
+  .tbl td { @apply px-3 py-2 border-b border-line/70 align-top; }
+  .tbl tr.row-link { @apply cursor-pointer hover:bg-hover; }
+  .tbl tr.row-active { @apply bg-accent-dim/60; }
+  .link { @apply text-accent hover:underline underline-offset-2; }
+  .mono { @apply font-mono; }
+  .chip { @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-mono border; }
+}
+
+.react-flow__attribution { display: none; }
+
+@keyframes fadein { from { opacity: 0; transform: translateY(-4px); background: rgb(var(--c-detect-dim)); } to { opacity: 1; transform: none; background: transparent; } }

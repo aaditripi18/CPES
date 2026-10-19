@@ -1,0 +1,32 @@
+# Named-pipe evidence (Sysmon EID 17/18) from raw .evtx records. Older Sysmon
+# versions do not log `User` on pipe events; such records are skipped by the
+# evidence builder (it never guesses whether a process ran as SYSTEM).
+version: evtx-sysmon-evidence-pipes-v1
+fields:
+  - source_field: Event.System.TimeCreated.#attributes.SystemTime
+    destination_field: source_timestamp
+    optional: false
+  - source_field: Event.System.EventRecordID
+    destination_field: source_event_id
+    optional: false
+  - source_field: Event.System.EventID
+    destination_field: event_code
+    optional: true
+  - source_field: Event.EventData.ProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: Event.EventData.Image
+    destination_field: image_path
+    optional: true
+  - source_field: Event.EventData.User
+    destination_field: user_name
+    optional: true
+  - source_field: Event.EventData.PipeName
+    destination_field: pipe_name
+    optional: true
+  - source_field: Event.EventData.EventType
+    destination_field: pipe_event_type
+    optional: true
+  - source_field: Event.EventData.__no_target_on_pipe_events__
+    destination_field: target_process_guid
+    optional: true

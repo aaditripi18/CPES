@@ -38,3 +38,6 @@ examples/demo-evaluation.json
 /Claude outputs/
 /analysis/
 
+
+# Third-party public datasets and rule packs (downloaded, never committed)
+/external/

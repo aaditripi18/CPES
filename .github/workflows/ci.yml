@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    # The private lab corpus is not in the repository; tests that need it skip.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt -r dashboard/requirements.txt
+      - run: python -m pytest tests dashboard/tests -q
+      - name: example pipeline on the synthetic sample
+        run: python examples/run_end_to_end_demo.py
+        env:
+          PYTHONPATH: .
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/web/package-lock.json
+      - run: npm ci
+      - run: npx vitest run
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t cpes-dashboard .
+      - name: API answers inside the container
+        run: |
+          docker run -d --name cpes -p 127.0.0.1:8790:8790 cpes-dashboard
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8790/api/health && break; sleep 1; done
+          curl -fs http://127.0.0.1:8790/api/inventory | grep -q synthetic-format-preview

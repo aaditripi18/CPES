@@ -1,0 +1,312 @@
+{
+  "id": "sigma-evasion-20261019T071537Z",
+  "protocol": "sigma-evasion",
+  "recorded_at": "2026-10-19T07:15:37+00:00",
+  "duration_seconds": 113.54,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "variants": {
+      "V0": {
+        "transform": "none (gate: must equal the published table)",
+        "packs": {
+          "core": {
+            "high_or_critical": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            },
+            "any_level": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            }
+          },
+          "all": {
+            "high_or_critical": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            },
+            "any_level": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "37/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "11/33"
+                },
+                "benign_units_flagged": 161
+              }
+            }
+          }
+        }
+      },
+      "V1": {
+        "transform": "renamed injector: mavinject.exe \u2192 msupdhlp.exe (all mavinject processes are attack processes)",
+        "packs": {
+          "core": {
+            "high_or_critical": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            },
+            "any_level": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            }
+          },
+          "all": {
+            "high_or_critical": {
+              "runs_consistent": "106/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "42/48"
+              },
+              "unit_level": {
+                "attack_units": "26/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "0/33"
+                },
+                "benign_units_flagged": 111
+              }
+            },
+            "any_level": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "37/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "11/33"
+                },
+                "benign_units_flagged": 161
+              }
+            }
+          }
+        }
+      },
+      "V3": {
+        "transform": "unlisted auto-elevating binary: ['computerdefaults.exe', 'eventvwr.exe', 'fodhelper.exe', 'sdclt.exe'] \u2192 wsreset.exe on the elevated attack processes",
+        "packs": {
+          "core": {
+            "high_or_critical": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "59/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "33/33"
+                },
+                "benign_units_flagged": 133
+              }
+            },
+            "any_level": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "59/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "33/33"
+                },
+                "benign_units_flagged": 133
+              }
+            }
+          },
+          "all": {
+            "high_or_critical": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "59/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "33/33"
+                },
+                "benign_units_flagged": 133
+              }
+            },
+            "any_level": {
+              "runs_consistent": "108/126",
+              "consistent_by_technique": {
+                "T1055.001": "18/22",
+                "T1134.001": "18/23",
+                "T1134.002": "0/1",
+                "T1543.003": "28/32",
+                "T1548.002": "44/48"
+              },
+              "unit_level": {
+                "attack_units": "59/87",
+                "by_technique": {
+                  "T1055.001": "18/18",
+                  "T1134": "8/8",
+                  "T1543.003": "0/28",
+                  "T1548.002": "33/33"
+                },
+                "benign_units_flagged": 172
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "V0": {
+        "core": "26/87",
+        "all": "37/87"
+      },
+      "V1": {
+        "core": "26/87",
+        "all": "37/87"
+      },
+      "V3": {
+        "core": "59/87",
+        "all": "59/87"
+      }
+    }
+  }
+}

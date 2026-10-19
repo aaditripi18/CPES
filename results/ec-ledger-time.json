@@ -1,0 +1,142 @@
+{
+  "id": "ec-ledger-time-20261019T071204Z",
+  "protocol": "ec-ledger-time",
+  "recorded_at": "2026-10-19T07:12:04+00:00",
+  "duration_seconds": 0.01,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "runs": 126,
+    "runs_by_technique": {
+      "T1055.001": 22,
+      "T1134.001": 23,
+      "T1134.002": 1,
+      "T1543.003": 32,
+      "T1548.002": 48
+    },
+    "tolerance_seconds": 150,
+    "detectors": {
+      "cpes_research_signals": {
+        "flagged_processes": 88,
+        "false_alarm_processes": 1,
+        "false_alarm_images": {
+          "winlogbeat.exe": 1
+        },
+        "modelled_runs_detected_any": "108/126",
+        "modelled_runs_detected_consistent": "98/126",
+        "unmodelled_runs_with_any_flag": {},
+        "by_technique_any": {
+          "T1055.001": "18/22",
+          "T1134.001": "18/23",
+          "T1134.002": "0/1",
+          "T1543.003": "28/32",
+          "T1548.002": "44/48"
+        },
+        "by_technique_consistent": {
+          "T1055.001": "18/22",
+          "T1134.001": "8/23",
+          "T1134.002": "0/1",
+          "T1543.003": "28/32",
+          "T1548.002": "44/48"
+        }
+      },
+      "ioc_signature_research": {
+        "flagged_processes": 51,
+        "false_alarm_processes": 0,
+        "false_alarm_images": {},
+        "modelled_runs_detected_any": "100/126",
+        "modelled_runs_detected_consistent": null,
+        "unmodelled_runs_with_any_flag": {},
+        "by_technique_any": {
+          "T1055.001": "18/22",
+          "T1134.001": "10/23",
+          "T1134.002": "0/1",
+          "T1543.003": "28/32",
+          "T1548.002": "44/48"
+        },
+        "by_technique_consistent": null
+      },
+      "single_event_research": {
+        "flagged_processes": 34,
+        "false_alarm_processes": 1,
+        "false_alarm_images": {
+          "taskmgr.exe": 1
+        },
+        "modelled_runs_detected_any": "44/126",
+        "modelled_runs_detected_consistent": null,
+        "unmodelled_runs_with_any_flag": {},
+        "by_technique_any": {
+          "T1055.001": "0/22",
+          "T1134.001": "0/23",
+          "T1134.002": "0/1",
+          "T1543.003": "0/32",
+          "T1548.002": "44/48"
+        },
+        "by_technique_consistent": null
+      },
+      "cpes_package_with_evidence": {
+        "flagged_processes": 63,
+        "false_alarm_processes": 7,
+        "false_alarm_images": {
+          "mpcmdrun.exe": 6,
+          "winlogbeat.exe": 1
+        },
+        "modelled_runs_detected_any": "90/126",
+        "modelled_runs_detected_consistent": "56/126",
+        "unmodelled_runs_with_any_flag": {},
+        "by_technique_any": {
+          "T1055.001": "18/22",
+          "T1134.001": "18/23",
+          "T1134.002": "0/1",
+          "T1543.003": "28/32",
+          "T1548.002": "26/48"
+        },
+        "by_technique_consistent": {
+          "T1055.001": "0/22",
+          "T1134.001": "8/23",
+          "T1134.002": "0/1",
+          "T1543.003": "28/32",
+          "T1548.002": "20/48"
+        }
+      },
+      "single_event_package": {
+        "flagged_processes": 33,
+        "false_alarm_processes": 1,
+        "false_alarm_images": {
+          "taskmgr.exe": 1
+        },
+        "modelled_runs_detected_any": "44/126",
+        "modelled_runs_detected_consistent": null,
+        "unmodelled_runs_with_any_flag": {},
+        "by_technique_any": {
+          "T1055.001": "0/22",
+          "T1134.001": "0/23",
+          "T1134.002": "0/1",
+          "T1543.003": "0/32",
+          "T1548.002": "44/48"
+        },
+        "by_technique_consistent": null
+      }
+    },
+    "note": "E-c: unit = logged run; CPES decision = OR of signals (every research weight exceeds the 0.50 threshold)."
+  }
+}

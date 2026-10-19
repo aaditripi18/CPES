@@ -1,0 +1,31 @@
+# Remote-thread evidence (Sysmon EID 8) from raw .evtx records: the source
+# process is SourceProcessGuid / SourceImage on this event type.
+version: evtx-sysmon-evidence-threads-v1
+fields:
+  - source_field: Event.System.TimeCreated.#attributes.SystemTime
+    destination_field: source_timestamp
+    optional: false
+  - source_field: Event.System.EventRecordID
+    destination_field: source_event_id
+    optional: false
+  - source_field: Event.System.EventID
+    destination_field: event_code
+    optional: true
+  - source_field: Event.EventData.SourceProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: Event.EventData.SourceImage
+    destination_field: image_path
+    optional: true
+  - source_field: Event.EventData.__no_user_on_thread_events__
+    destination_field: user_name
+    optional: true
+  - source_field: Event.EventData.__no_pipe_on_thread_events__
+    destination_field: pipe_name
+    optional: true
+  - source_field: Event.EventData.__no_pipe_on_thread_events__
+    destination_field: pipe_event_type
+    optional: true
+  - source_field: Event.EventData.TargetProcessGuid
+    destination_field: target_process_guid
+    optional: true

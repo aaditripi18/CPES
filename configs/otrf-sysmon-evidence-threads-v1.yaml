@@ -1,0 +1,30 @@
+# Remote-thread evidence (Sysmon EID 8) from OTRF records.
+version: otrf-sysmon-evidence-threads-v1
+fields:
+  - source_field: __cpes_utc_time
+    destination_field: source_timestamp
+    optional: false
+  - source_field: __cpes_event_id
+    destination_field: source_event_id
+    optional: false
+  - source_field: EventID
+    destination_field: event_code
+    optional: true
+  - source_field: SourceProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: SourceImage
+    destination_field: image_path
+    optional: true
+  - source_field: __no_user_on_thread_events__
+    destination_field: user_name
+    optional: true
+  - source_field: __no_pipe_on_thread_events__
+    destination_field: pipe_name
+    optional: true
+  - source_field: __no_pipe_on_thread_events__
+    destination_field: pipe_event_type
+    optional: true
+  - source_field: TargetProcessGuid
+    destination_field: target_process_guid
+    optional: true

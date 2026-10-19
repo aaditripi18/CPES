@@ -1,0 +1,66 @@
+{
+  "source_table": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+  "source_table_sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c",
+  "units": {
+    "total": 2161,
+    "attack": 87,
+    "benign": 2074
+  },
+  "estimation_policy": {
+    "attack_pseudocount": "0.5",
+    "benign_pseudocount": "0.5"
+  },
+  "prior_log_odds_derived": "-3.171326270134888919839638573",
+  "prior_applied": "0",
+  "prior_note": "Research decision rule scores \u03a3 fired weights (no prior); the derived prior is recorded but not applied.",
+  "default_threshold": "0.5",
+  "id": "cpes-v2",
+  "title": "CPES v2: v1 weights + weighted generic 'unexplained privilege gain' (lab-derived)",
+  "derived_with": "cpes.derivation.derive_evidence_model (generic term); v1 terms copied unchanged",
+  "signal_counts": {
+    "autoelevation_lolbin": {
+      "attack_present": 33,
+      "benign_present": 0
+    },
+    "service_dropped_binary": {
+      "attack_present": 28,
+      "benign_present": 1
+    },
+    "remote_thread_injection": {
+      "attack_present": 18,
+      "benign_present": 0
+    },
+    "token_impersonation": {
+      "attack_present": 8,
+      "benign_present": 0
+    },
+    "unexplained_privilege_gain": {
+      "attack_present": 18,
+      "benign_present": 1
+    }
+  },
+  "terms": [
+    {
+      "signal_id": "autoelevation_lolbin",
+      "signed_log_likelihood": "7.365072237577558260033422944"
+    },
+    {
+      "signal_id": "remote_thread_injection",
+      "signed_log_likelihood": "6.771297530830816644731446618"
+    },
+    {
+      "signal_id": "service_dropped_binary",
+      "signed_log_likelihood": "6.104818597353032660372378379"
+    },
+    {
+      "signal_id": "token_impersonation",
+      "signed_log_likelihood": "5.993592962242808280612885565"
+    },
+    {
+      "signal_id": "unexplained_privilege_gain",
+      "signed_log_likelihood": "5.672685242162706953336201381"
+    }
+  ],
+  "generic_flags_from": "evaluation.engine.run_package(with_evidence=True, generic=True) on corpus-v3",
+  "scope_note": "All weights derived from the lab corpus only. Frozen before the OTRF held-out evaluation (docs/design/cpes-v2-heldout.md)."
+}

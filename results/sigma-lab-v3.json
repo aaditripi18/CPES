@@ -1,0 +1,254 @@
+{
+  "id": "sigma-lab-v3-20261019T071328Z",
+  "protocol": "sigma-lab-v3",
+  "recorded_at": "2026-10-19T07:13:28+00:00",
+  "duration_seconds": 55.8,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "packs": {
+      "core": {
+        "rules_evaluated": 773,
+        "rules_dropped_details": 77,
+        "rules_unsupported": {
+          "not Sysmon": 523,
+          "modifier(s)": 4
+        },
+        "high_or_critical": {
+          "run_level": {
+            "alerts": 209,
+            "runs_any": "106/126",
+            "runs_consistent": "106/126",
+            "consistent_by_technique": {
+              "T1055.001": "18/22",
+              "T1134.001": "18/23",
+              "T1134.002": "0/1",
+              "T1543.003": "28/32",
+              "T1548.002": "42/48"
+            },
+            "outside_runs": {
+              "alerts": 8,
+              "processes": 8,
+              "rules": 2,
+              "top_rules": [
+                [
+                  "Suspect Svchost Activity",
+                  4
+                ],
+                [
+                  "Suspicious New Service Creation",
+                  4
+                ]
+              ]
+            }
+          },
+          "unit_level": {
+            "attack_units": "26/87",
+            "by_technique": {
+              "T1055.001": "18/18",
+              "T1134": "8/8",
+              "T1543.003": "0/28",
+              "T1548.002": "0/33"
+            },
+            "benign_units_flagged": 111
+          }
+        },
+        "any_level": {
+          "run_level": {
+            "alerts": 209,
+            "runs_any": "106/126",
+            "runs_consistent": "106/126",
+            "consistent_by_technique": {
+              "T1055.001": "18/22",
+              "T1134.001": "18/23",
+              "T1134.002": "0/1",
+              "T1543.003": "28/32",
+              "T1548.002": "42/48"
+            },
+            "outside_runs": {
+              "alerts": 8,
+              "processes": 8,
+              "rules": 2,
+              "top_rules": [
+                [
+                  "Suspect Svchost Activity",
+                  4
+                ],
+                [
+                  "Suspicious New Service Creation",
+                  4
+                ]
+              ]
+            }
+          },
+          "unit_level": {
+            "attack_units": "26/87",
+            "by_technique": {
+              "T1055.001": "18/18",
+              "T1134": "8/8",
+              "T1543.003": "0/28",
+              "T1548.002": "0/33"
+            },
+            "benign_units_flagged": 111
+          }
+        }
+      },
+      "all": {
+        "rules_evaluated": 1756,
+        "rules_dropped_details": 171,
+        "rules_unsupported": {
+          "not Sysmon": 1369,
+          "modifier(s)": 5,
+          "keyword search or unsupported selection ": 1
+        },
+        "high_or_critical": {
+          "run_level": {
+            "alerts": 213,
+            "runs_any": "106/126",
+            "runs_consistent": "106/126",
+            "consistent_by_technique": {
+              "T1055.001": "18/22",
+              "T1134.001": "18/23",
+              "T1134.002": "0/1",
+              "T1543.003": "28/32",
+              "T1548.002": "42/48"
+            },
+            "outside_runs": {
+              "alerts": 12,
+              "processes": 8,
+              "rules": 3,
+              "top_rules": [
+                [
+                  "Suspect Svchost Activity",
+                  4
+                ],
+                [
+                  "Uncommon Svchost Command Line Parameter",
+                  4
+                ],
+                [
+                  "Suspicious New Service Creation",
+                  4
+                ]
+              ]
+            }
+          },
+          "unit_level": {
+            "attack_units": "26/87",
+            "by_technique": {
+              "T1055.001": "18/18",
+              "T1134": "8/8",
+              "T1543.003": "0/28",
+              "T1548.002": "0/33"
+            },
+            "benign_units_flagged": 111
+          }
+        },
+        "any_level": {
+          "run_level": {
+            "alerts": 296,
+            "runs_any": "108/126",
+            "runs_consistent": "108/126",
+            "consistent_by_technique": {
+              "T1055.001": "18/22",
+              "T1134.001": "18/23",
+              "T1134.002": "0/1",
+              "T1543.003": "28/32",
+              "T1548.002": "44/48"
+            },
+            "outside_runs": {
+              "alerts": 21,
+              "processes": 13,
+              "rules": 9,
+              "top_rules": [
+                [
+                  "Suspect Svchost Activity",
+                  4
+                ],
+                [
+                  "Uncommon Svchost Command Line Parameter",
+                  4
+                ],
+                [
+                  "Suspicious New Service Creation",
+                  4
+                ],
+                [
+                  "Use Short Name Path in Image",
+                  2
+                ],
+                [
+                  "Use NTFS Short Name in Command Line",
+                  2
+                ],
+                [
+                  "Use NTFS Short Name in Image",
+                  2
+                ],
+                [
+                  "Sysmon Configuration Update",
+                  1
+                ],
+                [
+                  "Potential Python DLL SideLoading",
+                  1
+                ]
+              ]
+            }
+          },
+          "unit_level": {
+            "attack_units": "37/87",
+            "by_technique": {
+              "T1055.001": "18/18",
+              "T1134": "8/8",
+              "T1543.003": "0/28",
+              "T1548.002": "11/33"
+            },
+            "benign_units_flagged": 161
+          }
+        }
+      }
+    },
+    "cpes_reference": {
+      "cpes_research_signals": {
+        "modelled_runs_detected_consistent": "98/126",
+        "modelled_runs_detected_any": "108/126",
+        "false_alarm_processes": 1
+      },
+      "cpes_package_with_evidence": {
+        "modelled_runs_detected_consistent": "56/126",
+        "modelled_runs_detected_any": "90/126",
+        "false_alarm_processes": 7
+      }
+    },
+    "summary": {
+      "core": {
+        "high_or_critical": "106/126",
+        "any_level": "106/126"
+      },
+      "all": {
+        "high_or_critical": "106/126",
+        "any_level": "108/126"
+      }
+    }
+  }
+}

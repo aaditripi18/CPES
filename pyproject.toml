@@ -7,6 +7,7 @@ name = "cpes"
 version = "0.1.0"
 description = "Contextual Privilege Escalation Scoring research implementation"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "elasticsearch==9.4.1",

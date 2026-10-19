@@ -1,0 +1,156 @@
+{
+  "id": "incidents-lab-v3-20261019T071643Z",
+  "protocol": "incidents-lab-v3",
+  "recorded_at": "2026-10-19T07:16:43+00:00",
+  "duration_seconds": 23.12,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "analysis/corpus-v3.ndjson",
+      "sha256": "4cae7ad6a04ed6d112513e64241f6d4664705075590f8ead583364c940c58937"
+    },
+    {
+      "path": "analysis/cpes-atomic-log-v3.csv",
+      "sha256": "a4ef4887d9a405e84e4cee474e8ba51b8b8426891ee2c9284693e66758c0ba16"
+    },
+    {
+      "path": "Claude outputs/cpes_privilege_escalation_dataset.csv",
+      "sha256": "b39ba9e12c061105481750dbd5dcbd5759edf47a9cc49f3a1a7133e9933c8f0c"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "gap_seconds": 300.0,
+    "configurations": {
+      "sigma_alone": {
+        "alerts": 209,
+        "incidents": 101,
+        "compression": 2.07,
+        "runs_with_an_incident": "106/126",
+        "incidents_per_run_median": 15.0,
+        "incidents_per_run_max": 27,
+        "runs_whose_incident_names_the_elevated_process": "0/126",
+        "incidents_spanning_more_than_one_run": 93,
+        "noise_incidents_outside_runs": 8,
+        "largest_incident_alerts": 4,
+        "incidents_with_both_sources": 0,
+        "cpes_alerts_joined_to_sigma": 0
+      },
+      "cpes_alone": {
+        "alerts": 66,
+        "incidents": 66,
+        "compression": 1.0,
+        "runs_with_an_incident": "90/126",
+        "incidents_per_run_median": 8.0,
+        "incidents_per_run_max": 11,
+        "runs_whose_incident_names_the_elevated_process": "90/126",
+        "incidents_spanning_more_than_one_run": 58,
+        "noise_incidents_outside_runs": 8,
+        "largest_incident_alerts": 1,
+        "incidents_with_both_sources": 0,
+        "cpes_alerts_joined_to_sigma": 0
+      },
+      "fused": {
+        "alerts": 275,
+        "incidents": 146,
+        "compression": 1.88,
+        "runs_with_an_incident": "107/126",
+        "incidents_per_run_median": 21,
+        "incidents_per_run_max": 37,
+        "runs_whose_incident_names_the_elevated_process": "90/126",
+        "incidents_spanning_more_than_one_run": 130,
+        "noise_incidents_outside_runs": 16,
+        "largest_incident_alerts": 22,
+        "incidents_with_both_sources": 7,
+        "cpes_alerts_joined_to_sigma": 13
+      }
+    },
+    "fused_examples": [
+      {
+        "id": "INC-0099",
+        "start": "2026-09-01T08:01:41.747000+00:00",
+        "alerts": [
+          "sigma: PowerShell Download and Execution Cradles",
+          "sigma: Malicious PowerShell Commandlets - ProcessCreation",
+          "sigma: Potential Meterpreter/CobaltStrike Activity",
+          "sigma: Abused Debug Privilege by Arbitrary Parent Processes",
+          "sigma: Privilege Escalation via Named Pipe Impersonation",
+          "cpes: CPES token_impersonation",
+          "sigma: Privilege Escalation via Named Pipe Impersonation",
+          "sigma: Potential Meterpreter/CobaltStrike Activity"
+        ],
+        "outcome_processes": 4
+      },
+      {
+        "id": "INC-0100",
+        "start": "2026-09-01T08:02:09.352000+00:00",
+        "alerts": [
+          "sigma: PowerShell Download and Execution Cradles",
+          "sigma: Malicious PowerShell Commandlets - ProcessCreation",
+          "sigma: Potential Meterpreter/CobaltStrike Activity",
+          "sigma: Abused Debug Privilege by Arbitrary Parent Processes",
+          "sigma: Privilege Escalation via Named Pipe Impersonation",
+          "cpes: CPES token_impersonation",
+          "sigma: Privilege Escalation via Named Pipe Impersonation",
+          "sigma: Potential Meterpreter/CobaltStrike Activity"
+        ],
+        "outcome_processes": 4
+      },
+      {
+        "id": "INC-0107",
+        "start": "2026-09-01T08:10:36.274000+00:00",
+        "alerts": [
+          "cpes: CPES autoelevation_lolbin",
+          "sigma: Bypass UAC via Fodhelper.exe"
+        ],
+        "outcome_processes": 1
+      },
+      {
+        "id": "INC-0110",
+        "start": "2026-09-01T08:13:34.864000+00:00",
+        "alerts": [
+          "cpes: CPES autoelevation_lolbin",
+          "sigma: Bypass UAC via Fodhelper.exe"
+        ],
+        "outcome_processes": 1
+      },
+      {
+        "id": "INC-0113",
+        "start": "2026-09-01T08:16:24.890000+00:00",
+        "alerts": [
+          "cpes: CPES autoelevation_lolbin",
+          "sigma: Bypass UAC via Fodhelper.exe"
+        ],
+        "outcome_processes": 1
+      }
+    ],
+    "items_to_open": {
+      "sigma_and_cpes_separately": 167,
+      "fused": 146,
+      "reduction": 0.126
+    },
+    "note": "Runs in this corpus are ~75 s apart, so \u00b1150 s run windows overlap; per-run fragmentation and the 'spanning more than one run' count are dominated by that overlap and are not informative here.",
+    "summary": {
+      "sigma_alone": {
+        "alerts": 209,
+        "incidents": 101,
+        "attributed": "0/126"
+      },
+      "cpes_alone": {
+        "alerts": 66,
+        "incidents": 66,
+        "attributed": "90/126"
+      },
+      "fused": {
+        "alerts": 275,
+        "incidents": 146,
+        "attributed": "90/126"
+      }
+    }
+  }
+}

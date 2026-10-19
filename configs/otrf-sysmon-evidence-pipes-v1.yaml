@@ -1,0 +1,34 @@
+# Named-pipe evidence from OTRF records. There is deliberately NO user mapping:
+# the record's AccountName/Domain/UserID describe the account that wrote the log
+# (the Sysmon service, SYSTEM), not the process that used the pipe. Using them
+# would mark every pipe as SYSTEM. Pipe records are therefore skipped by the
+# evidence builder (missing user), and the token signal cannot fire on this data.
+version: otrf-sysmon-evidence-pipes-v1
+fields:
+  - source_field: __cpes_utc_time
+    destination_field: source_timestamp
+    optional: false
+  - source_field: __cpes_event_id
+    destination_field: source_event_id
+    optional: false
+  - source_field: EventID
+    destination_field: event_code
+    optional: true
+  - source_field: ProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: Image
+    destination_field: image_path
+    optional: true
+  - source_field: __no_process_user_in_otrf_records__
+    destination_field: user_name
+    optional: true
+  - source_field: PipeName
+    destination_field: pipe_name
+    optional: true
+  - source_field: EventType
+    destination_field: pipe_event_type
+    optional: true
+  - source_field: __no_target_on_pipe_events__
+    destination_field: target_process_guid
+    optional: true
