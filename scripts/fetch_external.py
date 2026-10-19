@@ -27,6 +27,19 @@ EXTERNAL = ROOT / "external"
 EVTX_COMMIT = "4ceed2f4706daf601c212a8f91c113dd85349a2c"
 EVTX_RAW = f"https://raw.githubusercontent.com/sbousseaden/EVTX-ATTACK-SAMPLES/{EVTX_COMMIT}/Privilege%20Escalation/"
 SIGMA_TAG = "r2026-07-01"
+OTRF_COMMIT = "d9d40ef123d2c87d5d3df28c96bcab4f0faccc87"
+OTRF_FILES = {
+    "privilege_escalation": ["empire_uac_shellapi_fodhelper.zip", "empire_invoke_runas.tar.gz", "cmd_service_mod_fax.zip"],
+    "defense_evasion": ["psh_cmstp_execution_bypassuac.zip", "empire_dllinjection_LoadLibrary_CreateRemoteThread.zip", "empire_psinject_PEinjection.zip",
+                        "psh_mavinject_dll_notepad.zip", "purplesharp_pe_injection_createremotethread.zip",
+                        "cmd_disable_eventlog_service_startuptype_modification_via_registry.zip", "psh_disable_eventlog_service_startuptype_modification.zip",
+                        "reg_disable_eventlog_service_startuptype_modification_via_registry.zip"],
+    "persistence": ["empire_persistence_registry_modification_run_keys_elevated_user.zip", "empire_schtasks_creation_execution_elevated_user.zip",
+                    "empire_wmi_local_event_subscriptions_elevated_user.zip"],
+    "credential_access": ["cmd_psexec_lsa_secrets_dump.zip", "psh_lsass_memory_dump_comsvcs.zip"],
+    "lateral_movement": ["empire_psexec_dcerpc_tcp_svcctl.zip", "empire_smbexec_dcerpc_smb_svcctl.zip", "covenant_sharpsc_create_dcerpc_smb_svcctl.zip",
+                         "covenant_sharpsc_start_dcerpc_smb_svcctl.zip", "empire_shell_dcerpc_smb_service_dll_hijack.zip"],
+}
 SIGMA_RELEASE = f"https://github.com/SigmaHQ/sigma/releases/download/{SIGMA_TAG}/"
 
 
@@ -50,7 +63,7 @@ def entries() -> list[tuple[dict, dict, Path, str]]:
     for dataset in manifest["datasets"]:
         for item in dataset["files"]:
             path = EXTERNAL / dataset["local_dir"] / item["name"]
-            url = dataset["url_prefix"] + urllib.parse.quote(item["name"])
+            url = item.get("url") or dataset["url_prefix"] + urllib.parse.quote(item["name"])
             out.append((dataset, item, path, url))
     return out
 
@@ -115,6 +128,19 @@ def write_manifest() -> int:
                 "local_dir": "sigma",
                 "url_prefix": SIGMA_RELEASE,
                 "files": [{"name": n, "sha256": sha256(sigma_dir / n), "bytes": (sigma_dir / n).stat().st_size} for n in ("sigma_core.zip", "sigma_all_rules.zip")],
+            },
+            {
+                "id": "otrf-security-datasets",
+                "source": "https://github.com/OTRF/Security-Datasets/tree/" + OTRF_COMMIT + "/datasets/atomic/windows",
+                "licence": "MIT",
+                "commit": OTRF_COMMIT,
+                "local_dir": "otrf/zips",
+                "url_prefix": "",
+                "files": [
+                    {"name": n, "tactic": tactic, "sha256": sha256(EXTERNAL / "otrf" / "zips" / n), "bytes": (EXTERNAL / "otrf" / "zips" / n).stat().st_size,
+                     "url": f"https://raw.githubusercontent.com/OTRF/Security-Datasets/{OTRF_COMMIT}/datasets/atomic/windows/{tactic}/host/{n}"}
+                    for tactic, names in OTRF_FILES.items() for n in names
+                ],
             },
         ],
     }

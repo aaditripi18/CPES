@@ -360,6 +360,163 @@
           "bytes": 3172748
         }
       ]
+    },
+    {
+      "id": "otrf-security-datasets",
+      "source": "https://github.com/OTRF/Security-Datasets/tree/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows",
+      "licence": "MIT",
+      "commit": "d9d40ef123d2c87d5d3df28c96bcab4f0faccc87",
+      "local_dir": "otrf/zips",
+      "url_prefix": "",
+      "files": [
+        {
+          "name": "empire_uac_shellapi_fodhelper.zip",
+          "tactic": "privilege_escalation",
+          "sha256": "b8cc7aae826f5e4aea3ea47b2b6db69b062c39201de8de9621d5081622d3c504",
+          "bytes": 712457,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/privilege_escalation/host/empire_uac_shellapi_fodhelper.zip"
+        },
+        {
+          "name": "empire_invoke_runas.tar.gz",
+          "tactic": "privilege_escalation",
+          "sha256": "17a3434c2b187c76c4bcc829930cf787c12507cc992a7c72bb8ef46cb4a11b7d",
+          "bytes": 690887,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/privilege_escalation/host/empire_invoke_runas.tar.gz"
+        },
+        {
+          "name": "cmd_service_mod_fax.zip",
+          "tactic": "privilege_escalation",
+          "sha256": "4a40cb09c514f1a4c601588cbfa5c81e12a6f8a5ab92fd76bad846c1a4352447",
+          "bytes": 36023,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/privilege_escalation/host/cmd_service_mod_fax.zip"
+        },
+        {
+          "name": "psh_cmstp_execution_bypassuac.zip",
+          "tactic": "defense_evasion",
+          "sha256": "a653c698e8f779261ba0b3ac92bd604d4abe3a510cda8ab1f5ccdd421d013d4c",
+          "bytes": 81318,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/psh_cmstp_execution_bypassuac.zip"
+        },
+        {
+          "name": "empire_dllinjection_LoadLibrary_CreateRemoteThread.zip",
+          "tactic": "defense_evasion",
+          "sha256": "98071a478f57f2ca71530c4cb839f2054da0e6bd8b106caaa5d9518d1be0ccc8",
+          "bytes": 1103116,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/empire_dllinjection_LoadLibrary_CreateRemoteThread.zip"
+        },
+        {
+          "name": "empire_psinject_PEinjection.zip",
+          "tactic": "defense_evasion",
+          "sha256": "ad6297ce8cfb908126e2ec1271d62f6cd8dcdac6006d7b6e5ecd377488b04df0",
+          "bytes": 827949,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/empire_psinject_PEinjection.zip"
+        },
+        {
+          "name": "psh_mavinject_dll_notepad.zip",
+          "tactic": "defense_evasion",
+          "sha256": "262680222316edb2dc0d7dca380dfe75191fb96779b8dacc8aac8a1d8bdc046b",
+          "bytes": 53452,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/psh_mavinject_dll_notepad.zip"
+        },
+        {
+          "name": "purplesharp_pe_injection_createremotethread.zip",
+          "tactic": "defense_evasion",
+          "sha256": "d1cfff7404448fd9ac7558967837a9903bb474957949218c293c09fd56a5ca7a",
+          "bytes": 82238,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/purplesharp_pe_injection_createremotethread.zip"
+        },
+        {
+          "name": "cmd_disable_eventlog_service_startuptype_modification_via_registry.zip",
+          "tactic": "defense_evasion",
+          "sha256": "4312946d5bb0883e691da3b1130d4179b951a413278b450a75c05d56a2858a1a",
+          "bytes": 367047,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/cmd_disable_eventlog_service_startuptype_modification_via_registry.zip"
+        },
+        {
+          "name": "psh_disable_eventlog_service_startuptype_modification.zip",
+          "tactic": "defense_evasion",
+          "sha256": "aaf99c001735e37dcf64206d369114087f0bd239f9d5c477a44f6d0d4cbce85a",
+          "bytes": 380571,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/psh_disable_eventlog_service_startuptype_modification.zip"
+        },
+        {
+          "name": "reg_disable_eventlog_service_startuptype_modification_via_registry.zip",
+          "tactic": "defense_evasion",
+          "sha256": "d79d5a13fbb1e7957d748955a1be5c68294e58d322b76e41393d6987fe769656",
+          "bytes": 235697,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/defense_evasion/host/reg_disable_eventlog_service_startuptype_modification_via_registry.zip"
+        },
+        {
+          "name": "empire_persistence_registry_modification_run_keys_elevated_user.zip",
+          "tactic": "persistence",
+          "sha256": "2809354d679025859d723be3ceb1e2c9f9e5dde2ebec5bbea7c398e165a9b67d",
+          "bytes": 102384,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/persistence/host/empire_persistence_registry_modification_run_keys_elevated_user.zip"
+        },
+        {
+          "name": "empire_schtasks_creation_execution_elevated_user.zip",
+          "tactic": "persistence",
+          "sha256": "74662dc5c52f4ac2fc9dcb336bae7fb4e101217169c65adf5784b03015501d3b",
+          "bytes": 4241110,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/persistence/host/empire_schtasks_creation_execution_elevated_user.zip"
+        },
+        {
+          "name": "empire_wmi_local_event_subscriptions_elevated_user.zip",
+          "tactic": "persistence",
+          "sha256": "a507f2edd768b592e6b3157e974fd0468965eee00407387d88356ecb8fd20fea",
+          "bytes": 6043932,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/persistence/host/empire_wmi_local_event_subscriptions_elevated_user.zip"
+        },
+        {
+          "name": "cmd_psexec_lsa_secrets_dump.zip",
+          "tactic": "credential_access",
+          "sha256": "c52e6145fefe37373a5274e2976ccf6d62e4d33e13c55dc1a2ce17f00506d1a6",
+          "bytes": 38086,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/credential_access/host/cmd_psexec_lsa_secrets_dump.zip"
+        },
+        {
+          "name": "psh_lsass_memory_dump_comsvcs.zip",
+          "tactic": "credential_access",
+          "sha256": "0af9e920220d746432f0972be83ad057629695540aecd68c15869d190786e1ae",
+          "bytes": 17957,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/credential_access/host/psh_lsass_memory_dump_comsvcs.zip"
+        },
+        {
+          "name": "empire_psexec_dcerpc_tcp_svcctl.zip",
+          "tactic": "lateral_movement",
+          "sha256": "8f40e7fc86bbbf31ebd50b3ba537cf0f4378392ae3e74de84bee00aeb0de1fa5",
+          "bytes": 656179,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/lateral_movement/host/empire_psexec_dcerpc_tcp_svcctl.zip"
+        },
+        {
+          "name": "empire_smbexec_dcerpc_smb_svcctl.zip",
+          "tactic": "lateral_movement",
+          "sha256": "c0fc435c9ce0ecdc7cd57b4055977b949ac6b1cae9d7f4ce7aa0f0e5eae7d7f1",
+          "bytes": 753172,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/lateral_movement/host/empire_smbexec_dcerpc_smb_svcctl.zip"
+        },
+        {
+          "name": "covenant_sharpsc_create_dcerpc_smb_svcctl.zip",
+          "tactic": "lateral_movement",
+          "sha256": "77487bbd1fc7954adbc9ba07bfeeeb9d57192b0f0e0f54e1ee5a05c71a5be84a",
+          "bytes": 276984,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/lateral_movement/host/covenant_sharpsc_create_dcerpc_smb_svcctl.zip"
+        },
+        {
+          "name": "covenant_sharpsc_start_dcerpc_smb_svcctl.zip",
+          "tactic": "lateral_movement",
+          "sha256": "a6cebf14f42f8f4e4f3ea457d88437ce16f0fce5b184ae70f097fcf48f68692c",
+          "bytes": 368726,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/lateral_movement/host/covenant_sharpsc_start_dcerpc_smb_svcctl.zip"
+        },
+        {
+          "name": "empire_shell_dcerpc_smb_service_dll_hijack.zip",
+          "tactic": "lateral_movement",
+          "sha256": "59265c906bf2fdac09b876cfa137f6e81e645d85d550c5b4efdebb8f3f491428",
+          "bytes": 865367,
+          "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/d9d40ef123d2c87d5d3df28c96bcab4f0faccc87/datasets/atomic/windows/lateral_movement/host/empire_shell_dcerpc_smb_service_dll_hijack.zip"
+        }
+      ]
     }
   ]
 }

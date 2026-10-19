@@ -170,6 +170,46 @@ def _sigma_section() -> list[str]:
     return out
 
 
+HELDOUT_CATEGORIES = {
+    "uac_listed_binary": "UAC, listed binary",
+    "uac_other_method": "UAC, other method",
+    "code_injection": "Code injection",
+    "service_as_system": "Service-based execution as SYSTEM",
+    "token_runas": "RunAs (no Sysmon) — not applicable",
+    "control_not_privesc": "Controls (persistence, log tampering, LSASS dump)",
+}
+
+
+def _heldout_section() -> list[str]:
+    record = _load("heldout-otrf-v2")
+    out = ["", "## 10. CPES v2 on held-out data — OTRF Security-Datasets", "",
+           "Pre-registered (with one amendment made before any result) in [design/cpes-v2-heldout.md](design/cpes-v2-heldout.md). v2 = v1 + the generic test, weighted from the lab corpus only. Unit = capture file.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    names = [("research-v3-full-table", "CPES v1"), ("cpes-v2", "CPES v2"), ("generic_alone", "Generic test"), ("single_event", "Single-event rule"), ("sigma_core_high", "Sigma core high+")]
+    out += [f"{r['dataset']} · execution `{record['id']}`", "",
+            "| Detector | Privilege-escalation files detected | Control files with an alert |", "|---|---|---|"]
+    for key, label in names:
+        p = r["primary"][key]
+        out.append(f"| {label} | {p['privesc_files_detected']} | {p['control_files_alerted']} |")
+    v = r["v2_verdict"]
+    out += ["", f"**Pre-registered verdict for v2: {v['verdict']}** ({v['rule']}).", "",
+            "| Category | Files | " + " | ".join(label for _, label in names) + " |", "|---|---|" + "---|" * len(names)]
+    for key, label in HELDOUT_CATEGORIES.items():
+        row = r["summary_by_category"].get(key)
+        if row:
+            out.append(f"| {label} | {row['files']} | " + " | ".join(str(row[k]) for k, _ in names) + " |")
+    out += ["", "Every CPES v1 alert and the process it is anchored on:", ""]
+    for f in r["files"]:
+        anchors = (f.get("detectors") or {}).get("research-v3-full-table", {})
+        if anchors.get("refused"):
+            out.append(f"- `{f['file']}` — pipeline refused: {anchors['refused']}")
+        elif anchors.get("anchors"):
+            out.append(f"- `{f['file']}` ({HELDOUT_CATEGORIES[f['category']]}) — " + ", ".join(anchors["anchors"]))
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -211,7 +251,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 

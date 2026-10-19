@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from . import data, engine, protocols
 
 RESULTS = data.ROOT / "results"
-PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion")
+PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2")
 
 
 def _code_fingerprint() -> str:
@@ -126,6 +126,10 @@ def run_protocol(name: str) -> dict:
         from . import sigma_eval
 
         return {"sigma-lab-v3": sigma_eval.run_lab, "sigma-ext-evtx": sigma_eval.run_external, "sigma-evasion": sigma_eval.run_evasion}[name]()
+    if name == "heldout-otrf-v2":
+        from . import heldout
+
+        return heldout.run()
     if name == "stream-replay-v3":
         from . import streaming_eval
 
@@ -144,6 +148,10 @@ def main() -> None:
             from . import external
 
             inputs = external.verify_manifest()
+        elif name == "heldout-otrf-v2":
+            from . import heldout
+
+            inputs = heldout.verify_manifest()
         else:
             inputs = data.inputs_manifest()
         started = time.perf_counter()

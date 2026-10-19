@@ -83,3 +83,38 @@ Change, applied identically to every OTRF file and every detector:
 Both are written into a copy of each record (`__cpes_utc_time`,
 `__cpes_event_id`); the archives are untouched. Nothing else changed: models,
 categories, detectors and the primary measure are as registered above.
+
+## Outcome (recorded 2026-10-19, after the run; ../RESULTS.md §10)
+
+**Primary measure: v2 is not an improvement.** v1 and v2 both detect 6/13
+privilege-escalation files and alert on 1/7 control files (0.25 alert windows
+per 10k control events). The pre-registered rule gives "no improvement". The
+generic test fired on **no** file: in these captures the parent and the
+elevated child are rarely both present as process-creation records, which the
+integrity-transition test needs. v2 adds nothing here and is not adopted.
+
+Per category, against the expectations:
+* UAC, listed binary (fodhelper): detected by v1/v2 — **held**.
+* UAC, other method (cmstp): missed by every CPES variant, the generic test and
+  the single-event rule; Sigma core detects it — **held** for v1, **v2's hoped-for
+  gain did not appear**.
+* Code injection: **4/4 detected** by real CreateRemoteThread evidence, anchored
+  on the injector (powershell.exe ×2, mavinject.exe, purplesharp.exe). Expectation
+  "mavinject/PurpleSharp likely missed" was **wrong**: each file has one EID 8
+  that the evidence channel used. Sigma core high+: 2/4.
+* Service-based execution as SYSTEM: the one hit (smbexec file) is anchored on
+  `CollectGuestLogs.exe`, a benign Azure agent, not the attack. Judged true
+  detections: **0/7** — as expected (payloads run from `C:\Windows`).
+* Controls: 1/7 files alerted (scheduled-task capture), all anchors benign:
+  Defender `MsMpEng`/`MpCmdRun`, five Azure agents, and one `csrss.exe`
+  remote thread. The WMI capture was refused by the pipeline (conflicting
+  process-id assertions for one GUID) rather than guessed.
+
+**What the held-out data settles.** The service rule's false alarms are vendor
+services installed outside `\Windows\` and `\Program Files` (Defender under
+`ProgramData`, Azure agents under `WindowsAzure` / `Packages`). Most are direct
+children of `services.exe`, so adding the research rule's `parent =
+services.exe` condition would **not** remove them. The defect is the location
+test, not the parent test. A corrective design (location allow-list for signed
+vendor service paths, or a signature check) is a new hypothesis and must be
+tested on data it was not designed on.

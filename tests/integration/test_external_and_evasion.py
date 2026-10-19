@@ -20,6 +20,22 @@ class ExternalDatasetTests(unittest.TestCase):
             self.assertIn(external.category(path.name, has_sysmon), external.CATEGORY_ORDER)
 
 
+@unittest.skipUnless((data.ROOT / "external" / "otrf" / "zips").exists(), "OTRF archives not fetched")
+class HeldOutDatasetTests(unittest.TestCase):
+    def test_archives_match_manifest_and_every_file_is_categorised(self) -> None:
+        from evaluation import heldout
+
+        self.assertEqual(len(heldout.verify_manifest()), 21)
+
+    def test_record_preparation_marks_utc_and_derives_missing_ids(self) -> None:
+        from evaluation.heldout import prepare
+
+        prepared = prepare({"UtcTime": "2020-10-22 05:54:23.975"}, 4)
+        self.assertEqual(prepared["__cpes_utc_time"], "2020-10-22T05:54:23.975Z")
+        self.assertEqual(prepared["__cpes_event_id"], "pos-0000005")
+        self.assertEqual(prepare({"UtcTime": "x", "RecordNumber": 309574}, 0)["__cpes_event_id"], "309574")
+
+
 @unittest.skipUnless(data.CORPUS.exists() and data.LABELS.exists(), "private lab corpus not present")
 class EvasionGateTests(unittest.TestCase):
     def test_research_signal_replication_equals_the_labelled_table(self) -> None:
