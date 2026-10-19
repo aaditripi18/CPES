@@ -5,7 +5,6 @@ Claude outputs/
 paper-package/
 verify-bundle/
 CPES-verify-bundle/
-corpus/cpes-telemetry-corpus-v1/telemetry/
 results/
 .venv/
 .git/

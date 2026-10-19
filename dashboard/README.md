@@ -84,6 +84,5 @@ datasets exist and the private-data experiments show as not runnable.
 
 ## Design
 
-Visual system and page structure: `docs/dashboard/stitch_prompts.md`. The
-assessment that led to this design: `docs/dashboard/ASSESSMENT.md`. Concerns
-about the evaluation method: `docs/dashboard/EVALUATION-NOTES.md`.
+Concerns about the evaluation method and the decisions taken on them:
+`docs/dashboard/EVALUATION-NOTES.md`.

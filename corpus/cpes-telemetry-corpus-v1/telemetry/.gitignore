@@ -1,4 +1,0 @@
-# Raw telemetry is created only in the approved laboratory environment and is
-# represented in Git by the manifest and execution ledger, not committed here.
-*
-!.gitignore
