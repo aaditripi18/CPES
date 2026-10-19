@@ -66,3 +66,20 @@ v2 may tie.
 
 Secondary: alerts per 10,000 Sysmon events over the control files (noise rate),
 for v1, v2, the single-event rule and Sigma core high+.
+
+## Amendment 1 (2026-10-19, before any detector output existed)
+
+The first execution stopped with an error before producing any result: nine of
+the 21 archives use a newer OTRF export schema with **no RecordNumber**, two of
+them without `@timestamp`, and in that schema `TimeCreated` / `@timestamp` hold
+local time labelled as UTC (e.g. `TimeCreated 01:54Z` vs Sysmon `UtcTime 05:54`).
+Change, applied identically to every OTRF file and every detector:
+
+* event time = Sysmon `UtcTime` marked explicitly as UTC (`…Z`); Sysmon defines
+  this field as UTC;
+* event id = `RecordNumber` where present, otherwise the record's position in the
+  file (`pos-0000001`, a derived id, as in the dashboard's position-id option).
+
+Both are written into a copy of each record (`__cpes_utc_time`,
+`__cpes_event_id`); the archives are untouched. Nothing else changed: models,
+categories, detectors and the primary measure are as registered above.

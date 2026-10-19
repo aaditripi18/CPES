@@ -5,10 +5,10 @@
 # evidence builder (missing user), and the token signal cannot fire on this data.
 version: otrf-sysmon-evidence-pipes-v1
 fields:
-  - source_field: "@timestamp"
+  - source_field: __cpes_utc_time
     destination_field: source_timestamp
     optional: false
-  - source_field: RecordNumber
+  - source_field: __cpes_event_id
     destination_field: source_event_id
     optional: false
   - source_field: EventID

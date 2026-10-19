@@ -1,13 +1,15 @@
 # OTRF Security-Datasets (Mordor) records: NXLog-flattened Sysmon events with the
 # EventData fields at top level. Values copied directly; no transformation.
-# @timestamp is the collector receive time (UTC, ~1 s after the event); Sysmon's
-# own UtcTime has no offset and would be rejected by the translator.
+# __cpes_utc_time and __cpes_event_id are added to a COPY of each record by
+# evaluation/heldout.py: Sysmon's UtcTime marked as UTC (it is UTC by definition;
+# TimeCreated/@timestamp are local time in part of OTRF), and RecordNumber, or the
+# record's position in the file when the export has no record number.
 version: otrf-sysmon-field-mapping-v1
 fields:
-  - source_field: "@timestamp"
+  - source_field: __cpes_utc_time
     destination_field: source_timestamp
     optional: false
-  - source_field: RecordNumber
+  - source_field: __cpes_event_id
     destination_field: source_event_id
     optional: false
   - source_field: EventID
