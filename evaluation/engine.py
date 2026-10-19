@@ -47,12 +47,13 @@ EVIDENCE_MAPPING = ROOT / "configs" / "elastic-sysmon-evidence-mapping-v1.yaml"
 MODEL = ROOT / "dashboard" / "models" / "research-v3-full-table.json"
 
 
-def make_resolver() -> ContextResolver:
+def make_resolver(validly_signed_process_guids: frozenset[str] = frozenset()) -> ContextResolver:
     s = RESOLVER_SETTINGS
     return ContextResolver(
         s["integrity_order"], s["auto_elevating_images"], s["hijack_registry_tokens"],
         elevated_levels=s["elevated_levels"], system_path_tokens=s["system_path_tokens"],
         service_registry_tokens=s["service_registry_tokens"], interactive_shell_images=s["interactive_shell_images"],
+        validly_signed_process_guids=validly_signed_process_guids,
     )
 
 

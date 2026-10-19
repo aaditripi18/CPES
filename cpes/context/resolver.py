@@ -69,6 +69,7 @@ class ContextResolver:
         system_path_tokens: tuple[str, ...] = ("\\windows\\", "\\program files"),
         service_registry_tokens: tuple[str, ...] = ("\\services\\",),
         interactive_shell_images: tuple[str, ...] = ("cmd.exe", "powershell.exe", "pwsh.exe"),
+        validly_signed_process_guids: frozenset[str] = frozenset(),
     ) -> None:
         if not integrity_order or len(set(integrity_order)) != len(integrity_order):
             raise ValueError("integrity_order must be a nonempty tuple of unique levels.")
@@ -85,6 +86,9 @@ class ContextResolver:
         self._system_paths = tuple(token.lower() for token in system_path_tokens)
         self._service_reg = tuple(token.lower() for token in service_registry_tokens)
         self._shell_images = frozenset(image.lower() for image in interactive_shell_images)
+        # Processes whose own image the telemetry recorded as validly signed
+        # (cpes.context.signatures). Empty: the service test is location-only.
+        self._signed = frozenset(validly_signed_process_guids)
 
     def _hijack_writes(self, events):
         return tuple(
@@ -155,11 +159,14 @@ class ContextResolver:
             # Service creation: a SYSTEM-integrity binary run from a location outside
             # the system directories (a dropped binary), corroborated by a service
             # registry write when present. Structural — no image-name allow/deny list.
+            # A process whose own image was recorded validly signed is skipped
+            # when the caller supplies that set (S1; empty by default).
             if (
                 integrity == "system"
                 and event.image_path
                 and image != "svchost.exe"
                 and not self._is_system_path(event.image_path)
+                and event.process_guid not in self._signed
             ):
                 evidence = [event.event_id]
                 path = [f"SYSTEM binary '{image}' run from outside system directories"]
