@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from . import data, engine, protocols
 
 RESULTS = data.ROOT / "results"
-PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2")
+PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2", "incidents-lab-v3")
 
 
 def _code_fingerprint() -> str:
@@ -130,6 +130,10 @@ def run_protocol(name: str) -> dict:
         from . import heldout
 
         return heldout.run()
+    if name == "incidents-lab-v3":
+        from . import incidents_eval
+
+        return incidents_eval.run()
     if name == "stream-replay-v3":
         from . import streaming_eval
 

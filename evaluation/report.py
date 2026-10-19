@@ -210,6 +210,25 @@ def _heldout_section() -> list[str]:
     return out
 
 
+def _incidents_section() -> list[str]:
+    record = _load("incidents-lab-v3")
+    out = ["", "## 11. Incidents — joining Sigma actor alerts and CPES outcome alerts", "",
+           "`cpes.correlation.correlate`: same process; parent/grandparent within 300 s; or a CPES alert's resolver actor is the other alert's process. Pre-registered in [design/incident-correlation.md](design/incident-correlation.md). Lab corpus, Sigma core high+ and the CPES package engine.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    out += [f"execution `{record['id']}`", "", "| Configuration | Alerts | Incidents | Runs whose incident names the elevated process | Incidents outside any run | Incidents with both sources |", "|---|---|---|---|---|---|"]
+    for key, label in (("sigma_alone", "Sigma alone"), ("cpes_alone", "CPES alone"), ("fused", "Fused")):
+        c = r["configurations"][key]
+        out.append(f"| {label} | {c['alerts']} | {c['incidents']} | {c['runs_whose_incident_names_the_elevated_process']} | {c['noise_incidents_outside_runs']} | {c['incidents_with_both_sources']} |")
+    items = r["items_to_open"]
+    out += ["", f"Items an analyst opens: {items['sigma_and_cpes_separately']} with both tools separately, {items['fused']} fused ({items['reduction'] * 100:.1f}% fewer). Attribution comes from CPES's alerts themselves; the join connects actor and outcome in only {r['configurations']['fused']['incidents_with_both_sources']} incidents (the resolver records no actor for service escalations). {r['note']}"]
+    if r.get("fused_examples"):
+        e = r["fused_examples"][-1]
+        out += ["", f"Example fused incident `{e['id']}`: " + "; ".join(e["alerts"])]
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -251,7 +270,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 
