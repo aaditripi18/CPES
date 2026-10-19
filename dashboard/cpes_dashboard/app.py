@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import Body, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 
-from . import __version__
+from . import __version__, analyst
 from .evidence import available_models
 from .experiments import METHOD_NOTES, ExperimentStore
 from .live import LiveStore, elastic_settings
@@ -480,6 +480,43 @@ def run_rejections(run_id: str) -> list[dict[str, Any]]:
     return runs.artifact(run_id, "rejections.json") or []
 
 
+def _run_incidents(run_id: str) -> dict[str, Any]:
+    """Recorded incidents; runs made before the incidents stage get CPES-only incidents built from their artifacts."""
+
+    status = runs.status(run_id)
+    if status.get("state") != "completed":
+        raise FileNotFoundError("run has not completed")
+    recorded = runs.artifact(run_id, "incidents.json")
+    if recorded is not None:
+        return recorded
+    processes = runs.artifact(run_id, "processes.json") or {}
+    cpes = analyst.cpes_alerts(runs.artifact(run_id, "export.json"), runs.artifact(run_id, "audit.json") or {}, processes)
+    return {"rule": "cpes.correlation.correlate (built on request: this run predates the incidents stage)", "gap_seconds": 300.0,
+            "sigma": {"enabled": False, "reason": "run predates the incidents stage"}, "cpes_alerts": len(cpes), "sigma_alerts": 0,
+            "incidents": analyst.build_incidents(cpes, [], processes)}
+
+
+@app.get("/api/runs/{run_id}/incidents")
+def run_incidents(run_id: str) -> dict[str, Any]:
+    return _run_incidents(run_id)
+
+
+@app.get("/api/runs/{run_id}/incidents/{incident_id}/report.md")
+def incident_report(run_id: str, incident_id: str) -> Response:
+    status = runs.status(run_id)
+    status["config"] = runs.artifact(run_id, "config.json")
+    incident = next((i for i in _run_incidents(run_id)["incidents"] if i["id"] == incident_id), None)
+    if incident is None:
+        raise KeyError(incident_id)
+    return Response(analyst.report_markdown(status, incident), media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{run_id}-{incident_id}.md"'})
+
+
+@app.get("/api/sigma")
+def sigma_status() -> dict[str, Any]:
+    return analyst.sigma_available()
+
+
 ARTIFACT_FILES = {
     "export.json": ("export.json", "application/json"),
     "config.json": ("config.json", "application/json"),
@@ -494,6 +531,14 @@ def run_download(run_id: str, name: str) -> Response:
     runs.status(run_id)
     if name == "detections.csv":
         return PlainTextResponse(runs.detections_csv(run_id), media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="{run_id}-detections.csv"'})
+    if name == "incidents.json":
+        return JSONResponse(_run_incidents(run_id), headers={"Content-Disposition": f'attachment; filename="{run_id}-incidents.json"'})
+    if name == "attack-layer.json":
+        layer = analyst.attack_layer(runs.status(run_id), _run_incidents(run_id)["incidents"])
+        return JSONResponse(layer, headers={"Content-Disposition": f'attachment; filename="{run_id}-attack-layer.json"'})
+    if name == "alerts.ecs.ndjson":
+        body = analyst.ecs_alerts(runs.status(run_id), [a for i in _run_incidents(run_id)["incidents"] for a in i["alerts"] if a["source"] == "cpes"])
+        return Response(body, media_type="application/x-ndjson", headers={"Content-Disposition": f'attachment; filename="{run_id}-alerts.ecs.ndjson"'})
     if name not in ARTIFACT_FILES:
         raise KeyError(name)
     path = runs.root / run_id / ARTIFACT_FILES[name][0]

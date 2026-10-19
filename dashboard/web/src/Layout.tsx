@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Database, FileSearch, GitBranch, Info, LayoutDashboard, ListTree, Play, Radio, Sigma } from "lucide-react";
+import { Activity, BarChart3, Siren, Database, FileSearch, GitBranch, Info, LayoutDashboard, ListTree, Play, Radio, Sigma } from "lucide-react";
 import { ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useApi } from "./lib/hooks";
@@ -19,6 +19,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: "/live", label: "Live", icon: <Radio size={16} /> },
     { to: "/runs", label: "Runs", icon: <Play size={16} /> },
     { to: runId ? `/runs/${runId}/detections` : "/detections", label: "Detections", icon: <Activity size={16} /> },
+    { to: runId ? `/runs/${runId}/incidents` : "/incidents", label: "Incidents", icon: <Siren size={16} /> },
     { to: runId ? `/runs/${runId}/lineage` : "/lineage", label: "Lineage", icon: <GitBranch size={16} /> },
     { to: "/evaluation", label: "Evaluation", icon: <BarChart3 size={16} /> },
     { to: "/system", label: "System & limits", icon: <Info size={16} /> },
@@ -44,7 +45,7 @@ export function Layout({ children }: { children: ReactNode }) {
               to={item.to}
               end={item.to === "/"}
               className={({ isActive }) => {
-                const active = isActive || (item.label === "Detections" && location.pathname.includes("/detections")) || (item.label === "Lineage" && location.pathname.includes("/lineage")) || (item.label === "Explorer" && location.pathname.startsWith("/explore"));
+                const active = isActive || (item.label === "Detections" && location.pathname.includes("/detections")) || (item.label === "Lineage" && location.pathname.includes("/lineage")) || (item.label === "Incidents" && location.pathname.includes("/incidents")) || (item.label === "Explorer" && location.pathname.startsWith("/explore"));
                 return `flex items-center gap-2.5 rounded px-2.5 py-1.5 text-[13px] ${active ? "bg-accent-dim text-ink" : "text-muted hover:text-ink hover:bg-hover"}`;
               }}
             >

@@ -150,6 +150,51 @@ export interface RunSummary {
   threshold: string;
   evidence_model: string;
   evaluated: boolean;
+  cpes_alerts?: number;
+  sigma_alerts?: number;
+  incidents?: number;
+  sigma_enabled?: boolean;
+}
+
+export interface IncidentAlert {
+  id: string;
+  source: "cpes" | "sigma";
+  time: string;
+  process_guid: string | null;
+  image: string | null;
+  title: string;
+  level: string;
+  tags: string[];
+  signal_id?: string;
+  weight?: string;
+  window_index?: number;
+  score?: string;
+  actor_process_guid?: string | null;
+  explanation?: string[];
+  rule_id?: string;
+  record_index?: number;
+}
+
+export interface Incident {
+  id: string;
+  start: string;
+  end: string;
+  level: string;
+  sources: string[];
+  techniques: string[];
+  outcome: { process_guid: string; image: string | null; integrity_level: string | null }[];
+  processes: string[];
+  alerts: IncidentAlert[];
+  headline: string;
+}
+
+export interface IncidentsFile {
+  rule: string;
+  gap_seconds: number;
+  sigma: { enabled: boolean; reason?: string; pack?: string; rules?: number; levels?: string; alerts?: number };
+  cpes_alerts: number;
+  sigma_alerts: number;
+  incidents: Incident[];
 }
 
 export interface RunStatus {

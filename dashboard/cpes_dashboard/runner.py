@@ -33,6 +33,7 @@ from cpes.windowing.models import SlidingWindowParameters
 from . import __version__
 from .evidence import LABEL_TABLE, load_model, read_label_table, to_evidence_model
 from .ingest import KNOWN_INTEGRITY_LEVELS, POSITION_KEY, map_records, mapped_document, mapping_table, resolve_mapping
+from . import analyst
 from .paths import REPO_ROOT, data_root
 from .storage import DatasetStore, new_id, now, read_json, write_json
 
@@ -68,7 +69,7 @@ def signal_wiring(evidence_enabled: bool, evidence: dict[str, Any] | None = None
 
 
 SIGNAL_WIRING = signal_wiring(True)
-STAGES = ("queued", "loading", "mapping", "pipeline", "export", "baseline", "evaluation", "indexing", "completed")
+STAGES = ("queued", "loading", "mapping", "pipeline", "export", "baseline", "evaluation", "indexing", "incidents", "completed")
 
 _run_lock = threading.Lock()
 
@@ -154,7 +155,7 @@ class RunStore:
         }
         directory = self.root / run_id
         write_json(directory / "status.json", status)
-        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration, "evidence_channels": bool(request.get("evidence_channels", True))}
+        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration, "evidence_channels": bool(request.get("evidence_channels", True)), "sigma": bool(request.get("sigma", False))}
         if background:
             threading.Thread(target=self._execute, args=(run_id, params), daemon=True).start()
         else:
@@ -241,6 +242,7 @@ class RunStore:
             "evidence_model": params["model"],
             "signals": signal_wiring(bool(evidence_report.get("enabled")), evidence_report),
             "evidence_channels": evidence_report,
+            "sigma": {"requested": params["sigma"], "result": "recorded in incidents.json (rules, levels, alerts)"},
             "resolver": {key: list(value) for key, value in RESOLVER_SETTINGS.items()},
             "versions": {"cpes": cpes_version(), "dashboard": __version__, "python": platform.python_version(), **git_state()},
             "engine": "cpes.orchestration.CpesPipeline (unchanged package code)",
@@ -275,6 +277,9 @@ class RunStore:
 
         stage("indexing")
         self._index(directory, context, events, mapped.record_indices, resolver, baseline_decisions, params, labels)
+
+        stage("incidents")
+        incident_summary = self._incidents(directory, parsed, mapped.record_indices, params, export)
         summary = export["summary"]
         detected = [record for record in export["detections"] if record["is_detected"]]
         self._update(
@@ -292,9 +297,28 @@ class RunStore:
                 "threshold": str(params["threshold"]),
                 "evidence_model": params["model"]["id"],
                 "evaluated": evaluation.get("available", False),
+                **incident_summary,
             },
             dataset_sha256=meta.get("sha256"),
         )
+
+    # ------------------------------------------------------------------ incidents
+    @staticmethod
+    def _incidents(directory, parsed, record_indices, params, export) -> dict[str, Any]:
+        """CPES alerts (+ SigmaHQ core high/critical when requested) joined into incidents."""
+
+        processes = read_json(directory / "processes.json")
+        cpes = analyst.cpes_alerts(export, read_json(directory / "audit.json") or {}, processes)
+        if params["sigma"]:
+            sigma, sigma_report = analyst.run_sigma(parsed, record_indices, params["mapping_spec"].get("preset"))
+        else:
+            sigma, sigma_report = [], {"enabled": False, "reason": "not requested for this run"}
+        incidents = analyst.build_incidents(cpes, sigma, processes)
+        write_json(directory / "incidents.json", {
+            "rule": "cpes.correlation.correlate: same process; parent/child/grandparent within 300 s; CPES resolver actor link (docs/design/incident-correlation.md)",
+            "gap_seconds": 300.0, "sigma": sigma_report, "cpes_alerts": len(cpes), "sigma_alerts": len(sigma), "incidents": incidents,
+        })
+        return {"cpes_alerts": len(cpes), "sigma_alerts": len(sigma), "incidents": len(incidents), "sigma_enabled": bool(sigma_report.get("enabled"))}
 
     # ------------------------------------------------------------------ evidence
     @staticmethod

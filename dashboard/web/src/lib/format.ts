@@ -44,7 +44,8 @@ export function shortGuid(guid: string | null | undefined): string {
   if (!guid) return "—";
   const clean = guid.replace(/[{}]/g, "");
   const parts = clean.split("-");
-  return parts.length >= 5 ? `${parts[1]}-${parts[2]}-${parts[3]}` : clean.slice(0, 18);
+  // middle segments are a start timestamp in Sysmon GUIDs; the last segment's tail separates processes started in the same second
+  return parts.length >= 5 ? `${parts[1]}-${parts[2]}…${parts[4].slice(-6)}` : clean.slice(0, 18);
 }
 
 export function score(value: string | number | null | undefined, digits = 2): string {

@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Download, GitBranch, Loader2 } from "lucide-react";
+import { Activity, BarChart3, Download, GitBranch, Loader2, Siren } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CategoryBadge, Empty, ErrorBox, Hash, KV, Loading, Notice, PageHeader, Panel, Pill, Stat, StatusPill } from "../components/ui";
@@ -102,6 +102,9 @@ export function RunDetail() {
               <Link className="btn btn-primary" to={`/runs/${id}/detections`}>
                 <Activity size={14} /> Detections
               </Link>
+              <Link className="btn" to={`/runs/${id}/incidents`}>
+                <Siren size={14} /> Incidents{summary?.incidents !== undefined ? ` (${summary.incidents})` : ""}
+              </Link>
               <Link className="btn" to={`/runs/${id}/lineage`}>
                 <GitBranch size={14} /> Lineage
               </Link>
@@ -197,6 +200,9 @@ export function RunDetail() {
                   ["evaluation.json", "metrics (only if labels exist)"],
                   ["baseline.json", "single-event baseline per window"],
                   ["rejections.json", "records excluded, with reasons"],
+                  ["incidents.json", "CPES (+ Sigma) alerts joined into incidents"],
+                  ["attack-layer.json", "MITRE ATT&CK Navigator layer"],
+                  ["alerts.ecs.ndjson", "CPES alerts as ECS documents for a SIEM"],
                 ].map(([name, description]) => (
                   <a key={name} className="flex items-start gap-2 rounded border border-line px-3 py-2 hover:bg-hover" href={`/api/runs/${id}/download/${name}`}>
                     <Download size={14} className="mt-0.5 text-accent" />

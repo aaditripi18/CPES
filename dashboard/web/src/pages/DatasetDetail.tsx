@@ -477,6 +477,10 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
   const [threshold, setThreshold] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [evidenceChannels, setEvidenceChannels] = useState(true);
+  const sigmaInfo = useApi<{ available: boolean; pack: string | null; how: string | null }>("/api/sigma");
+  const [sigma, setSigma] = useState(true);
+  const sigmaPresets = ["elastic-sysmon-field-mapping-v1", "evtx-sysmon-field-mapping-v1"];
+  const sigmaPossible = Boolean(sigmaInfo.data?.available) && sigmaPresets.includes(spec.preset ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const invalid = report.status === "invalid";
@@ -484,7 +488,7 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
     setBusy(true);
     setError(null);
     try {
-      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note, evidence_channels: evidenceChannels });
+      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note, evidence_channels: evidenceChannels, sigma: sigma && sigmaPossible });
       setRunId(run.id);
       navigate(`/runs/${run.id}`);
     } catch (reason) {
@@ -526,6 +530,13 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
         <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" checked={evidenceChannels} onChange={(event) => setEvidenceChannels(event.target.checked)} />
         <span>
           Attach cross-channel evidence (named pipes EID 17/18, remote threads EID 8) so the token-impersonation and injection signals can fire. Untick to reproduce the package as it was before evidence channels.
+        </span>
+      </label>
+      <label className={`flex items-start gap-2 text-[13px] mt-2 ${sigmaPossible ? "" : "opacity-60"}`}>
+        <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" disabled={!sigmaPossible} checked={sigma && sigmaPossible} onChange={(event) => setSigma(event.target.checked)} />
+        <span>
+          Also run SigmaHQ core rules (high and critical) and join their alerts with CPES alerts into incidents.
+          {!sigmaInfo.data?.available && sigmaInfo.data?.how ? ` Unavailable: ${sigmaInfo.data.how}` : !sigmaPossible && sigmaInfo.data ? " Available for the Winlogbeat/ECS and raw EVTX presets only." : ""}
         </span>
       </label>
       {model && (
