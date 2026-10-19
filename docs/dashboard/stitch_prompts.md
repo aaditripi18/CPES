@@ -33,8 +33,8 @@ Severity: detected = coral #ff7b6b, below threshold = slate, baseline-only =
 amber #f2b84b, clean = sage #7fd1a8. Evidence styling: observed telemetry is a
 solid chip; derived context is an outlined chip; resolver-inferred association is
 a dashed outline chip. Radius 4–6 px. 14 px base text. Left sidebar navigation
-(Overview, Datasets, Explorer, Runs, Detections, Lineage, Scoring, Evaluation,
-Experiments, System), a slim top bar showing the active dataset and active run as
+(Overview, Datasets, Explorer, Live, Runs, Detections, Lineage, Evaluation,
+System), a slim top bar showing the active dataset and active run as
 mono chips, and a persistent "SYNTHETIC" or "PRIVATE LAB DATA" badge whenever such
 data is on screen.
 
@@ -57,7 +57,8 @@ A first-time visitor strip at the very top, dismissible: "New here? Take the
 
 ## Prompt 2 — Datasets (upload + inventory)
 
-A drag-and-drop upload zone (dashed border, accepts .csv .json .jsonl .ndjson,
+A drag-and-drop upload zone (dashed border, accepts .evtx .csv .json .jsonl .ndjson —
+.evtx first, with the hint "a Sysmon log saved from Event Viewer works as-is" —
 256 MB limit shown), with optional fields "Name", "Where does this data come
 from?", and a checkbox "This file is synthetic". After upload, a validation report
 card: status pill (Valid / Valid with rejections / Invalid), counts (read, accepted,
@@ -67,7 +68,7 @@ column editable as a mono text input, required fields marked), warnings list
 range" line and a lineage preview line ("2,219 process nodes · 96 chains · 38
 truncated"). A primary button "Run CPES on this dataset" with window span,
 advance and threshold inputs. Below, the inventory: a table of datasets with name,
-category badge (Research telemetry / Synthetic / User upload), format, records,
+category badge (Research telemetry / Public dataset / Synthetic / User upload; public dataset in sage), format, records,
 SHA-256 (truncated mono, copy button), ground truth (yes/no + unit), validation
 status, run count. A second table "Other artifacts" for label tables, execution
 ledgers and zip archives.
@@ -114,6 +115,35 @@ precision / recall / F1 for three detectors with ± std whiskers. Band 2 "This
 detection run (dashboard protocol)": a protocol banner stating "in-sample, chain
 level — not the paper's protocol", two confusion matrices side by side (CPES vs
 single-event baseline), and a per-technique table.
+
+## Prompt 7a — Evaluation additions (paste with prompt 6)
+
+Add to the experiments band four more cards with the same layout: "External
+generalisation" (badge Validity check), "Evasion robustness" (badge Robustness),
+"Live scoring" (badge Validity check) and three "CPES vs SigmaHQ" cards (badge
+Adverse result, coral-outlined — results that do not favour CPES are styled as
+prominently as those that do). The evasion card shows a small before/after grid:
+rows V1 renamed injector, V2 renamed service binary, V3 unlisted auto-elevating
+binary, V4 random pipe names, V5 obfuscated command lines; columns CPES, generic
+test, IOC rule, single-event rule; each cell "18→0" style with the drop in coral
+and unchanged values muted.
+
+## Prompt 8 — Live
+
+A two-column screen. Left, a narrow control panel: radio "Replay recorded
+telemetry" (with the line "the alerts are real CPES output, the arrival is
+simulated") and radio "Elasticsearch (live lab)" (disabled, with "Not
+configured — see lab/README.md"); dataset select; speed select (30×, 60×, 120×,
+600×, as fast as possible); a full-width violet Start button that becomes Stop.
+Under it a Session card: status pill, an amber "REPLAY 600×" badge (or coral
+"LIVE" with a radio icon in Elasticsearch mode), a thin progress bar of event
+time, three counters (events, windows, alerts — alerts in coral), and per-signal
+counts. Right, a tall "Alert feed" with newest first: each alert a compact row
+with a coral mono score "+6.77", a coral signal pill, the anchored process
+names in mono with short GUIDs, one or two mono lines of the resolver's
+explanation, and a muted footer "chain 676B-6A96 · 599 events known when scored
+· raised 15:43:57Z". New alerts fade in with a brief coral tint. No fake
+"threat level" gauges, maps or globe animations.
 
 ## Prompt 7 — System & limitations
 
