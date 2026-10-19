@@ -1,0 +1,39 @@
+# OTRF Security-Datasets (Mordor) records: NXLog-flattened Sysmon events with the
+# EventData fields at top level. Values copied directly; no transformation.
+# @timestamp is the collector receive time (UTC, ~1 s after the event); Sysmon's
+# own UtcTime has no offset and would be rejected by the translator.
+version: otrf-sysmon-field-mapping-v1
+fields:
+  - source_field: "@timestamp"
+    destination_field: source_timestamp
+    optional: false
+  - source_field: RecordNumber
+    destination_field: source_event_id
+    optional: false
+  - source_field: EventID
+    destination_field: event_code
+    optional: true
+  - source_field: ProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: ParentProcessGuid
+    destination_field: parent_process_guid
+    optional: true
+  - source_field: ProcessId
+    destination_field: process_id
+    optional: true
+  - source_field: IntegrityLevel
+    destination_field: integrity_level
+    optional: true
+  - source_field: CommandLine
+    destination_field: command_line
+    optional: true
+  - source_field: TargetObject
+    destination_field: registry_object
+    optional: true
+  - source_field: Image
+    destination_field: image_path
+    optional: true
+  - source_field: ImageLoaded
+    destination_field: module_path
+    optional: true
