@@ -1,0 +1,1082 @@
+{
+  "id": "heldout-otrf-v2-20261019T071620Z",
+  "protocol": "heldout-otrf-v2",
+  "recorded_at": "2026-10-19T07:16:20+00:00",
+  "duration_seconds": 42.76,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
+  "git": {
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
+    "dirty": false
+  },
+  "python": "3.12.10",
+  "inputs": [
+    {
+      "path": "external/otrf/zips/empire_uac_shellapi_fodhelper.zip",
+      "sha256": "b8cc7aae826f5e4aea3ea47b2b6db69b062c39201de8de9621d5081622d3c504"
+    },
+    {
+      "path": "external/otrf/zips/empire_invoke_runas.tar.gz",
+      "sha256": "17a3434c2b187c76c4bcc829930cf787c12507cc992a7c72bb8ef46cb4a11b7d"
+    },
+    {
+      "path": "external/otrf/zips/cmd_service_mod_fax.zip",
+      "sha256": "4a40cb09c514f1a4c601588cbfa5c81e12a6f8a5ab92fd76bad846c1a4352447"
+    },
+    {
+      "path": "external/otrf/zips/psh_cmstp_execution_bypassuac.zip",
+      "sha256": "a653c698e8f779261ba0b3ac92bd604d4abe3a510cda8ab1f5ccdd421d013d4c"
+    },
+    {
+      "path": "external/otrf/zips/empire_dllinjection_LoadLibrary_CreateRemoteThread.zip",
+      "sha256": "98071a478f57f2ca71530c4cb839f2054da0e6bd8b106caaa5d9518d1be0ccc8"
+    },
+    {
+      "path": "external/otrf/zips/empire_psinject_PEinjection.zip",
+      "sha256": "ad6297ce8cfb908126e2ec1271d62f6cd8dcdac6006d7b6e5ecd377488b04df0"
+    },
+    {
+      "path": "external/otrf/zips/psh_mavinject_dll_notepad.zip",
+      "sha256": "262680222316edb2dc0d7dca380dfe75191fb96779b8dacc8aac8a1d8bdc046b"
+    },
+    {
+      "path": "external/otrf/zips/purplesharp_pe_injection_createremotethread.zip",
+      "sha256": "d1cfff7404448fd9ac7558967837a9903bb474957949218c293c09fd56a5ca7a"
+    },
+    {
+      "path": "external/otrf/zips/cmd_disable_eventlog_service_startuptype_modification_via_registry.zip",
+      "sha256": "4312946d5bb0883e691da3b1130d4179b951a413278b450a75c05d56a2858a1a"
+    },
+    {
+      "path": "external/otrf/zips/psh_disable_eventlog_service_startuptype_modification.zip",
+      "sha256": "aaf99c001735e37dcf64206d369114087f0bd239f9d5c477a44f6d0d4cbce85a"
+    },
+    {
+      "path": "external/otrf/zips/reg_disable_eventlog_service_startuptype_modification_via_registry.zip",
+      "sha256": "d79d5a13fbb1e7957d748955a1be5c68294e58d322b76e41393d6987fe769656"
+    },
+    {
+      "path": "external/otrf/zips/empire_persistence_registry_modification_run_keys_elevated_user.zip",
+      "sha256": "2809354d679025859d723be3ceb1e2c9f9e5dde2ebec5bbea7c398e165a9b67d"
+    },
+    {
+      "path": "external/otrf/zips/empire_schtasks_creation_execution_elevated_user.zip",
+      "sha256": "74662dc5c52f4ac2fc9dcb336bae7fb4e101217169c65adf5784b03015501d3b"
+    },
+    {
+      "path": "external/otrf/zips/empire_wmi_local_event_subscriptions_elevated_user.zip",
+      "sha256": "a507f2edd768b592e6b3157e974fd0468965eee00407387d88356ecb8fd20fea"
+    },
+    {
+      "path": "external/otrf/zips/cmd_psexec_lsa_secrets_dump.zip",
+      "sha256": "c52e6145fefe37373a5274e2976ccf6d62e4d33e13c55dc1a2ce17f00506d1a6"
+    },
+    {
+      "path": "external/otrf/zips/psh_lsass_memory_dump_comsvcs.zip",
+      "sha256": "0af9e920220d746432f0972be83ad057629695540aecd68c15869d190786e1ae"
+    },
+    {
+      "path": "external/otrf/zips/empire_psexec_dcerpc_tcp_svcctl.zip",
+      "sha256": "8f40e7fc86bbbf31ebd50b3ba537cf0f4378392ae3e74de84bee00aeb0de1fa5"
+    },
+    {
+      "path": "external/otrf/zips/empire_smbexec_dcerpc_smb_svcctl.zip",
+      "sha256": "c0fc435c9ce0ecdc7cd57b4055977b949ac6b1cae9d7f4ce7aa0f0e5eae7d7f1"
+    },
+    {
+      "path": "external/otrf/zips/covenant_sharpsc_create_dcerpc_smb_svcctl.zip",
+      "sha256": "77487bbd1fc7954adbc9ba07bfeeeb9d57192b0f0e0f54e1ee5a05c71a5be84a"
+    },
+    {
+      "path": "external/otrf/zips/covenant_sharpsc_start_dcerpc_smb_svcctl.zip",
+      "sha256": "a6cebf14f42f8f4e4f3ea457d88437ce16f0fce5b184ae70f097fcf48f68692c"
+    },
+    {
+      "path": "external/otrf/zips/empire_shell_dcerpc_smb_service_dll_hijack.zip",
+      "sha256": "59265c906bf2fdac09b876cfa137f6e81e645d85d550c5b4efdebb8f3f491428"
+    }
+  ],
+  "design": "docs/design/evidence-channels-and-package-evaluation.md",
+  "result": {
+    "dataset": "OTRF Security-Datasets @ d9d40ef (21 archives)",
+    "summary_by_category": {
+      "uac_listed_binary": {
+        "files": 1,
+        "applicable": 1,
+        "research-v3-full-table": 1,
+        "cpes-v2": 1,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 1
+      },
+      "uac_other_method": {
+        "files": 1,
+        "applicable": 1,
+        "research-v3-full-table": 0,
+        "cpes-v2": 0,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 1
+      },
+      "code_injection": {
+        "files": 4,
+        "applicable": 4,
+        "research-v3-full-table": 4,
+        "cpes-v2": 4,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 2
+      },
+      "service_as_system": {
+        "files": 7,
+        "applicable": 7,
+        "research-v3-full-table": 1,
+        "cpes-v2": 1,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 5
+      },
+      "token_runas": {
+        "files": 1,
+        "applicable": 0,
+        "research-v3-full-table": 0,
+        "cpes-v2": 0,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 0
+      },
+      "control_not_privesc": {
+        "files": 7,
+        "applicable": 7,
+        "research-v3-full-table": 1,
+        "cpes-v2": 1,
+        "generic_alone": 0,
+        "single_event": 0,
+        "sigma_core_high": 3
+      }
+    },
+    "primary": {
+      "research-v3-full-table": {
+        "privesc_files_detected": "6/13",
+        "control_files_alerted": "1/7",
+        "control_alert_windows_per_10k_events": 0.25
+      },
+      "cpes-v2": {
+        "privesc_files_detected": "6/13",
+        "control_files_alerted": "1/7",
+        "control_alert_windows_per_10k_events": 0.25
+      },
+      "generic_alone": {
+        "privesc_files_detected": "0/13",
+        "control_files_alerted": "0/7"
+      },
+      "single_event": {
+        "privesc_files_detected": "0/13",
+        "control_files_alerted": "0/7"
+      },
+      "sigma_core_high": {
+        "privesc_files_detected": "9/13",
+        "control_files_alerted": "3/7"
+      }
+    },
+    "v2_verdict": {
+      "gain_privesc_files": 0,
+      "extra_control_files": 0,
+      "verdict": "no improvement",
+      "rule": "improvement iff v2 detects more privesc files and alerts on at most one more control file than v1 (pre-registered)"
+    },
+    "files": [
+      {
+        "file": "cmd_disable_eventlog_service_startuptype_modification_via_registry.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 7277,
+        "records_accepted": 7277,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 23
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "cmd_psexec_lsa_secrets_dump.zip",
+        "category": "service_as_system",
+        "sysmon_records": 241,
+        "records_accepted": 241,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 14
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Dumping of Sensitive Hives Via Reg.EXE",
+              "PsExec Service Child Process Execution as LOCAL SYSTEM"
+            ],
+            "rules": 2
+          }
+        }
+      },
+      {
+        "file": "cmd_service_mod_fax.zip",
+        "category": "service_as_system",
+        "sysmon_records": 341,
+        "records_accepted": 341,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {},
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Abused Debug Privilege by Arbitrary Parent Processes",
+              "PowerShell as a Service in Registry",
+              "Suspicious PowerShell Parent Process",
+              "Suspicious Service Path Modification"
+            ],
+            "rules": 4
+          }
+        }
+      },
+      {
+        "file": "covenant_sharpsc_create_dcerpc_smb_svcctl.zip",
+        "category": "service_as_system",
+        "sysmon_records": 2486,
+        "records_accepted": 2486,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 18
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "covenant_sharpsc_start_dcerpc_smb_svcctl.zip",
+        "category": "service_as_system",
+        "sysmon_records": 3308,
+        "records_accepted": 3308,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 25
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "empire_dllinjection_LoadLibrary_CreateRemoteThread.zip",
+        "category": "code_injection",
+        "sysmon_records": 5320,
+        "records_accepted": 5320,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 1,
+          "skipped": {
+            "pipe_missing_field": 55
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: powershell.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: powershell.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "empire_invoke_runas.tar.gz",
+        "category": "token_runas",
+        "sysmon_records": 0,
+        "outcome": "not_applicable_no_sysmon"
+      },
+      {
+        "file": "empire_persistence_registry_modification_run_keys_elevated_user.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 129,
+        "records_accepted": 129,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 4
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "empire_psexec_dcerpc_tcp_svcctl.zip",
+        "category": "service_as_system",
+        "sysmon_records": 2941,
+        "records_accepted": 2941,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 7
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Abused Debug Privilege by Arbitrary Parent Processes",
+              "HackTool - Empire PowerShell Launch Parameters",
+              "Net WebClient Casing Anomalies",
+              "Potential CobaltStrike Service Installations - Registry",
+              "PowerShell as a Service in Registry",
+              "Suspicious SYSTEM User Process Creation",
+              "Whoami.EXE Execution From Privileged Process"
+            ],
+            "rules": 7
+          }
+        }
+      },
+      {
+        "file": "empire_psinject_PEinjection.zip",
+        "category": "code_injection",
+        "sysmon_records": 1165,
+        "records_accepted": 1165,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 88,
+          "skipped": {
+            "pipe_missing_field": 7
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: powershell.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: powershell.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "empire_schtasks_creation_execution_elevated_user.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 35889,
+        "records_accepted": 35889,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 83,
+          "skipped": {
+            "pipe_missing_field": 185
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: csrss.exe",
+              "service_dropped_binary: mpcmdrun.exe",
+              "service_dropped_binary: msmpeng.exe",
+              "service_dropped_binary: networkwatcheragent.exe",
+              "service_dropped_binary: waappagent.exe",
+              "service_dropped_binary: windowsazureguestagent.exe",
+              "service_dropped_binary: windowsazurenetagent.exe"
+            ],
+            "alert_windows": 3
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: csrss.exe",
+              "service_dropped_binary: mpcmdrun.exe",
+              "service_dropped_binary: msmpeng.exe",
+              "service_dropped_binary: networkwatcheragent.exe",
+              "service_dropped_binary: waappagent.exe",
+              "service_dropped_binary: windowsazureguestagent.exe",
+              "service_dropped_binary: windowsazurenetagent.exe"
+            ],
+            "alert_windows": 3
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Base64 Encoded PowerShell Command Detected",
+              "Schtasks Creation Or Modification With SYSTEM Privileges",
+              "Suspicious Command Patterns In Scheduled Task Creation",
+              "Windows Shell/Scripting Processes Spawning Suspicious Programs"
+            ],
+            "rules": 4
+          }
+        }
+      },
+      {
+        "file": "empire_shell_dcerpc_smb_service_dll_hijack.zip",
+        "category": "service_as_system",
+        "sysmon_records": 2038,
+        "records_accepted": 2038,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 9
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Potential DLL Sideloading Of Non-Existent DLLs From System Folders",
+              "Windows Binaries Write Suspicious Extensions"
+            ],
+            "rules": 2
+          }
+        }
+      },
+      {
+        "file": "empire_smbexec_dcerpc_smb_svcctl.zip",
+        "category": "service_as_system",
+        "sysmon_records": 5921,
+        "records_accepted": 5921,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 7
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "service_dropped_binary: collectguestlogs.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "service_dropped_binary: collectguestlogs.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Abused Debug Privilege by Arbitrary Parent Processes",
+              "HackTool - Empire PowerShell Launch Parameters",
+              "Net WebClient Casing Anomalies",
+              "Potential CobaltStrike Service Installations - Registry",
+              "PowerShell as a Service in Registry",
+              "Suspicious SYSTEM User Process Creation",
+              "Whoami.EXE Execution From Privileged Process"
+            ],
+            "rules": 7
+          }
+        }
+      },
+      {
+        "file": "empire_uac_shellapi_fodhelper.zip",
+        "category": "uac_listed_binary",
+        "sysmon_records": 2918,
+        "records_accepted": 2918,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 19
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "autoelevation_lolbin: fodhelper.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "autoelevation_lolbin: fodhelper.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Bypass UAC Using DelegateExecute",
+              "Bypass UAC via Fodhelper.exe",
+              "HackTool - Empire PowerShell Launch Parameters",
+              "HackTool - Empire PowerShell UAC Bypass",
+              "Net WebClient Casing Anomalies",
+              "Shell Open Registry Keys Manipulation"
+            ],
+            "rules": 6
+          }
+        }
+      },
+      {
+        "file": "empire_wmi_local_event_subscriptions_elevated_user.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 64574,
+        "records_accepted": 64574,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 86,
+          "skipped": {
+            "pipe_missing_field": 123
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "refused": "conflicting process_id assertions for one ProcessGUID are not allowed."
+          },
+          "cpes-v2": {
+            "refused": "conflicting process_id assertions for one ProcessGUID are not allowed."
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "HackTool - SysmonEnte Execution",
+              "Net WebClient Casing Anomalies",
+              "Suspicious SYSTEM User Process Creation",
+              "WMI Persistence - Command Line Event Consumer",
+              "Whoami.EXE Execution From Privileged Process"
+            ],
+            "rules": 5
+          }
+        }
+      },
+      {
+        "file": "psh_cmstp_execution_bypassuac.zip",
+        "category": "uac_other_method",
+        "sysmon_records": 775,
+        "records_accepted": 775,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {},
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Bypass UAC via CMSTP",
+              "CMSTP Execution Process Access",
+              "CMSTP Execution Registry Event",
+              "CMSTP UAC Bypass via COM Object Access",
+              "UAC Bypass via ICMLuaUtil"
+            ],
+            "rules": 5
+          }
+        }
+      },
+      {
+        "file": "psh_disable_eventlog_service_startuptype_modification.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 6249,
+        "records_accepted": 6249,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 16
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      },
+      {
+        "file": "psh_lsass_memory_dump_comsvcs.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 148,
+        "records_accepted": 148,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {},
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "LSASS Dump Keyword In CommandLine",
+              "LSASS Process Memory Dump Files",
+              "Lsass Memory Dump via Comsvcs DLL",
+              "Process Memory Dump Via Comsvcs.DLL"
+            ],
+            "rules": 4
+          }
+        }
+      },
+      {
+        "file": "psh_mavinject_dll_notepad.zip",
+        "category": "code_injection",
+        "sysmon_records": 467,
+        "records_accepted": 467,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 1,
+          "skipped": {},
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: mavinject.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: mavinject.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "Mavinject Inject DLL Into Running Process",
+              "Renamed Mavinject.EXE Execution"
+            ],
+            "rules": 2
+          }
+        }
+      },
+      {
+        "file": "purplesharp_pe_injection_createremotethread.zip",
+        "category": "code_injection",
+        "sysmon_records": 562,
+        "records_accepted": 562,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 1,
+          "skipped": {},
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: purplesharp.exe"
+            ],
+            "alert_windows": 1
+          },
+          "cpes-v2": {
+            "detected": true,
+            "anchors": [
+              "remote_thread_injection: purplesharp.exe"
+            ],
+            "alert_windows": 1
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": true,
+            "anchors": [
+              "HackTool - Generic Process Access",
+              "HackTool - PurpleSharp Execution",
+              "Suspicious Process Parents"
+            ],
+            "rules": 3
+          }
+        }
+      },
+      {
+        "file": "reg_disable_eventlog_service_startuptype_modification_via_registry.zip",
+        "category": "control_not_privesc",
+        "sysmon_records": 3687,
+        "records_accepted": 3687,
+        "records_rejected": {},
+        "evidence": {
+          "pipe": 0,
+          "remote_thread": 0,
+          "skipped": {
+            "pipe_missing_field": 11
+          },
+          "unmappable": {}
+        },
+        "detectors": {
+          "research-v3-full-table": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "cpes-v2": {
+            "detected": false,
+            "anchors": [],
+            "alert_windows": 0
+          },
+          "single_event": {
+            "detected": false,
+            "anchors": []
+          },
+          "generic_alone": {
+            "detected": false,
+            "anchors": []
+          },
+          "sigma_core_high": {
+            "detected": false,
+            "anchors": [],
+            "rules": 0
+          }
+        }
+      }
+    ],
+    "summary": {
+      "v1": "6/13",
+      "v2": "6/13",
+      "verdict": "no improvement"
+    }
+  }
+}

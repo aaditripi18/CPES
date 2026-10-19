@@ -8,7 +8,7 @@ All figures: corpus-v3 (single Windows 11 lab endpoint). Inputs are pinned by SH
 
 Research signal flags from the labelled table; replication of `analysis/corpus_eval_grouped.py`. It reproduces that script's printed means and standard deviations exactly, which validates the fold code used below.
 
-Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `research-grouped-20261018T155827Z`, code `3521accdcc1c`
+Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `research-grouped-20261019T071159Z`, code `a9375fb8d6d1`
 
 | Detector | P (mean ± sd) | R (mean ± sd) | F1 (mean ± sd) | Pooled TP / FP / FN | Pooled F1 | Recall by technique |
 |---|---|---|---|---|---|---|
@@ -20,7 +20,7 @@ Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0
 
 Same as §1 but each benign lineage chain is one CV group, so related benign processes never straddle folds.
 
-Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `ea-chain-grouped-20261018T155833Z`, code `3521accdcc1c`
+Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `ea-chain-grouped-20261019T071203Z`, code `a9375fb8d6d1`
 
 | Detector | P (mean ± sd) | R (mean ± sd) | F1 (mean ± sd) | Pooled TP / FP / FN | Pooled F1 | Recall by technique |
 |---|---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Benign CV groups: 54.
 
 Signals observed by `cpes.CpesPipeline` with pipe and remote-thread evidence attached to windows; weights re-derived per fold with `cpes.derivation`.
 
-Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `package-grouped-20261018T155831Z`, code `3521accdcc1c`
+Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `package-grouped-20261019T071201Z`, code `a9375fb8d6d1`
 
 | Detector | P (mean ± sd) | R (mean ± sd) | F1 (mean ± sd) | Pooled TP / FP / FN | Pooled F1 | Recall by technique |
 |---|---|---|---|---|---|---|
@@ -50,7 +50,7 @@ Alerts the unit metrics cannot see (anchored only on processes without a Process
 
 As §3 without evidence: the package before this change.
 
-Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `package-grouped-noevidence-20261018T155833Z`, code `3521accdcc1c`
+Units 2,161 (87 attack, 2,074 benign) · 5 folds · folds skipped (no attack): 0 · execution `package-grouped-noevidence-20261019T071203Z`, code `a9375fb8d6d1`
 
 | Detector | P (mean ± sd) | R (mean ± sd) | F1 (mean ± sd) | Pooled TP / FP / FN | Pooled F1 | Recall by technique |
 |---|---|---|---|---|---|---|
@@ -66,7 +66,7 @@ Alerts the unit metrics cannot see (anchored only on processes without a Process
 
 Unit = logged Atomic run; a run is detected if a flagged process was created within ±150 s of it. *Consistent* = the flag's signal belongs to the run's technique (not defined for rules without mechanism semantics). No fitting.
 
-126 logged runs: T1055.001 22, T1134.001 23, T1134.002 1, T1543.003 32, T1548.002 48 · execution `ec-ledger-time-20261018T155834Z`
+126 logged runs: T1055.001 22, T1134.001 23, T1134.002 1, T1543.003 32, T1548.002 48 · execution `ec-ledger-time-20261019T071204Z`
 
 | Detector | Runs, any flag | Runs, technique-consistent | Flagged processes | False-alarm processes | Consistent by technique |
 |---|---|---|---|---|---|
@@ -80,7 +80,7 @@ Unit = logged Atomic run; a run is detected if a flagged process was created wit
 
 Shipped package engine with frozen weights from the lab corpus (held out). Unit = published sample file; every file is an attack, so precision is not estimated. Pre-registered in [design/external-and-evasion-evaluation.md](design/external-and-evasion-evaluation.md).
 
-sbousseaden/EVTX-ATTACK-SAMPLES Privilege Escalation @ 4ceed2f · execution `ext-evtx-privesc-20261018T155834Z`
+sbousseaden/EVTX-ATTACK-SAMPLES Privilege Escalation @ 4ceed2f · execution `ext-evtx-privesc-20261019T071204Z`
 
 | Category | Files | CPES detected | Generic test fired | Single-event rule fired | CPES or generic |
 |---|---|---|---|---|---|
@@ -124,7 +124,7 @@ Benign units flagged are unchanged across variants (benign records are never mod
 
 `cpes.streaming.StreamingScorer` scores each window once, when the event-time watermark passes its end, using only what has arrived. Package engine with evidence channels, frozen weights.
 
-Replay of 35,345 events · window 300 s / advance 150 s · watermark tick 30 s · execution `stream-replay-v3-20261018T155905Z`
+Replay of 35,345 events · window 300 s / advance 150 s · watermark tick 30 s · execution `stream-replay-v3-20261019T071232Z`
 
 | Measure | Value |
 |---|---|
@@ -134,7 +134,7 @@ Replay of 35,345 events · window 300 s / advance 150 s · watermark tick 30 s �
 | Live-only / batch-only | 0 / 0 |
 | Attack processes alerted live | 51 |
 | Time to alert, median / p95 / max (event time) | 83 s / 147 s / 151 s |
-| Scoring cost per tick, median / max (wall time) | 0.0 ms / 916 ms over 327 ticks |
+| Scoring cost per tick, median / max (wall time) | 0.0 ms / 828 ms over 327 ticks |
 
 Chain IDs differ between live and batch for 59 live window(s): a chain's root changes when an earlier ancestor's events arrive, so alerts are compared on what they point at, not on chain names. Event time from the attack process's creation to the watermark of its first live alert. With overlapping windows the earliest window containing an event closes at most `advance` seconds after it, plus up to one tick of watermark granularity, so the bound is advance + tick.
 
@@ -186,6 +186,58 @@ Caveat: some SigmaHQ rules were written with this public dataset in view (3 of t
 | V3 | 108/126 | 59/87 |
 
 V1: Sigma's injection rules match the PE `OriginalFileName`, which a renamed copy keeps, so renaming does not evade them (the CPES research injection signal and the image-name IOC drop to 0/18). V3: WSReset is itself a documented UAC-bypass binary with a dedicated Sigma rule, so Sigma's per-binary coverage catches the substitution; CPES's four-name list does not, and CPES's generic test does (§7).
+
+## 10. CPES v2 on held-out data — OTRF Security-Datasets
+
+Pre-registered (with one amendment made before any result) in [design/cpes-v2-heldout.md](design/cpes-v2-heldout.md). v2 = v1 + the generic test, weighted from the lab corpus only. Unit = capture file.
+
+OTRF Security-Datasets @ d9d40ef (21 archives) · execution `heldout-otrf-v2-20261019T071620Z`
+
+| Detector | Privilege-escalation files detected | Control files with an alert |
+|---|---|---|
+| CPES v1 | 6/13 | 1/7 |
+| CPES v2 | 6/13 | 1/7 |
+| Generic test | 0/13 | 0/7 |
+| Single-event rule | 0/13 | 0/7 |
+| Sigma core high+ | 9/13 | 3/7 |
+
+**Pre-registered verdict for v2: no improvement** (improvement iff v2 detects more privesc files and alerts on at most one more control file than v1 (pre-registered)).
+
+| Category | Files | CPES v1 | CPES v2 | Generic test | Single-event rule | Sigma core high+ |
+|---|---|---|---|---|---|---|
+| UAC, listed binary | 1 | 1 | 1 | 0 | 0 | 1 |
+| UAC, other method | 1 | 0 | 0 | 0 | 0 | 1 |
+| Code injection | 4 | 4 | 4 | 0 | 0 | 2 |
+| Service-based execution as SYSTEM | 7 | 1 | 1 | 0 | 0 | 5 |
+| RunAs (no Sysmon) — not applicable | 1 | 0 | 0 | 0 | 0 | 0 |
+| Controls (persistence, log tampering, LSASS dump) | 7 | 1 | 1 | 0 | 0 | 3 |
+
+Every CPES v1 alert and the process it is anchored on:
+
+- `empire_dllinjection_LoadLibrary_CreateRemoteThread.zip` (Code injection) — remote_thread_injection: powershell.exe
+- `empire_psinject_PEinjection.zip` (Code injection) — remote_thread_injection: powershell.exe
+- `empire_schtasks_creation_execution_elevated_user.zip` (Controls (persistence, log tampering, LSASS dump)) — remote_thread_injection: csrss.exe, service_dropped_binary: mpcmdrun.exe, service_dropped_binary: msmpeng.exe, service_dropped_binary: networkwatcheragent.exe, service_dropped_binary: waappagent.exe, service_dropped_binary: windowsazureguestagent.exe, service_dropped_binary: windowsazurenetagent.exe
+- `empire_smbexec_dcerpc_smb_svcctl.zip` (Service-based execution as SYSTEM) — service_dropped_binary: collectguestlogs.exe
+- `empire_uac_shellapi_fodhelper.zip` (UAC, listed binary) — autoelevation_lolbin: fodhelper.exe
+- `empire_wmi_local_event_subscriptions_elevated_user.zip` — pipeline refused: conflicting process_id assertions for one ProcessGUID are not allowed.
+- `psh_mavinject_dll_notepad.zip` (Code injection) — remote_thread_injection: mavinject.exe
+- `purplesharp_pe_injection_createremotethread.zip` (Code injection) — remote_thread_injection: purplesharp.exe
+
+## 11. Incidents — joining Sigma actor alerts and CPES outcome alerts
+
+`cpes.correlation.correlate`: same process; parent/grandparent within 300 s; or a CPES alert's resolver actor is the other alert's process. Pre-registered in [design/incident-correlation.md](design/incident-correlation.md). Lab corpus, Sigma core high+ and the CPES package engine.
+
+execution `incidents-lab-v3-20261019T071643Z`
+
+| Configuration | Alerts | Incidents | Runs whose incident names the elevated process | Incidents outside any run | Incidents with both sources |
+|---|---|---|---|---|---|
+| Sigma alone | 209 | 101 | 0/126 | 8 | 0 |
+| CPES alone | 66 | 66 | 90/126 | 8 | 0 |
+| Fused | 275 | 146 | 90/126 | 16 | 7 |
+
+Items an analyst opens: 167 with both tools separately, 146 fused (12.6% fewer). Attribution comes from CPES's alerts themselves; the join connects actor and outcome in only 7 incidents (the resolver records no actor for service escalations). Runs in this corpus are ~75 s apart, so ±150 s run windows overlap; per-run fragmentation and the 'spanning more than one run' count are dominated by that overlap and are not informative here.
+
+Example fused incident `INC-0113`: cpes: CPES autoelevation_lolbin; sigma: Bypass UAC via Fodhelper.exe
 
 ## Reading these results
 

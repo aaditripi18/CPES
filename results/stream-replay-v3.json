@@ -1,11 +1,11 @@
 {
-  "id": "stream-replay-v3-20261018T155905Z",
+  "id": "stream-replay-v3-20261019T071232Z",
   "protocol": "stream-replay-v3",
-  "recorded_at": "2026-10-18T15:59:05+00:00",
-  "duration_seconds": 11.73,
-  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
+  "recorded_at": "2026-10-19T07:12:32+00:00",
+  "duration_seconds": 10.8,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
   "git": {
-    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
     "dirty": false
   },
   "python": "3.12.10",
@@ -53,9 +53,9 @@
     },
     "cost": {
       "ticks": 327,
-      "median_tick_seconds": 3.6999699659645557e-06,
-      "max_tick_seconds": 0.9156527000013739,
-      "total_seconds": 7.455890100507531
+      "median_tick_seconds": 4.599976819008589e-06,
+      "max_tick_seconds": 0.8280556999961846,
+      "total_seconds": 6.9660065997741185
     },
     "summary": {
       "live_alerts": 160,

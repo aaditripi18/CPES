@@ -1,11 +1,11 @@
 {
-  "id": "evasion-v3-20261018T155853Z",
+  "id": "evasion-v3-20261019T071221Z",
   "protocol": "evasion-v3",
-  "recorded_at": "2026-10-18T15:58:53+00:00",
-  "duration_seconds": 18.36,
-  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
+  "recorded_at": "2026-10-19T07:12:21+00:00",
+  "duration_seconds": 16.8,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
   "git": {
-    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
     "dirty": false
   },
   "python": "3.12.10",

@@ -1,11 +1,11 @@
 {
-  "id": "package-grouped-20261018T155831Z",
+  "id": "package-grouped-20261019T071201Z",
   "protocol": "package-grouped",
-  "recorded_at": "2026-10-18T15:58:31+00:00",
-  "duration_seconds": 3.27,
-  "code_sha256": "3521accdcc1c141b24024fcd98f01093a2a78e0e8a0a239b97a7f765bebf834c",
+  "recorded_at": "2026-10-19T07:12:01+00:00",
+  "duration_seconds": 2.34,
+  "code_sha256": "a9375fb8d6d1fe3933b919527c977912ac79b27bfd01bd5cd7c2430f45fcbfdc",
   "git": {
-    "commit": "d6b2f0b0039a2a63d621d0b816a92712b3cf9474",
+    "commit": "999337f8f2f5258c896df3fa16096c509a65e4a8",
     "dirty": false
   },
   "python": "3.12.10",
