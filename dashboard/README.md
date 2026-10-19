@@ -16,6 +16,8 @@ The dashboard computes no scores, signals or metrics of its own:
 | Metrics on a run | `cpes.evaluation.EvaluationHarness`, only when the dataset has ground truth |
 | Published figures | `analysis/*.py` and `demo/cpes_demo.py`, executed unchanged; stdout stored with script and input SHA-256 |
 | Versioned protocols | `python -m evaluation.run <protocol>` (replication, package engine, E-a, E-c); `results/*.json` |
+| Incidents | `cpes.correlation.correlate` over CPES alerts (from `export.json` + resolver audit) and, if requested, SigmaHQ core high/critical matches (`evaluation.sigma`); rules pre-registered in `docs/design/incident-correlation.md` |
+| Incident report, ATT&CK layer, ECS alerts | Rendered from `incidents.json` by `cpes_dashboard/analyst.py`; CPES techniques are the technique each signal was designed for, not a verified attribution |
 | Evidence weights | `dashboard/models/research-v3-full-table.json`, derived with `cpes.derivation.derive_evidence_model` by `dashboard/scripts/derive_evidence_model.py` |
 
 ## Run it

@@ -3,6 +3,11 @@
 #
 #   docker build -t cpes-dashboard .
 #   docker run --rm -p 127.0.0.1:8790:8790 cpes-dashboard
+#
+# Public samples and SigmaHQ rules (scripts/fetch_external.py) are not
+# redistributed in the image either; mount them read-only for the incidents demo:
+#
+#   docker run --rm -p 127.0.0.1:8790:8790 -v "$PWD/external:/app/external:ro" cpes-dashboard
 #   docker run --rm -p 127.0.0.1:8790:8790 \
 #     -v "$PWD/analysis:/app/analysis:ro" \
 #     -v "$PWD/Claude outputs:/app/Claude outputs:ro" cpes-dashboard

@@ -7,7 +7,9 @@
 Automated, interpretable, chain-level scoring for runtime
 privilege-escalation detection on a single Windows endpoint.
 
+[![CI](https://github.com/aaditripi18/CPES/actions/workflows/ci.yml/badge.svg)](https://github.com/aaditripi18/CPES/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)
+![ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-TA0004%20privilege%20escalation-red)
 ![Status](https://img.shields.io/badge/status-active--research-orange)
 ![License](https://img.shields.io/badge/license-private-lightgrey)
 ![Platform](https://img.shields.io/badge/platform-windows%2011-0078D6?logo=windows&logoColor=white)
@@ -145,6 +147,7 @@ Each test below was written down with its expected outcome before it ran
 | **Does renaming tools evade it?** Attacker-controlled changes to the lab telemetry | Renamed injector: the research injection signal and the IOC rule drop 18/18 → **0/18** (both are name rules). Renamed service binary, random pipe names, obfuscated command lines: **no change**. Switching to an unlisted auto-elevating binary: CPES UAC 33/33 → **0/33**, while the generic test rises to **32/33**. |
 | **Can it run live?** Lab corpus replayed as a stream | Live alerts equal the hindsight result exactly (**160/160**). Time to alert: median **83 s**, max 151 s of event time. Under 1 s of compute per closed window. |
 | **Does a fix hold up on held-out data?** CPES v2 (adds the generic test) pre-registered, then run on 21 [OTRF Security-Datasets](https://github.com/OTRF/Security-Datasets) captures | **No improvement** (v1 = v2 = 6/13 escalation captures): the generic test never fired there, so v2 is not adopted. Real CreateRemoteThread evidence detected **4/4 injection captures** (Sigma core 2/4). The service rule's false alarms recur on vendor services (Defender, Azure agents) — a location-test defect that the planned "parent = services.exe" condition would **not** fix. |
+| **Does joining CPES with Sigma help an analyst?** Pre-registered incident correlation on the lab corpus | Fused incidents name the elevated process in **90/126** runs (Sigma alone: 0), with 12.6% fewer items to open than both tools separately. But only **7** incidents join a Sigma alert to a CPES outcome: service escalations re-parent under `services.exe`, so the conservative rules rarely cross that boundary. |
 | **How does it compare with SigmaHQ?** 850 core / 1,927 total Sysmon rules on the same data | Sigma detects **more**: 106/126 lab runs (CPES 98/126) and 42/53 external files, with similar noise outside attack runs. Sigma alerts on the *actor* (`reg.exe`, `sc.exe`). CPES names the process that **gained** privilege and shows the mechanism (Sigma flags 0/33 elevated UAC processes and 0/28 service binaries). |
 
 **Positioning, stated plainly:** CPES does not out-detect a mature community
@@ -192,10 +195,16 @@ python demo/cpes_demo.py
 ## Research dashboard
 
 `dashboard/` is a local web application over the unchanged package: upload
-and validate telemetry, explore raw records, run `CpesPipeline`, trace each
-detection to its signals, weights and source records, inspect process lineage,
-and re-run the `analysis/` evaluation scripts with recorded provenance. See
-[dashboard/README.md](dashboard/README.md).
+and validate telemetry (JSONL, CSV, raw `.evtx`), explore raw records, run
+`CpesPipeline`, trace each detection to its signals, weights and source
+records, inspect process lineage, replay a dataset as a live stream, and re-run
+every evaluation protocol with recorded provenance. See
+[dashboard/README.md](dashboard/README.md) and the five-minute walkthrough in
+[docs/DEMO.md](docs/DEMO.md).
+
+Each run also produces analyst outputs: **incidents** that join CPES alerts
+with SigmaHQ rule matches, a Markdown **incident report**, a **MITRE ATT&CK
+Navigator layer**, and CPES alerts as **ECS documents** a SIEM can ingest.
 
 ```powershell
 pip install -r dashboard/requirements.txt
