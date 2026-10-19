@@ -120,7 +120,7 @@ export function Live() {
   return (
     <>
       <PageHeader eyebrow="detection" title="Live detection">
-        CPES scoring telemetry as it arrives: each window is scored once, when it closes, using only the events received so far (<span className="font-mono">cpes.streaming.StreamingScorer</span>). Replay plays recorded telemetry at a chosen speed; Elasticsearch mode reads your lab's live index.
+        Score telemetry as it arrives. Each window is scored once, when it closes, from the events received so far. Replay a recorded dataset, or read a live Elasticsearch index.
       </PageHeader>
       {index.error && <ErrorBox error={index.error} />}
       <div className="grid xl:grid-cols-[360px_1fr] gap-5 items-start">
@@ -128,14 +128,14 @@ export function Live() {
           <Panel title="Source">
             <div className="space-y-3 text-[13px]">
               <label className="flex items-start gap-2">
-                <input type="radio" className="mt-1 accent-[#a78bfa]" checked={source === "replay"} onChange={() => setSource("replay")} disabled={running} />
+                <input type="radio" className="mt-1 accent-accent" checked={source === "replay"} onChange={() => setSource("replay")} disabled={running} />
                 <span>
                   <b>Replay</b> recorded telemetry
                   <span className="block text-2xs text-muted">Honest demo mode: the alerts are real CPES output, the arrival is simulated.</span>
                 </span>
               </label>
               <label className="flex items-start gap-2">
-                <input type="radio" className="mt-1 accent-[#a78bfa]" checked={source === "elasticsearch"} onChange={() => setSource("elasticsearch")} disabled={running || !index.data?.elasticsearch.configured} />
+                <input type="radio" className="mt-1 accent-accent" checked={source === "elasticsearch"} onChange={() => setSource("elasticsearch")} disabled={running || !index.data?.elasticsearch.configured} />
                 <span>
                   <b>Elasticsearch</b> (live lab)
                   <span className="block text-2xs text-muted">{index.data?.elasticsearch.configured ? `${index.data.elasticsearch.url} · ${index.data.elasticsearch.index}` : `Not configured. ${index.data?.elasticsearch.how ?? ""}`}</span>

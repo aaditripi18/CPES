@@ -15,6 +15,7 @@ import { Overview } from "./pages/Overview";
 import { RunDetail, Runs } from "./pages/Runs";
 import { System } from "./pages/System";
 import { WorkspaceProvider } from "./Workspace";
+import { ThemeProvider } from "./lib/theme";
 import { PageHeader } from "./components/ui";
 
 function NotFound() {
@@ -29,6 +30,7 @@ function Keyed({ children }: { children: (key: string) => JSX.Element }) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <ThemeProvider>
     <BrowserRouter>
       <WorkspaceProvider>
         <Layout>
@@ -55,5 +57,6 @@ createRoot(document.getElementById("root")!).render(
         </Layout>
       </WorkspaceProvider>
     </BrowserRouter>
+    </ThemeProvider>
   </StrictMode>,
 );

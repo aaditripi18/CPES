@@ -21,7 +21,7 @@ export function Datasets() {
   return (
     <>
       <PageHeader eyebrow="data" title="Datasets">
-        Upload telemetry, check it against the C5 field mapping record by record, then run the real CPES pipeline on it. Built-in datasets are registered by reference to files in the repository; uploads are stored byte-for-byte with their SHA-256.
+        Upload Sysmon telemetry (JSONL, CSV or raw .evtx), check every record, then run CPES on it.
       </PageHeader>
       <UploadPanel onUploaded={inventory.reload} />
       <div className="h-5" />
@@ -135,7 +135,7 @@ function UploadPanel({ onUploaded }: { onUploaded: () => void }) {
             <textarea className="input w-full mt-1 h-16 resize-none" value={source} onChange={(event) => setSource(event.target.value)} placeholder="Host, collector, time span — recorded with the dataset" />
           </label>
           <label className="flex items-start gap-2 text-[13px]">
-            <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" checked={synthetic} onChange={(event) => setSynthetic(event.target.checked)} />
+            <input type="checkbox" className="mt-0.5 accent-accent" checked={synthetic} onChange={(event) => setSynthetic(event.target.checked)} />
             <span>
               This file is <b>synthetic</b> (hand-written or generated). It will carry a SYNTHETIC badge everywhere it appears.
             </span>

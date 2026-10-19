@@ -1,7 +1,8 @@
-import { Activity, BarChart3, Siren, Database, FileSearch, GitBranch, Info, LayoutDashboard, ListTree, Play, Radio, Sigma } from "lucide-react";
+import { Activity, BarChart3, Database, FileSearch, GitBranch, Info, LayoutDashboard, Moon, Play, Radio, Siren, Sun } from "lucide-react";
 import { ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useApi } from "./lib/hooks";
+import { useTheme } from "./lib/theme";
 import { useWorkspace } from "./Workspace";
 import type { DatasetMeta, RunStatus } from "./types";
 import { CategoryBadge, StatusPill } from "./components/ui";
@@ -30,9 +31,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <Link to="/" className="px-4 pt-4 pb-5 block">
           <div className="flex items-center gap-2">
             <svg width="22" height="22" viewBox="0 0 16 16" aria-hidden>
-              <rect width="16" height="16" rx="3" fill="#161b24" stroke="#2e3747" />
-              <path d="M4 11 L8 4 L12 11" stroke="#a78bfa" strokeWidth="1.6" fill="none" />
-              <circle cx="8" cy="4" r="1.3" fill="#ff7b6b" />
+              <rect width="16" height="16" rx="3" className="fill-raised stroke-line-strong" />
+              <path d="M4 11 L8 4 L12 11" className="stroke-accent" strokeWidth="1.6" fill="none" />
+              <circle cx="8" cy="4" r="1.3" className="fill-detect" />
             </svg>
             <span className="font-mono font-semibold tracking-[0.14em] text-[13px]">CPES</span>
           </div>
@@ -54,12 +55,8 @@ export function Layout({ children }: { children: ReactNode }) {
             </NavLink>
           ))}
         </nav>
-        <div className="px-4 py-3 border-t border-line text-2xs text-faint leading-relaxed">
-          <ListTree size={12} className="inline mr-1" />
-          Engine: unchanged <span className="font-mono">cpes</span> package. Research figures: <span className="font-mono">analysis/</span> scripts.
-          <div className="mt-1 flex items-center gap-1">
-            <Sigma size={12} /> No metric is computed without labels.
-          </div>
+        <div className="px-3 py-3 border-t border-line">
+          <ThemeToggle />
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
@@ -91,6 +88,25 @@ export function Layout({ children }: { children: ReactNode }) {
         </header>
         <main className="flex-1 px-6 py-6 min-w-0">{children}</main>
       </div>
+    </div>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  return (
+    <div className="flex items-center rounded border border-line bg-bg p-0.5 text-2xs" role="group" aria-label="Colour theme">
+      {(["light", "dark"] as const).map((option) => (
+        <button
+          key={option}
+          className={`flex-1 flex items-center justify-center gap-1.5 rounded px-2 py-1 transition-colors ${theme === option ? "bg-raised text-ink shadow-sm" : "text-muted hover:text-ink"}`}
+          aria-pressed={theme === option}
+          onClick={() => theme !== option && toggle()}
+        >
+          {option === "light" ? <Sun size={12} /> : <Moon size={12} />}
+          {option === "light" ? "Light" : "Dark"}
+        </button>
+      ))}
     </div>
   );
 }

@@ -94,3 +94,13 @@ def test_sigma_stage_records_what_it_ran(client, uac_documents):
 def test_sigma_is_refused_for_presets_without_a_field_view():
     alerts, report = analyst.run_sigma(None, [], "synthetic-sample-field-mapping-v1")
     assert alerts == [] and report["enabled"] is False
+
+
+def test_overview_features_a_recorded_chain_with_its_actor(client, uac_documents):
+    dataset = upload(client, "uac.jsonl", jsonl(uac_documents)).json()
+    run = start(client, dataset["id"])
+    featured = client.get("/api/overview").json()["featured"]
+    assert featured["run_id"] == run["id"] and featured["signal_id"] == "autoelevation_lolbin"
+    assert [node["image"] for node in featured["chain"]] == ["explorer.exe", "cmd.exe", "fodhelper.exe"]
+    assert featured["actor"]["process_guid"] == "{CMD}"  # the resolver's actor, not the chain root
+    assert featured["chain"][-1]["integrity_level"] == "High"

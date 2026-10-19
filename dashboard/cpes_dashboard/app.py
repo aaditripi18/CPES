@@ -607,6 +607,85 @@ def live_stop(session_id: str) -> dict[str, Any]:
 # ------------------------------------------------------------------- overview
 
 
+def _featured_chain(completed: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The highest-scoring CPES outcome among recent runs, with its ancestry and actor (all from recorded artifacts)."""
+
+    best = None
+    for status in completed[:12]:
+        try:
+            private = bool(datasets.meta(status["dataset_id"]).get("private"))
+        except KeyError:
+            private = True
+        try:
+            incidents = _run_incidents(status["id"])["incidents"]
+        except (KeyError, FileNotFoundError, TypeError):
+            continue
+        for incident in incidents:
+            for alert in incident["alerts"]:
+                if alert["source"] != "cpes":
+                    continue
+                # real public data first, then synthetic, private last: the landing page stays safe to screenshot or record
+                rank = (not private, status.get("dataset_category") != "synthetic", alert.get("actor_process_guid") is not None, float(alert["score"]))
+                if best is None or rank > best[0]:
+                    best = (rank, status, incident, alert)
+    if best is None:
+        return None
+    _, status, incident, alert = best
+    processes = runs.artifact(status["id"], "processes.json") or {}
+    config = runs.artifact(status["id"], "config.json") or {}
+
+    def node(guid: str | None) -> dict[str, Any] | None:
+        info = processes.get(guid or "")
+        if not info:
+            return None
+        return {"process_guid": guid, "image": analyst._basename(info.get("image_path")), "pid": info.get("process_id"), "integrity_level": info.get("integrity_level")}
+
+    chain, guid = [], alert["process_guid"]
+    for _ in range(3):
+        item = node(guid)
+        if item is None:
+            break
+        chain.insert(0, item)
+        guid = processes[guid].get("parent_process_guid")
+    actor = node(alert.get("actor_process_guid"))
+    sigma = [a for a in incident["alerts"] if a["source"] == "sigma"]
+    return {
+        "run_id": status["id"], "dataset_name": status.get("dataset_name"), "dataset_category": status.get("dataset_category"),
+        "incident_id": incident["id"], "signal_id": alert["signal_id"], "weight": alert["weight"], "score": alert["score"],
+        "threshold": config.get("threshold"), "window_index": alert["window_index"], "explanation": (alert.get("explanation") or [None])[0],
+        "chain": chain, "actor": actor,
+        "sigma_alerts": len(sigma), "sigma_titles": sorted({a["title"] for a in sigma})[:3],
+    }
+
+
+def _headline_results() -> list[dict[str, Any]]:
+    """Headline figures read from the committed results/ files; an item is skipped if its file is missing."""
+
+    def load(name: str) -> dict[str, Any] | None:
+        path = REPO_ROOT / "results" / f"{name}.json"
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+    out = []
+    if (r := load("research-grouped")) and "detectors" in r["result"]:
+        d = r["result"]["detectors"]
+        out.append({"label": "Lab corpus", "value": f"F1 {d['cpes']['fold_mean']['f1']:.3f}", "detail": f"grouped 5-fold CV · single-event rule {d['single_event_research']['fold_mean']['f1']:.3f}", "protocol": "research-grouped"})
+    if (r := load("stream-replay-v3")):
+        s = r["result"]["summary"]
+        out.append({"label": "Live scoring", "value": f"{s['agree']}/{s['live_alerts']}", "detail": f"alerts identical to hindsight · median {s['median_time_to_alert_s']:.0f} s to alert", "protocol": "stream-replay-v3"})
+    if (r := load("ext-evtx-privesc")):
+        rows = {k: v for k, v in r["result"]["summary_by_category"].items() if k != "not_applicable_no_sysmon"}
+        files = sum(v["files"] for v in rows.values())
+        found = sum(v["cpes_or_generic"] for v in rows.values())
+        specific = sum(v["cpes_detected"] for v in rows.values())
+        sigma = load("sigma-ext-evtx")
+        sigma_hits = sum(v["core_high"] for k, v in sigma["result"]["summary_by_category"].items() if k != "not_applicable_no_sysmon") if sigma else None
+        out.append({"label": "Unseen public attacks", "value": f"{found}/{files}", "detail": f"{specific}/{files} by the specific signals" + (f" · SigmaHQ core {sigma_hits}/{files}" if sigma_hits is not None else ""), "protocol": "ext-evtx-privesc"})
+    if (r := load("incidents-lab-v3")):
+        c = r["result"]["configurations"]
+        out.append({"label": "Names the elevated process", "value": c["fused"]["runs_whose_incident_names_the_elevated_process"], "detail": f"lab runs · SigmaHQ alone {c['sigma_alone']['runs_whose_incident_names_the_elevated_process']}", "protocol": "incidents-lab-v3"})
+    return out
+
+
 @app.get("/api/overview")
 def overview() -> dict[str, Any]:
     run_list = runs.list()
@@ -645,6 +724,8 @@ def overview() -> dict[str, Any]:
             "signals_fired": latest.get("summary", {}).get("signals_fired", {}),
         }
     return {
+        "featured": _featured_chain(completed),
+        "headline": _headline_results(),
         "runs": run_list[:8],
         "run_counts": dict(Counter(r["state"] for r in run_list)),
         "latest": latest_detail,

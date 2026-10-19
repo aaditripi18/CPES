@@ -1,5 +1,5 @@
 // CPES palette: graphite surfaces, one violet interaction accent, severity colours
-// with fixed meanings (see docs/dashboard/stitch_prompts.md, prompt 0).
+// with fixed meanings. Values are CSS variables (src/index.css) so light and dark themes share one token set.
 const MONO = ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"];
 const SANS = ["Hanken Grotesk", "ui-sans-serif", "system-ui", "sans-serif"];
 
@@ -8,24 +8,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: "#0b0e13",
-        panel: "#11151c",
-        raised: "#161b24",
-        hover: "#1b212c",
-        line: "#222a36",
-        "line-strong": "#2e3747",
-        ink: "#e4e8ef",
-        muted: "#8a94a6",
-        faint: "#5d6778",
-        accent: "#a78bfa",
-        "accent-dim": "#2a2347",
-        detect: "#ff7b6b",
-        "detect-dim": "#3a1d1b",
-        warn: "#f2b84b",
-        "warn-dim": "#3a2d12",
-        ok: "#7fd1a8",
-        "ok-dim": "#15301f",
-        info: "#7cb7ff",
+        "bg": "rgb(var(--c-bg) / <alpha-value>)",
+        "panel": "rgb(var(--c-panel) / <alpha-value>)",
+        "raised": "rgb(var(--c-raised) / <alpha-value>)",
+        "hover": "rgb(var(--c-hover) / <alpha-value>)",
+        "line": "rgb(var(--c-line) / <alpha-value>)",
+        "line-strong": "rgb(var(--c-line-strong) / <alpha-value>)",
+        "ink": "rgb(var(--c-ink) / <alpha-value>)",
+        "muted": "rgb(var(--c-muted) / <alpha-value>)",
+        "faint": "rgb(var(--c-faint) / <alpha-value>)",
+        "accent": "rgb(var(--c-accent) / <alpha-value>)",
+        "accent-dim": "rgb(var(--c-accent-dim) / <alpha-value>)",
+        "detect": "rgb(var(--c-detect) / <alpha-value>)",
+        "detect-dim": "rgb(var(--c-detect-dim) / <alpha-value>)",
+        "warn": "rgb(var(--c-warn) / <alpha-value>)",
+        "warn-dim": "rgb(var(--c-warn-dim) / <alpha-value>)",
+        "ok": "rgb(var(--c-ok) / <alpha-value>)",
+        "ok-dim": "rgb(var(--c-ok-dim) / <alpha-value>)",
+        "info": "rgb(var(--c-info) / <alpha-value>)",
+        "info-dim": "rgb(var(--c-info-dim) / <alpha-value>)",
       },
       fontFamily: { sans: SANS, mono: MONO },
       fontSize: { "2xs": ["0.6875rem", { lineHeight: "1rem" }] },

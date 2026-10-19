@@ -49,8 +49,7 @@ export function Incidents() {
           </>
         }
       >
-        Alerts joined into incidents by three fixed rules: same process; parent, child or grandparent within {data.gap_seconds} s; or the CPES resolver's actor link. The rules were pre-registered in{" "}
-        <span className="font-mono">docs/design/incident-correlation.md</span> and are not tuned per run.
+        CPES and Sigma alerts grouped into incidents: same process, close relatives within {data.gap_seconds} s, or the actor CPES traced the elevation back to.
       </PageHeader>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-5">
@@ -110,7 +109,6 @@ export function Incidents() {
           {selected ? <IncidentDetail runId={id} incident={selected} /> : <Panel><Empty title="Select an incident" /></Panel>}
         </div>
       )}
-      <p className="text-2xs text-muted mt-4">{data.rule}</p>
     </>
   );
 }

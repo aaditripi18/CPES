@@ -59,7 +59,7 @@ export function Evaluation() {
   return (
     <>
       <PageHeader eyebrow="research" title="Evaluation workbench">
-        Four different things are kept apart here: a <b>detection run</b> (no labels needed), <b>evaluation with labels</b> of a run, <b>cross-validation</b> as the paper reports it, and <b>recorded experiments</b> re-executed from the unchanged analysis scripts. Numbers from different protocols are never placed in one table.
+        Every figure comes from a protocol written down before it ran. Results from different protocols are never mixed in one table.
       </PageHeader>
       <div className="grid md:grid-cols-4 gap-3 mb-5">
         {[
@@ -108,7 +108,7 @@ export function Evaluation() {
         <p className="text-2xs text-muted mt-2">“Matches” means the script printed the same value to three decimals in an execution recorded on this machine. Run the experiments below to check.</p>
       </Panel>
 
-      <Panel title="2 · Recorded research experiments" eyebrow="analysis/ scripts, executed unchanged" className="mb-5">
+      <Panel title="2 · Recorded research experiments" eyebrow="re-run the research scripts" className="mb-5">
         {error && <div className="mb-3"><ErrorBox error={error} /></div>}
         {catalog.error && <ErrorBox error={catalog.error} />}
         {!catalog.data && !catalog.error && <Loading />}

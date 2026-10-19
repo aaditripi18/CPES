@@ -272,7 +272,7 @@ function ColumnPicker({ schema, columns, onChange, onReset }: { schema: SchemaEn
       <div className="grid md:grid-cols-3 gap-x-4 gap-y-1 max-h-64 overflow-y-auto">
         {rows.map((entry) => (
           <label key={entry.path} className="flex items-center gap-2 text-[12px] font-mono">
-            <input type="checkbox" className="accent-[#a78bfa]" checked={columns.includes(entry.path)} onChange={(event) => onChange(event.target.checked ? [...columns, entry.path] : columns.filter((c) => c !== entry.path))} />
+            <input type="checkbox" className="accent-accent" checked={columns.includes(entry.path)} onChange={(event) => onChange(event.target.checked ? [...columns, entry.path] : columns.filter((c) => c !== entry.path))} />
             <span className="truncate" title={entry.path}>{entry.path}</span>
             <span className="text-faint ml-auto">{Math.round(entry.coverage * 100)}%</span>
           </label>

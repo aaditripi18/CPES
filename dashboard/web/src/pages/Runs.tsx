@@ -15,7 +15,7 @@ export function Runs() {
   return (
     <>
       <PageHeader eyebrow="history" title="Runs" actions={<input className="input w-72" placeholder="search runs (id, dataset, note, state)" value={filter} onChange={(event) => setFilter(event.target.value)} />}>
-        Every detection run is a fresh execution with its own directory: configuration, dataset checksum, the package exporter's output, baseline decisions and evaluation. Reopening a run shows what was recorded then; it is not re-executed.
+        Every run keeps its configuration, dataset checksum and outputs, so it can be reopened exactly as it was.
       </PageHeader>
       {runs.error && <ErrorBox error={runs.error} onRetry={runs.reload} />}
       {!runs.data && !runs.error && <Loading />}
@@ -94,7 +94,7 @@ export function RunDetail() {
   return (
     <>
       <PageHeader
-        eyebrow={`detection run · ${data.state === "completed" ? "recorded output" : data.state}`}
+        eyebrow={`detection run${data.state === "completed" ? "" : ` · ${data.state}`}`}
         title={<span className="font-mono text-[19px]">{data.id}</span>}
         actions={
           data.state === "completed" && (
@@ -195,7 +195,7 @@ export function RunDetail() {
               <div className="grid sm:grid-cols-2 gap-2">
                 {[
                   ["detections.csv", "detected windows, one row each"],
-                  ["export.json", "cpes.exporting.ResultExporter output, verbatim"],
+                  ["export.json", "full detection output"],
                   ["config.json", "everything needed to reproduce"],
                   ["evaluation.json", "metrics (only if labels exist)"],
                   ["baseline.json", "single-event baseline per window"],

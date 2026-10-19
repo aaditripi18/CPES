@@ -491,7 +491,40 @@ export interface Claim {
   execution_id: string | null;
 }
 
+export interface ChainNode {
+  process_guid: string;
+  image: string | null;
+  pid: number | null;
+  integrity_level: string | null;
+}
+
+export interface FeaturedChain {
+  run_id: string;
+  dataset_name: string;
+  dataset_category: string;
+  incident_id: string;
+  signal_id: string;
+  weight: string;
+  score: string;
+  threshold: string | null;
+  window_index: number;
+  explanation: string | null;
+  chain: ChainNode[];
+  actor: ChainNode | null;
+  sigma_alerts: number;
+  sigma_titles: string[];
+}
+
+export interface HeadlineResult {
+  label: string;
+  value: string;
+  detail: string;
+  protocol: string;
+}
+
 export interface Overview {
+  featured: FeaturedChain | null;
+  headline: HeadlineResult[];
   runs: RunStatus[];
   run_counts: Record<string, number>;
   latest: {

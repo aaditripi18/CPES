@@ -40,7 +40,7 @@ const TONES: Record<Tone, string> = {
   detect: "border-detect/40 text-detect bg-detect-dim",
   warn: "border-warn/40 text-warn bg-warn-dim",
   ok: "border-ok/40 text-ok bg-ok-dim",
-  info: "border-info/40 text-info bg-[#132235]",
+  info: "border-info/40 text-info bg-info-dim",
   faint: "border-line text-muted bg-transparent",
 };
 
@@ -135,7 +135,7 @@ export function ErrorBox({ error, onRetry }: { error: string; onRetry?: () => vo
 }
 
 export function Notice({ tone = "warn", title, children }: { tone?: "warn" | "info" | "detect" | "ok"; title?: ReactNode; children: ReactNode }) {
-  const styles = { warn: "border-warn/40 bg-warn-dim/60", info: "border-info/30 bg-[#101c2b]", detect: "border-detect/40 bg-detect-dim", ok: "border-ok/30 bg-ok-dim/60" }[tone];
+  const styles = { warn: "border-warn/40 bg-warn-dim/60", info: "border-info/30 bg-info-dim/70", detect: "border-detect/40 bg-detect-dim", ok: "border-ok/30 bg-ok-dim/60" }[tone];
   const text = { warn: "text-warn", info: "text-info", detect: "text-detect", ok: "text-ok" }[tone];
   return (
     <div className={`rounded-md border px-4 py-3 text-[13px] leading-relaxed ${styles}`}>

@@ -8,6 +8,7 @@ import { qs } from "../api";
 import { Empty, ErrorBox, KV, Loading, PageHeader, Panel, Pill } from "../components/ui";
 import { basename, eventCodeLabel, int, score, shortGuid, time } from "../lib/format";
 import { useApi } from "../lib/hooks";
+import { GRAPH_COLORS, type Theme, useTheme } from "../lib/theme";
 import type { ChainGraph, ChainRow, GraphNode, ProcessInfo, RunStatus } from "../types";
 import { useWorkspace } from "../Workspace";
 
@@ -23,7 +24,7 @@ function ProcessCard({ data }: NodeProps<Node<ProcessNodeData>>) {
   const integrityTone = integrity === "System" ? "text-detect" : integrity === "High" ? "text-warn" : "text-muted";
   return (
     <div
-      className={`rounded-md border px-2.5 py-1.5 bg-panel text-left transition-colors ${data.selected ? "border-accent shadow-[0_0_0_2px_#a78bfa55]" : detected ? "border-detect" : "border-line-strong"} ${data.focus ? "ring-1 ring-accent/50" : ""}`}
+      className={`rounded-md border px-2.5 py-1.5 bg-panel text-left transition-colors ${data.selected ? "border-accent shadow-[0_0_0_2px_rgb(var(--c-accent)/0.35)]" : detected ? "border-detect" : "border-line-strong"} ${data.focus ? "ring-1 ring-accent/50" : ""}`}
       style={{ width: NODE_W, height: NODE_H }}
     >
       <Handle type="target" position={Position.Top} className="!bg-line-strong !border-0 !w-1.5 !h-1.5" />
@@ -59,7 +60,7 @@ function GhostCard({ data }: NodeProps<Node<GhostNodeData>>) {
 
 const nodeTypes = { process: ProcessCard, ghost: GhostCard };
 
-function layout(graph: ChainGraph, selected: string | null, focus: string | null) {
+function layout(graph: ChainGraph, selected: string | null, focus: string | null, colors: (typeof GRAPH_COLORS)[Theme]) {
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir: "TB", nodesep: 24, ranksep: 46 });
   g.setDefaultEdgeLabel(() => ({}));
@@ -85,8 +86,8 @@ function layout(graph: ChainGraph, selected: string | null, focus: string | null
     }),
   ];
   const edges = [
-    ...graph.edges.map((edge) => ({ id: `${edge.source}->${edge.target}`, source: edge.source, target: edge.target, style: { stroke: "#3b4658" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#3b4658" } })),
-    ...graph.nodes.filter((n) => n.parent_unresolved && n.parent_process_guid).map((n) => ({ id: `ghost-${n.id}`, source: `ghost:${n.parent_process_guid}`, target: n.id, style: { stroke: "#5d6778", strokeDasharray: "4 4" } })),
+    ...graph.edges.map((edge) => ({ id: `${edge.source}->${edge.target}`, source: edge.source, target: edge.target, style: { stroke: colors.edge }, markerEnd: { type: MarkerType.ArrowClosed, color: colors.edge } })),
+    ...graph.nodes.filter((n) => n.parent_unresolved && n.parent_process_guid).map((n) => ({ id: `ghost-${n.id}`, source: `ghost:${n.parent_process_guid}`, target: n.id, style: { stroke: colors.ghost, strokeDasharray: "4 4" } })),
   ];
   return { nodes, edges };
 }
@@ -121,7 +122,7 @@ export function Lineage() {
   return (
     <>
       <PageHeader eyebrow={`lineage · run ${id}`} title="Process-lineage investigation">
-        The structure CPES reconstructed from ProcessGuid / ParentProcessGuid (cpes.lineage.LineageBuilder). Parents absent from the telemetry are drawn as dashed placeholders, never guessed. Large chains open as a neighbourhood around a detection; select a node and “expand” to walk further.
+        The process tree rebuilt from the telemetry. Parents missing from the data are drawn dashed, never guessed. Select a process to inspect it or expand its neighbourhood.
       </PageHeader>
       {run.data?.state && run.data.state !== "completed" && <ErrorBox error={`run is ${run.data.state}; lineage is available after it completes.`} />}
       <div className="grid grid-cols-[280px_1fr] gap-4 items-start">
@@ -129,7 +130,7 @@ export function Lineage() {
           <div className="p-3 space-y-2 border-b border-line">
             <input className="input w-full" placeholder="filter by GUID or root image" value={chainFilter} onChange={(event) => setChainFilter(event.target.value)} />
             <label className="flex items-center gap-2 text-[12px]">
-              <input type="checkbox" className="accent-[#a78bfa]" checked={detectedOnly} onChange={(event) => setDetectedOnly(event.target.checked)} /> only chains with detections
+              <input type="checkbox" className="accent-accent" checked={detectedOnly} onChange={(event) => setDetectedOnly(event.target.checked)} /> only chains with detections
             </label>
           </div>
           {chains.error && <div className="p-3"><ErrorBox error={chains.error} /></div>}
@@ -193,7 +194,9 @@ export function Lineage() {
 }
 
 function Graph({ graph, selected, focus, onSelect }: { graph: ChainGraph; selected: string | null; focus: string | null; onSelect: (guid: string) => void }) {
-  const { nodes, edges } = useMemo(() => layout(graph, selected, focus), [graph, selected, focus]);
+  const { theme } = useTheme();
+  const colors = GRAPH_COLORS[theme];
+  const { nodes, edges } = useMemo(() => layout(graph, selected, focus, colors), [graph, selected, focus, colors]);
   const flow = useReactFlow();
   useEffect(() => {
     const target = focus ?? graph.nodes.find((n) => n.detected_windows.length)?.id;
@@ -218,12 +221,12 @@ function Graph({ graph, selected, focus, onSelect }: { graph: ChainGraph; select
       nodesDraggable={false}
       nodesConnectable={false}
       minZoom={0.1}
-      colorMode="dark"
+      colorMode={theme}
       proOptions={{ hideAttribution: true }}
     >
-      <Background color="#1b212c" gap={22} />
+      <Background color={colors.grid} gap={22} />
       <Controls showInteractive={false} />
-      <MiniMap pannable zoomable nodeColor={(n) => (n.type === "ghost" ? "#2e3747" : (n.data as unknown as ProcessNodeData).detected_windows?.length ? "#ff7b6b" : "#5d6778")} maskColor="#0b0e13cc" style={{ background: "#11151c" }} />
+      <MiniMap pannable zoomable nodeColor={(n) => (n.type === "ghost" ? colors.grid : (n.data as unknown as ProcessNodeData).detected_windows?.length ? colors.detect : colors.node)} maskColor={colors.mask} style={{ background: colors.panel }} />
     </ReactFlow>
   );
 }

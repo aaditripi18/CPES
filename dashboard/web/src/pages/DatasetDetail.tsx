@@ -278,7 +278,7 @@ function MappingEditor({ spec, onChange, fields, schema, presence }: { spec: Map
             </select>
           </label>
           <label className="flex items-center gap-1.5" title="For files without a record id. The id is derived from the record's position (rec-0000001…) and shown as derived everywhere.">
-            <input type="checkbox" className="accent-[#a78bfa]" checked={!!spec.event_id_from_position} onChange={(event) => onChange({ ...spec, event_id_from_position: event.target.checked })} />
+            <input type="checkbox" className="accent-accent" checked={!!spec.event_id_from_position} onChange={(event) => onChange({ ...spec, event_id_from_position: event.target.checked })} />
             <span>derive event id from record position</span>
           </label>
         </div>
@@ -527,13 +527,13 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
         </label>
       </div>
       <label className="flex items-start gap-2 text-[13px] mt-3">
-        <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" checked={evidenceChannels} onChange={(event) => setEvidenceChannels(event.target.checked)} />
+        <input type="checkbox" className="mt-0.5 accent-accent" checked={evidenceChannels} onChange={(event) => setEvidenceChannels(event.target.checked)} />
         <span>
           Attach cross-channel evidence (named pipes EID 17/18, remote threads EID 8) so the token-impersonation and injection signals can fire. Untick to reproduce the package as it was before evidence channels.
         </span>
       </label>
       <label className={`flex items-start gap-2 text-[13px] mt-2 ${sigmaPossible ? "" : "opacity-60"}`}>
-        <input type="checkbox" className="mt-0.5 accent-[#a78bfa]" disabled={!sigmaPossible} checked={sigma && sigmaPossible} onChange={(event) => setSigma(event.target.checked)} />
+        <input type="checkbox" className="mt-0.5 accent-accent" disabled={!sigmaPossible} checked={sigma && sigmaPossible} onChange={(event) => setSigma(event.target.checked)} />
         <span>
           Also run SigmaHQ core rules (high and critical) and join their alerts with CPES alerts into incidents.
           {!sigmaInfo.data?.available && sigmaInfo.data?.how ? ` Unavailable: ${sigmaInfo.data.how}` : !sigmaPossible && sigmaInfo.data ? " Available for the Winlogbeat/ECS and raw EVTX presets only." : ""}
