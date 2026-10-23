@@ -125,3 +125,24 @@ for R and for Sigma, as in `sigma-lab-v3`.
 The dashboard's Live page polls `cpes-live-v1` during the attack runs; the time
 from each run's logged start to the first live alert is reported as observed,
 and the session may be screen-recorded for a demo.
+
+## Outcome (2026-10-24, after the run)
+
+Recorded at commit `9c0b259` (clean tree) as `results/vm-live-v1.json`; tables in
+[../RESULTS.md](../RESULTS.md) §13. L1 and L2 **not supported** (20/50; UAC 5/20).
+L3–L7 supported. S2a and S2b supported, so S2 met its adoption criteria. It still has
+to be implemented as an optional package setting before it can be used.
+
+Defender reported a successful detection in all 20 UAC runs and none of the
+others. The protocol counts those runs as pre-registered; the secondary figures
+exclude them (R 15/30). Inspecting the corpus afterwards (not a protocol result),
+the elevation completed only in the five sdclt runs, and R flagged all five.
+
+The live time-to-alert was not recorded: the dashboard Live page was not run
+during the session.
+
+Implementation notes. The registry pre-filter for P was checked on one
+30-minute slice (identical flags). Two fixes were made after the first execution
+and before this one: runs excluded from the secondary figures no longer count as
+false alarms, and the ledger summary was corrected. Neither changes a detector or
+a primary figure. The first execution (commit `21a4860`) stays in the ledger.

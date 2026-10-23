@@ -90,7 +90,7 @@ suppressor that trusts a validly signed own image, was pre-registered and run on
 **100 OTRF captures never used before** (S1): it removed **0 of 7** vendor
 alarms, because those captures record no image loads for the agents. **Not
 adopted.** A real fix needs service-install events (System 7045 / Security 4697)
-or unfiltered image loads.
+or unfiltered image loads; section 10 tests exactly that.
 
 ## 9. Joining CPES and Sigma helps less than hoped
 
@@ -101,10 +101,41 @@ re-parent the elevated binary under `services.exe`, outside the attacker's
 process tree, and the resolver records no actor for them. Fused incidents
 remain useful as a hand-off format (report, ATT&CK layer, ECS alerts).
 
+## 10. A second, live corpus: some figures held, UAC did not replicate
+
+A new VM session (vm-live-v1) with every detector frozen: 30 minutes of benign
+use, then the ten corpus-v3 Atomic tests five times each (50 runs), Microsoft
+Defender left on, System 7045 and Security 4697 collected alongside Sysmon.
+
+- **Overall detection fell short of the expectation**: CPES detected **20 of 50**
+  runs against an expected ≥ 70% (L1 not supported), and **5 of 20** UAC runs
+  against ≥ 80% (L2 not supported). Defender reported a successful detection in
+  all 20 UAC runs. Inspecting the corpus afterwards (outside the protocol), the
+  privilege gain actually happened only in the five sdclt runs: Event Viewer
+  never started, Fodhelper was blocked before it ran, and ComputerDefaults ran
+  without elevating. CPES flagged all five. The pre-registered denominator still
+  counts all 20; without the Defender runs, CPES detects 15 of 30.
+- **Service 10/10 and injection 5/5** replicated; injection is again caught by
+  the `mavinject.exe` name. **Token theft 0/15**, below the lab's 8/24; a
+  weakness was predicted (L3) but not one this complete.
+- **No false alarms**: zero false-alarm processes from the research signals
+  across the benign period and the session (L4).
+- **Next to SigmaHQ**: Sigma flags 30/50 runs, CPES 20/50, together 35/50 (L7).
+  Sigma flagged none of the UAC runs. In every run where the privileged process
+  actually appeared (15), CPES named it and Sigma did not.
+- **The service-rule fix works on this data (S2)**: keeping a service alert only
+  when a service-install record names the same binary removed all **4** false
+  alarms of the package engine (Defender's `MpCmdRun.exe`) and kept all 20
+  service detections. The adoption criteria were met. The evidence is small: 4
+  false alarms, one image, one machine. S2 is not yet a setting in the package.
+
+The session ran with one guest freeze and recovery, recorded in
+[../lab/vm-session/SESSION-NOTES.md](../lab/vm-session/SESSION-NOTES.md).
+
 ## What would change these conclusions
 
-- A second, independently collected corpus — ideally live captures from the
-  planned VM lab, with System and Security logs alongside Sysmon, which would
-  also make the service-install fix testable.
+- A further, independently collected corpus on a different Windows build,
+  ideally with Defender's UAC protection accounted for in advance, so that the
+  UAC signal is tested on escalations that actually complete.
 - Recording an actor for service escalations, so correlation can cross the
   `services.exe` boundary (section 9).
