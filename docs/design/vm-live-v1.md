@@ -95,6 +95,19 @@ false alarm in the session; with zero false alarms S2b is untestable and S2 is
 not adopted. Known limit stated now: a service installed before telemetry
 starts, or by a technique that reuses an existing service, is suppressed.
 
+## Amendment 1 (2026-10-23, before the session)
+
+Matching how corpus-v3 was recorded: the UAC tests run in a non-administrator
+window (a UAC bypass from an elevated shell gains nothing), the other six in an
+administrator window. So the attack runs are two parts, each round-robin:
+part 1 = the four T1548.002 tests × 5, part 2 = the other six × 5. Runs start
+**≥ 180 s** apart (not 120 s), so a process created by one run is never within
+the 150 s tolerance of the next. The benign period also contains one legitimate
+service lifecycle (`sc.exe create`/`delete` of a `svchost.exe` service, as in
+corpus-v3) and two manual "Run as administrator" consents. The procedure is
+exactly `lab/vm-session/benign-period.ps1` and `lab/vm-session/run-attacks.ps1`
+at this commit.
+
 ## Also recorded (no hypothesis)
 
 The dashboard's Live page polls `cpes-live-v1` during the attack runs; the time
