@@ -41,3 +41,6 @@ examples/demo-evaluation.json
 
 # Third-party public datasets and rule packs (downloaded, never committed)
 /external/
+
+# Live VM corpora (contain host/account identifiers; never published)
+/lab-data/

@@ -50,6 +50,7 @@ the right technique in **98 of 126** runs with one false alarm.
 | Live replay of the lab corpus | **160/160** alerts equal to hindsight, median 83 s to alert | — |
 | 21 held-out OTRF captures | 6/13 escalation captures; injection **4/4** | SigmaHQ core injection 2/4 |
 | 100 unused OTRF captures, service rule | 7 alerts, all on Azure vendor agents | — |
+| Live VM session, 50 runs, detectors frozen, Defender on | **20/50** (15/30 without the 20 runs Defender intervened in); **0** false alarms; named the privileged process in **15/15** runs where it appeared | SigmaHQ core 30/50, named 0/15; both together 35/50 |
 
 | | Pre-registered expectation | Verdict |
 |---|---|---|
@@ -62,6 +63,9 @@ the right technique in **98 of 126** runs with one false alarm.
 | V2 | Adding the generic test (CPES v2) improves held-out detection | **not supported** (6/13 both); v2 not adopted |
 | I | Joined CPES + Sigma incidents name the elevated process more often than Sigma | **supported** (90/126 vs 0/126), but no more often than CPES alone |
 | S1 | A signature suppressor removes the service rule's vendor false alarms | **not supported** (0 of 7 removed); not adopted |
+| L1 | On a second, live corpus CPES detects ≥ 70% of runs | **not supported** (20/50; Defender intervened in all 20 UAC runs) |
+| L7 | CPES and Sigma together detect more runs than Sigma alone | **supported** (35 vs 30) |
+| S2 | Requiring a service-install event removes the service rule's false alarms | **supported** (4 → 0, service runs kept 20/20); not yet a package setting |
 
 ## How it relates to existing tools
 
@@ -114,11 +118,12 @@ incident correlation (`cpes.correlation`). Component contracts: [docs/](docs).
 
 ## Limitations
 
-- One lab endpoint; no multi-host or enterprise traffic.
+- One lab endpoint and one VM session; no multi-host or enterprise traffic.
+- On the live session token theft went undetected (0/15), and the UAC signal could only be tested on 5 runs because Defender stopped the rest.
 - Four mechanisms; techniques without a signal are not detected.
 - The auto-elevation signal names four binaries and does not generalise to other UAC methods.
 - On the lab corpus the injection signal is effectively an image-name rule.
-- The service rule raises false alarms on vendor agents installed outside `Program Files`; fixing it needs service-install events or unfiltered image loads ([analysis](docs/design/service-rule-feasibility.md)).
+- The service rule raises false alarms on vendor agents installed outside `Program Files`. With service-install events (System 7045 / Security 4697) a fix removed them on the live session (S2), but it is tested on one machine and not yet in the package ([analysis](docs/design/service-rule-feasibility.md)).
 - The lab corpora are private (they contain host and account identifiers); lab protocols cannot be re-run from a clone.
 
 ## Reproduce

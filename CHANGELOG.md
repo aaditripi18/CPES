@@ -5,6 +5,15 @@ release may change signals, weights and report fields. Every evaluation and its
 expected outcome are pre-registered in [docs/design/](docs/design); results are
 generated into [docs/RESULTS.md](docs/RESULTS.md).
 
+## Unreleased
+
+- **Live VM evaluation** (`vm-live-v1`, pre-registered in
+  [docs/design/vm-live-v1.md](docs/design/vm-live-v1.md)): a second corpus of 50
+  Atomic runs with detectors frozen and Defender on. CPES 20/50 (expectation
+  ≥ 70% not met), SigmaHQ 30/50, both 35/50; service-install corroboration
+  (S2) removed 4/4 service false alarms. Session scripts in `lab/vm-session/`,
+  export in `lab/export_live.py`; the corpus stays private.
+
 ## 0.2.0 — 2026-10-19
 
 - **Dashboard** (`dashboard/`): upload Sysmon JSONL / CSV / raw `.evtx` with
