@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from . import data, engine, protocols
 
 RESULTS = data.ROOT / "results"
-PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2", "incidents-lab-v3", "service-signature-v1")
+PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2", "incidents-lab-v3", "service-signature-v1", "vm-live-v1")
 
 
 def _code_fingerprint() -> str:
@@ -138,6 +138,10 @@ def run_protocol(name: str) -> dict:
         from . import service_signature
 
         return service_signature.run()
+    if name == "vm-live-v1":
+        from . import vm_live
+
+        return vm_live.run()
     if name == "stream-replay-v3":
         from . import streaming_eval
 
@@ -164,6 +168,10 @@ def main() -> None:
             from . import external, service_signature
 
             inputs = [{"path": f"external/otrf/test/{n}"} for n in service_signature.verify_test_manifest()] + external.verify_manifest() + data.inputs_manifest()
+        elif name == "vm-live-v1":
+            from . import external, vm_live
+
+            inputs = vm_live.inputs_manifest() + external.verify_manifest()
         else:
             inputs = data.inputs_manifest()
         started = time.perf_counter()

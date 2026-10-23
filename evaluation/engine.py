@@ -72,12 +72,16 @@ def build_evidence(docs) -> tuple:
     return EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(mapper.map_document(d) for d in docs)
 
 
-def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 150.0, docs=None, generic: bool = False) -> dict:
+def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 150.0, docs=None, generic: bool = False,
+                bounds: tuple[datetime, datetime] | None = None) -> dict:
+    """``bounds`` fixes the window grid (start, end); by default it spans the documents."""
+
     docs = documents() if docs is None else docs
     mapper = CanonicalEventMapper(load_mapping_configuration(MAPPING))
     events = [mapper.map_document(d) for d in docs]
     stamps = [datetime.fromisoformat(e.source_timestamp.replace("Z", "+00:00")) for e in events]
-    params = SlidingWindowParameters(min(stamps), max(stamps) + timedelta(seconds=span), span, advance)
+    start, end = bounds if bounds else (min(stamps), max(stamps) + timedelta(seconds=span))
+    params = SlidingWindowParameters(start, end, span, advance)
     configuration = PipelineConfiguration(params, frozen_model(), Decimal("0.5"), make_generator(make_resolver()))
     channels = build_evidence(docs) if with_evidence else None
     context = CpesPipeline().run(events, configuration, evidence=channels.items if channels else ())
