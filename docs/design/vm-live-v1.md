@@ -108,6 +108,18 @@ corpus-v3) and two manual "Run as administrator" consents. The procedure is
 exactly `lab/vm-session/benign-period.ps1` and `lab/vm-session/run-attacks.ps1`
 at this commit.
 
+## Amendment 2 (2026-10-23, during the benign period, before any attack run)
+
+One added hypothesis on what CPES contributes next to a rule set:
+
+| | Expectation |
+|---|---|
+| L7 | R ∪ Sigma detects more runs (any flag) than Sigma alone |
+
+Also reported, no hypothesis: runs where the flagged set contains the process
+that gained privilege (the elevated child of the UAC binary, the service binary)
+for R and for Sigma, as in `sigma-lab-v3`.
+
 ## Also recorded (no hypothesis)
 
 The dashboard's Live page polls `cpes-live-v1` during the attack runs; the time
