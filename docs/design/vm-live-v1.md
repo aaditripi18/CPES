@@ -138,6 +138,10 @@ others. The protocol counts those runs as pre-registered; the secondary figures
 exclude them (R 15/30). Inspecting the corpus afterwards (not a protocol result),
 the elevation completed only in the five sdclt runs, and R flagged all five.
 
+The same inspection found that the 15 token runs never reached SYSTEM: their
+processes ran at High integrity and no SYSTEM shell connected to a named pipe,
+so L3's 0/15 reflects attacks that did not complete, not a measured miss.
+
 The live time-to-alert was not recorded: the dashboard Live page was not run
 during the session.
 
