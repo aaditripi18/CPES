@@ -162,8 +162,13 @@ def _sorted(docs: list[dict]) -> list[dict]:
     return sorted(docs, key=lambda d: (d["@timestamp"], _get(d, "winlog", "record_id") or 0))
 
 
-def run_level(flags: dict[str, tuple[str, ...]], created: dict[str, datetime], run_list, *, with_semantics: bool) -> dict:
-    """E-c rule on this session's runs: a run is detected if a flagged process was created within ±150 s."""
+def run_level(flags: dict[str, tuple[str, ...]], created: dict[str, datetime], run_list, *, with_semantics: bool, alarm_runs=None) -> dict:
+    """E-c rule on this session's runs: a run is detected if a flagged process was created within ±150 s.
+
+    A false alarm is a flagged process not within ±150 s of any of ``alarm_runs``
+    (default: ``run_list``), so excluding runs from the denominators never turns
+    their processes into false alarms.
+    """
 
     near = lambda t, at: abs((t - at).total_seconds()) <= TOLERANCE_SECONDS  # noqa: E731
     flagged = [(g, s) for g, s in flags.items() if s and g in created]
@@ -173,7 +178,7 @@ def run_level(flags: dict[str, tuple[str, ...]], created: dict[str, datetime], r
         close = [s for g, s in flagged if near(created[g], run.at)]
         any_hit[run.technique] += bool(close)
         consistent[run.technique] += any(run.technique in SIGNAL_TECHNIQUES.get(sig, ()) for s in close for sig in s)
-    false_alarms = [g for g, _ in flagged if not any(near(created[g], r.at) for r in run_list)]
+    false_alarms = [g for g, _ in flagged if not any(near(created[g], r.at) for r in (run_list if alarm_runs is None else alarm_runs))]
     out = {
         "flagged_processes": len(flagged),
         "flagged_without_creation_record": sum(1 for g, s in flags.items() if s and g not in created),
@@ -261,7 +266,7 @@ def run() -> dict:
     blocked = [r for r in run_list if r.defender]
     unblocked = [r for r in run_list if not r.defender]
     levels = {name: run_level(flags, created, run_list, with_semantics=sem) for name, (flags, sem) in detectors.items()}
-    levels_unblocked = {name: run_level(flags, created, unblocked, with_semantics=sem) for name, (flags, sem) in detectors.items()}
+    levels_unblocked = {name: run_level(flags, created, unblocked, with_semantics=sem, alarm_runs=run_list) for name, (flags, sem) in detectors.items()}
     sigma = sigma_level(loaded["alerts"], run_list)
 
     # L7: R or Sigma, any flag, per run.

@@ -55,3 +55,11 @@ def test_outcome_process_is_the_elevated_binary():
     assert outcome_processes(nodes, created, Run("T1548.002", "3", T0, "0", False)) == {"u1"}
     assert outcome_processes(nodes, created, Run("T1543.003", "2", T0, "0", False)) == {"s1"}
     assert outcome_processes(nodes, created, Run("T1055.001", "1", T0, "0", False)) == set()
+
+
+def test_excluded_runs_do_not_create_false_alarms():
+    blocked = Run("T1548.002", "3", T0, "", True)
+    kept = Run("T1543.003", "2", T0 + timedelta(minutes=10), "0", False)
+    created = {"a": T0 + timedelta(seconds=30)}
+    level = run_level({"a": ("autoelevation_lolbin",)}, created, (kept,), with_semantics=True, alarm_runs=(blocked, kept))
+    assert level["runs"] == 1 and level["false_alarm_processes"] == 0

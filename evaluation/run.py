@@ -188,7 +188,7 @@ def main() -> None:
             "design": "docs/design/evidence-channels-and-package-evaluation.md",
         }
         (RESULTS / f"{name}.json").write_text(json.dumps({**record, "result": result}, indent=2, default=str) + "\n", encoding="utf-8")
-        if "detectors" in result:
+        if "detectors" in result and "summary" not in result:
             summary = {d: v.get("fold_mean", {}).get("f1") if "fold_mean" in v else v.get("modelled_runs_detected_any") for d, v in result["detectors"].items()}
         else:
             summary = result.get("summary_by_category") or result.get("summary")
