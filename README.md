@@ -119,7 +119,7 @@ incident correlation (`cpes.correlation`). Component contracts: [docs/](docs).
 ## Limitations
 
 - One lab endpoint and one VM session; no multi-host or enterprise traffic.
-- On the live session token theft went undetected (0/15), and the UAC signal could only be tested on 5 runs because Defender stopped the rest.
+- On the live session the token-theft tests never reached SYSTEM and Defender stopped 15 of 20 UAC escalations, so the token signal went untested and the UAC signal was tested on only 5 runs.
 - Four mechanisms; techniques without a signal are not detected.
 - The auto-elevation signal names four binaries and does not generalise to other UAC methods.
 - On the lab corpus the injection signal is effectively an image-name rule.

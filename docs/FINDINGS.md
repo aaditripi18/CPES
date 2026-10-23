@@ -116,8 +116,11 @@ Defender left on, System 7045 and Security 4697 collected alongside Sysmon.
   without elevating. CPES flagged all five. The pre-registered denominator still
   counts all 20; without the Defender runs, CPES detects 15 of 30.
 - **Service 10/10 and injection 5/5** replicated; injection is again caught by
-  the `mavinject.exe` name. **Token theft 0/15**, below the lab's 8/24; a
-  weakness was predicted (L3) but not one this complete.
+  the `mavinject.exe` name. **Token theft 0/15**, below the lab's 8/24 (L3
+  predicted a weakness). Inspecting the corpus afterwards, the token tests never
+  reached SYSTEM on this VM: every process they started ran at High integrity,
+  and no SYSTEM shell connected to a named pipe. So the runs contain no
+  escalation for any detector to find, and they do not test the token signal.
 - **No false alarms**: zero false-alarm processes from the research signals
   across the benign period and the session (L4).
 - **Next to SigmaHQ**: Sigma flags 30/50 runs, CPES 20/50, together 35/50 (L7).
