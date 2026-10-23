@@ -111,7 +111,7 @@ def test_custom_mapping_rules(tmp_path):
         resolve_mapping({"overrides": {"hostname": "host.name"}})
     configuration, spec = resolve_mapping({"preset": None, "overrides": {"source_timestamp": "t", "source_event_id": "id"}})
     assert spec["preset"] is None
-    assert sum(1 for f in configuration.fields if f.source_field not in ("t", "id")) == 9  # the rest unmapped, optional
+    assert sum(1 for f in configuration.fields if f.source_field not in ("t", "id")) == 10  # the rest unmapped, optional
 
 
 def test_inspect_record_matches_the_package_mapper(tmp_path, uac_documents):

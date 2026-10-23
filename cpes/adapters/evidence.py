@@ -31,10 +31,14 @@ class EvidenceRecord:
     pipe_name: Any | None
     pipe_event_type: Any | None
     target_process_guid: Any | None
+    # Service-install fields (evidence mapping v2); v1 mappings omit them.
+    service_image_path: Any | None = None
+    service_file_name: Any | None = None
 
 
 _DESTINATIONS = frozenset(EvidenceRecord.__dataclass_fields__)
 _REQUIRED = frozenset({"source_timestamp", "source_event_id"})
+_OMITTABLE = frozenset({"service_image_path", "service_file_name"})
 
 
 class EvidenceRecordMapper:
@@ -44,7 +48,7 @@ class EvidenceRecordMapper:
         destinations = [field.destination_field for field in mapping_configuration.fields]
         if len(destinations) != len(set(destinations)):
             raise ValueError("evidence mapping destinations must be unique.")
-        if set(destinations) != _DESTINATIONS:
+        if not _DESTINATIONS - _OMITTABLE <= set(destinations) <= _DESTINATIONS:
             raise ValueError("evidence mapping must declare exactly the evidence destinations.")
         if any(field.optional for field in mapping_configuration.fields if field.destination_field in _REQUIRED):
             raise ValueError("ordering fields must be required evidence mapping fields.")

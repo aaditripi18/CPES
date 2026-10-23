@@ -28,10 +28,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from cpes.context.models import PipeEvidence, RemoteThreadEvidence
+from cpes.context.models import PipeEvidence, RemoteThreadEvidence, ServiceInstallEvidence
 from cpes.windowing.models import EventGroup
 
-__all__ = ["ResolvedContext", "ContextResolver", "PipeEvidence", "RemoteThreadEvidence"]
+__all__ = ["ResolvedContext", "ContextResolver", "PipeEvidence", "RemoteThreadEvidence", "ServiceInstallEvidence"]
 
 
 @dataclass(frozen=True)
@@ -70,6 +70,13 @@ class ContextResolver:
         service_registry_tokens: tuple[str, ...] = ("\\services\\",),
         interactive_shell_images: tuple[str, ...] = ("cmd.exe", "powershell.exe", "pwsh.exe"),
         validly_signed_process_guids: frozenset[str] = frozenset(),
+        uac_requires_hijack_write: bool = True,
+        service_parent_images: tuple[str, ...] = (),
+        require_service_install: bool = False,
+        service_image_tokens: tuple[str, ...] = (),
+        injection_images: tuple[str, ...] = (),
+        remote_thread_source_images: tuple[str, ...] | None = None,
+        token_first_creator_only: bool = False,
     ) -> None:
         if not integrity_order or len(set(integrity_order)) != len(integrity_order):
             raise ValueError("integrity_order must be a nonempty tuple of unique levels.")
@@ -89,6 +96,18 @@ class ContextResolver:
         # Processes whose own image the telemetry recorded as validly signed
         # (cpes.context.signatures). Empty: the service test is location-only.
         self._signed = frozenset(validly_signed_process_guids)
+        # Opt-in variants (docs/design/package-v3-and-vm2.md). Defaults keep the
+        # behaviour every recorded result was produced with.
+        # Structural: the service anchor's parent must be one of these images (B1)
+        # and/or a service-install record must name its executable (B2).
+        self._uac_needs_write = uac_requires_hijack_write
+        self._service_parents = frozenset(image.lower() for image in service_parent_images)
+        self._needs_install = require_service_install
+        # NAME RULES (research-v3 replication): image-name matches, not mechanisms.
+        self._service_name_tokens = tuple(token.lower() for token in service_image_tokens)
+        self._injection_images = frozenset(image.lower() for image in injection_images)
+        self._thread_sources = None if remote_thread_source_images is None else frozenset(i.lower() for i in remote_thread_source_images)
+        self._first_creator_only = token_first_creator_only
 
     def _hijack_writes(self, events):
         return tuple(
@@ -116,6 +135,7 @@ class ContextResolver:
         *,
         pipe_evidence: tuple["PipeEvidence", ...] = (),
         remote_thread_evidence: tuple["RemoteThreadEvidence", ...] = (),
+        service_install_evidence: tuple["ServiceInstallEvidence", ...] = (),
     ) -> tuple[ResolvedContext, ...]:
         """Emit one ResolvedContext per re-associated escalation in the window.
 
@@ -138,20 +158,21 @@ class ContextResolver:
             # UAC-hijack registry write is present in the same window. Re-association
             # over channels (process-create <- registry) is what makes this a
             # mechanism signal rather than an image IOC.
-            if image in self._auto_images and integrity in self._elevated and hijack_writes:
-                write = hijack_writes[0]
+            if image in self._auto_images and integrity in self._elevated and (hijack_writes or not self._uac_needs_write):
+                write = hijack_writes[0] if hijack_writes else None
                 resolved.append(
                     ResolvedContext(
                         anchor_process_guid=event.process_guid,
                         anchor_kind="autoelevation_lolbin",
-                        actor_process_guid=write.process_guid,
+                        actor_process_guid=write.process_guid if write else None,
                         mediator="appinfo_consent",
                         privilege_level=event.integrity_level,
-                        evidence_event_ids=(event.event_id, write.event_id),
+                        evidence_event_ids=(event.event_id, write.event_id) if write else (event.event_id,),
                         resolution_path=(
                             f"auto-elevating '{image}' at '{integrity}' re-associated "
                             f"with hijack registry write '{write.registry_object}' "
-                            f"by actor {write.process_guid}",
+                            f"by actor {write.process_guid}"
+                            if write else f"auto-elevating '{image}' at '{integrity}' (no hijack write required)",
                         ),
                     )
                 )
@@ -161,15 +182,28 @@ class ContextResolver:
             # registry write when present. Structural — no image-name allow/deny list.
             # A process whose own image was recorded validly signed is skipped
             # when the caller supplies that set (S1; empty by default).
-            if (
+            structural = bool(
                 integrity == "system"
                 and event.image_path
                 and image != "svchost.exe"
                 and not self._is_system_path(event.image_path)
                 and event.process_guid not in self._signed
-            ):
+                and (not self._service_parents or _basename(event.parent_image_path) in self._service_parents)
+            )
+            install = None
+            if structural and self._needs_install:
+                install = next((i for i in service_install_evidence if i.image_basename == image and i.occurred_at <= event.occurred_at), None)
+                structural = install is not None
+            # Name rule (research-v3 only): the image name contains a listed token.
+            named = event.integrity_level is not None and any(token in image for token in self._service_name_tokens)
+            if structural or named:
                 evidence = [event.event_id]
-                path = [f"SYSTEM binary '{image}' run from outside system directories"]
+                path = [f"SYSTEM binary '{image}' run from outside system directories" if structural else f"NAME RULE: image '{image}' matches a listed service token"]
+                if self._service_parents and structural:
+                    path.append(f"parent '{_basename(event.parent_image_path)}'")
+                if install is not None:
+                    evidence.append(install.event_id)
+                    path.append(f"service-install record for '{install.image_basename}'")
                 if service_writes:
                     evidence.append(service_writes[0].event_id)
                     path.append(
@@ -192,9 +226,17 @@ class ContextResolver:
         # a SYSTEM interactive shell. Re-association across the pipe channel (create
         # <- connect) is what distinguishes impersonation from ordinary service IPC.
         creators_by_pipe: dict[str, PipeEvidence] = {}
-        for pipe in pipe_evidence:
-            if pipe.action == "create" and not pipe.user_is_system:
-                creators_by_pipe.setdefault(pipe.pipe_name, pipe)
+        if self._first_creator_only:
+            # research-v3: the first creator of each pipe, which must not be SYSTEM.
+            first: dict[str, PipeEvidence] = {}
+            for pipe in pipe_evidence:
+                if pipe.action == "create":
+                    first.setdefault(pipe.pipe_name, pipe)
+            creators_by_pipe = {name: pipe for name, pipe in first.items() if not pipe.user_is_system}
+        else:
+            for pipe in pipe_evidence:
+                if pipe.action == "create" and not pipe.user_is_system:
+                    creators_by_pipe.setdefault(pipe.pipe_name, pipe)
         for pipe in pipe_evidence:
             if (
                 pipe.action == "connect"
@@ -219,7 +261,11 @@ class ContextResolver:
                 )
 
         # Injection: a remote-thread creation re-associates injector -> victim.
+        injectors: set[str] = set()
         for thread in remote_thread_evidence:
+            if self._thread_sources is not None and thread.source_image_basename not in self._thread_sources:
+                continue
+            injectors.add(thread.source_process_guid)
             resolved.append(
                 ResolvedContext(
                     anchor_process_guid=thread.source_process_guid,
@@ -234,5 +280,20 @@ class ContextResolver:
                     ),
                 )
             )
+        # Name rule (research-v3 only): a process created from a listed injector image.
+        for event in events:
+            if event.integrity_level is not None and event.process_guid not in injectors and _basename(event.image_path) in self._injection_images:
+                injectors.add(event.process_guid)
+                resolved.append(
+                    ResolvedContext(
+                        anchor_process_guid=event.process_guid,
+                        anchor_kind="remote_thread_injection",
+                        actor_process_guid=event.process_guid,
+                        mediator="image_name_rule",
+                        privilege_level=event.integrity_level,
+                        evidence_event_ids=(event.event_id,),
+                        resolution_path=(f"NAME RULE: process image '{_basename(event.image_path)}' is a listed injector",),
+                    )
+                )
 
         return tuple(resolved)

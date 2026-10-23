@@ -19,6 +19,7 @@ class ContextEvent:
     registry_object: str | None = None
     image_path: str | None = None
     module_path: str | None = None
+    parent_image_path: str | None = None
 
 
 @dataclass(frozen=True)
@@ -104,6 +105,15 @@ class RemoteThreadEvidence:
     source_process_guid: str
     target_process_guid: str
     source_image_basename: str
+
+
+@dataclass(frozen=True)
+class ServiceInstallEvidence:
+    """A service-install record (System 7045 / Security 4697): which executable was registered, and when."""
+
+    event_id: str
+    occurred_at: datetime
+    image_basename: str
 
 
 @dataclass(frozen=True)

@@ -142,3 +142,30 @@ class PipelineEvidenceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ServiceInstallChannelTests(unittest.TestCase):
+    _V2 = Path(__file__).resolve().parents[2] / "configs" / "elastic-sysmon-evidence-mapping-v2.yaml"
+
+    def test_v2_mapping_reads_both_install_fields(self) -> None:
+        mapper = EvidenceRecordMapper(load_evidence_mapping(self._V2))
+        system = mapper.map_document({"@timestamp": _iso(1), "winlog": {"record_id": 7, "event_data": {"ImagePath": '"C:\T\Svc.exe" -k x'}}, "event": {"code": "7045"}})
+        security = mapper.map_document({"@timestamp": _iso(2), "winlog": {"record_id": 8, "event_data": {"ServiceFileName": "C:\T\Svc.exe"}}, "event": {"code": "4697"}})
+        self.assertEqual(system.service_image_path, '"C:\T\Svc.exe" -k x')
+        self.assertEqual(security.service_file_name, "C:\T\Svc.exe")
+
+    def test_builds_install_evidence_and_attaches_it_by_time(self) -> None:
+        builder = EvidenceChannelBuilder(pipe_create_codes=("17",), pipe_connect_codes=("18",), remote_thread_codes=("8",),
+                                         system_user_names=("SYSTEM",), service_install_codes=("7045", "4697"))
+        records = [
+            EvidenceRecord(_iso(5), "a", "7045", None, None, None, None, None, None, service_image_path='"C:\T\Svc.exe" -k x'),
+            EvidenceRecord(_iso(6), "b", "4697", None, None, None, None, None, None, service_file_name="C:\T\Other.exe"),
+            EvidenceRecord(_iso(7), "c", "4697", None, None, None, None, None, None),
+        ]
+        channels = builder.build(records)
+        self.assertEqual([i.evidence.image_basename for i in channels.service_installs], ["svc.exe", "other.exe"])
+        self.assertEqual(dict(channels.skipped), {"service_install_missing_image": 1})
+        group = EventGroup("chain", (), False, False, False)
+        windows = (DetectionWindow(_T0, _T0 + timedelta(seconds=6), group), DetectionWindow(_T0 + timedelta(seconds=6), _T0 + timedelta(seconds=12), group))
+        attached = EvidenceWindowAttacher().attach(windows, channels.items, {})
+        self.assertEqual([len(w.event_group.service_install_evidence) for w in attached], [1, 1])

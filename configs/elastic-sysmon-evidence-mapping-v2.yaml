@@ -1,0 +1,44 @@
+# v2 (2026-10-24): v1 plus service-install fields, System 7045 ImagePath and
+# Security 4697 ServiceFileName (checked against the vm-live-v1 export).
+# Declarative source-to-evidence mapping for cross-channel evidence (additive to
+# elastic-sysmon-field-mapping-v1). Values are copied directly; no transformation.
+#
+# Field locations checked 2026-10-18 against corpus-v3 (Winlogbeat 9.4.3, ECS):
+# EID 17/18 carry file.name (pipe), user.name and winlog.event_data.EventType;
+# EID 8 carries winlog.event_data.TargetProcessGUID. Note the GUID spelling
+# "TargetProcessGUID" (Sysmon), unlike ECS process.entity_id.
+version: elastic-sysmon-evidence-mapping-v2
+fields:
+  - source_field: "@timestamp"
+    destination_field: source_timestamp
+    optional: false
+  - source_field: winlog.record_id
+    destination_field: source_event_id
+    optional: false
+  - source_field: event.code
+    destination_field: event_code
+    optional: true
+  - source_field: process.entity_id
+    destination_field: process_guid
+    optional: true
+  - source_field: process.executable
+    destination_field: image_path
+    optional: true
+  - source_field: user.name
+    destination_field: user_name
+    optional: true
+  - source_field: file.name
+    destination_field: pipe_name
+    optional: true
+  - source_field: winlog.event_data.EventType
+    destination_field: pipe_event_type
+    optional: true
+  - source_field: winlog.event_data.TargetProcessGUID
+    destination_field: target_process_guid
+    optional: true
+  - source_field: winlog.event_data.ImagePath
+    destination_field: service_image_path
+    optional: true
+  - source_field: winlog.event_data.ServiceFileName
+    destination_field: service_file_name
+    optional: true

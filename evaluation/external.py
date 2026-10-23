@@ -29,6 +29,7 @@ from .engine import EVIDENCE_SETTINGS, INTEGRITY_ORDER, frozen_model, make_gener
 SAMPLES = ROOT / "external" / "evtx-attack-samples" / "privesc"
 MANIFEST = ROOT / "configs" / "external-datasets.json"
 CANONICAL_MAPPING = ROOT / "configs" / "evtx-sysmon-field-mapping-v1.yaml"
+CANONICAL_MAPPING_V2 = ROOT / "configs" / "evtx-sysmon-field-mapping-v2.yaml"
 PIPE_MAPPING = ROOT / "configs" / "evtx-sysmon-evidence-pipes-v1.yaml"
 THREAD_MAPPING = ROOT / "configs" / "evtx-sysmon-evidence-threads-v1.yaml"
 SPAN, ADVANCE = 300.0, 150.0
@@ -103,13 +104,13 @@ def _basename(path) -> str:
     return str(path or "").replace("/", "\\").split("\\")[-1].lower()
 
 
-def evaluate_file(path: Path) -> dict:
+def evaluate_file(path: Path, mode: str = "package-v2") -> dict:
     docs = evtx_source.sysmon_records(path)
     out: dict = {"file": path.name, "sysmon_records": len(docs), "category": category(path.name, bool(docs))}
     if not docs:
         out["outcome"] = "not_applicable"
         return out
-    mapper = CanonicalEventMapper(load_mapping_configuration(CANONICAL_MAPPING))
+    mapper = CanonicalEventMapper(load_mapping_configuration(CANONICAL_MAPPING if mode == "package-v2" else CANONICAL_MAPPING_V2))
     translator = CanonicalEventTranslator()
     events, rejections = [], Counter()
     for document in docs:
@@ -137,7 +138,7 @@ def evaluate_file(path: Path) -> dict:
         return out
 
     stamps = [datetime.fromisoformat(e.source_timestamp.replace("Z", "+00:00")) for e in events]
-    resolver = make_resolver()
+    resolver = make_resolver(mode=mode)
     configuration = PipelineConfiguration(
         SlidingWindowParameters(min(stamps), max(stamps) + timedelta(seconds=SPAN), SPAN, ADVANCE),
         frozen_model(), Decimal("0.5"), make_generator(resolver),

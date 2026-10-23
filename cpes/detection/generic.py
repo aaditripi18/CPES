@@ -63,6 +63,7 @@ class GenericEscalationObservationGenerator:
                 event_group,
                 pipe_evidence=event_group.pipe_evidence,
                 remote_thread_evidence=event_group.remote_thread_evidence,
+                service_install_evidence=event_group.service_install_evidence,
             )
         }
         image_by_guid = {

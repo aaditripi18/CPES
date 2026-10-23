@@ -23,7 +23,7 @@ class CanonicalEventTranslator:
             process_guid = self._optional_string(event.process_guid, "process_guid")
             if process_guid is None:
                 continue
-            context_events.append(ContextEvent(event.source_event_id, process_guid, occurred_at, self._optional_string(event.integrity_level, "integrity_level"), None, self._optional_string(event.command_line, "command_line"), self._optional_string(event.registry_object, "registry_object"), self._optional_string(event.image_path, "image_path"), self._optional_string(event.module_path, "module_path")))
+            context_events.append(ContextEvent(event.source_event_id, process_guid, occurred_at, self._optional_string(event.integrity_level, "integrity_level"), None, self._optional_string(event.command_line, "command_line"), self._optional_string(event.registry_object, "registry_object"), self._optional_string(event.image_path, "image_path"), self._optional_string(event.module_path, "module_path"), self._optional_string(event.parent_image_path, "parent_image_path")))
             incoming = ProcessNode(process_guid, self._optional_string(event.parent_process_guid, "parent_process_guid"), event.process_id)
             existing = nodes.get(process_guid)
             nodes[process_guid] = incoming if existing is None else self._merge_node(existing, incoming)

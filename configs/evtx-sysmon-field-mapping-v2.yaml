@@ -1,0 +1,42 @@
+# v2 (2026-10-24): v1 plus the parent image (Sysmon ParentImage).
+# Raw Sysmon records read from .evtx files (python `evtx` JSON layout:
+# Event.System.* and Event.EventData.*). Values are copied directly; no
+# transformation. Checked 2026-10-18 against EVTX-ATTACK-SAMPLES.
+version: evtx-sysmon-field-mapping-v2
+fields:
+  - source_field: Event.System.TimeCreated.#attributes.SystemTime
+    destination_field: source_timestamp
+    optional: false
+  - source_field: Event.System.EventRecordID
+    destination_field: source_event_id
+    optional: false
+  - source_field: Event.System.EventID
+    destination_field: event_code
+    optional: true
+  - source_field: Event.EventData.ProcessGuid
+    destination_field: process_guid
+    optional: true
+  - source_field: Event.EventData.ParentProcessGuid
+    destination_field: parent_process_guid
+    optional: true
+  - source_field: Event.EventData.ProcessId
+    destination_field: process_id
+    optional: true
+  - source_field: Event.EventData.IntegrityLevel
+    destination_field: integrity_level
+    optional: true
+  - source_field: Event.EventData.CommandLine
+    destination_field: command_line
+    optional: true
+  - source_field: Event.EventData.TargetObject
+    destination_field: registry_object
+    optional: true
+  - source_field: Event.EventData.Image
+    destination_field: image_path
+    optional: true
+  - source_field: Event.EventData.ImageLoaded
+    destination_field: module_path
+    optional: true
+  - source_field: Event.EventData.ParentImage
+    destination_field: parent_image_path
+    optional: true

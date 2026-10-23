@@ -38,4 +38,6 @@ class CanonicalEvent:
     registry_object: Any | None
     image_path: Any | None
     module_path: Any | None
+    # Optional (mapping v2): mappings written before it may omit it.
+    parent_image_path: Any | None = None
 

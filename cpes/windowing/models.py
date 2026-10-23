@@ -10,6 +10,7 @@ from cpes.context.models import (
     IntegrityTransition,
     PipeEvidence,
     RemoteThreadEvidence,
+    ServiceInstallEvidence,
 )
 
 
@@ -43,6 +44,7 @@ class EventGroup:
     integrity_transitions: tuple[IntegrityTransition, ...] = ()
     pipe_evidence: tuple[PipeEvidence, ...] = ()
     remote_thread_evidence: tuple[RemoteThreadEvidence, ...] = ()
+    service_install_evidence: tuple[ServiceInstallEvidence, ...] = ()
 
 
 @dataclass(frozen=True)
