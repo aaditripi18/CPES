@@ -85,3 +85,25 @@ denominators and are reported separately.
 Adoption: the dashboard switches its default to `research-v3` (labelled) if A's
 development checks hold and V2 holds; `structural-v3` becomes the recommended
 structural setting if V3 and V4 hold. Either outcome is reported.
+
+## Development checks: outcome (2026-10-25, before VM2)
+
+`results/package-v3-dev.json`, commit `a6398bc`, clean tree:
+
+- **A holds.** research-v3 flags equal the research flags per process on corpus-v3
+  and on vm-live-v1 (zero differences). Package grouped-CV F1 0.993 (was 0.684).
+- **B1 + B2 (structural-v3).** corpus-v3 benign units with a service flag drop from 12 to 1,
+  and grouped-CV F1 goes from 0.684 to 0.734. vm-live-v1 service false alarms drop
+  from 4 to 0, with service runs kept at 10/10. **Cost:** on EVTX-ATTACK-SAMPLES the
+  service signal is lost on 4 of 5 files (EfsPotato, RogueWinRM, RoguePotato, a
+  NetSvc impersonation), and detected files fall from 9 to 5.
+- **B2 alone** gives the same vm-live-v1 result as the protocol S2 (10 runs kept,
+  4 false alarms removed). On the EVTX samples it changes nothing, because they
+  hold no install records.
+
+## Amendment 1 (2026-10-25, before VM2 exists)
+
+Because of the B1 cost above, VM2 also evaluates **B2 alone** (`service-install-only`)
+with the same criteria as V3 and V4 (V3b, V4b). If structural-v3 and B2 alone both
+hold, B2 alone is recommended: on the development data it keeps the Potato detections
+that B1 loses.

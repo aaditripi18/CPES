@@ -7,6 +7,12 @@ generated into [docs/RESULTS.md](docs/RESULTS.md).
 
 ## Unreleased
 
+- **Package v3 modes** (opt-in, defaults unchanged): `research-v3` reproduces the
+  published research rules exactly, with name rules labelled (corpus-v3 F1 0.993 in
+  the package); `structural-v3` adds the `services.exe` parent check and
+  service-install corroboration (System 7045 / Security 4697 evidence channel).
+  Field mappings v2 add the parent image. Development checks: RESULTS §14.
+
 - **Live VM evaluation** (`vm-live-v1`, pre-registered in
   [docs/design/vm-live-v1.md](docs/design/vm-live-v1.md)): a second corpus of 50
   Atomic runs with detectors frozen and Defender on. CPES 20/50 (expectation

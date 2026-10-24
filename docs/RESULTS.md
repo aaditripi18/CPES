@@ -283,6 +283,22 @@ Service-install corroboration (S2): R service runs 10 → 10, false-alarm proces
 | S2a | S2 keeps >= 90% of service runs S0 detects (R and P pooled) | 20/20 | supported |
 | S2b | S2 removes >= 80% of S0 false-alarm processes (R and P pooled) | 4/4 | supported |
 
+## 14. Package v3 modes — development checks (seen data)
+
+research-v3 replicates the published research rules inside the package, including their two name rules (`mavinject.exe`, `atomicservice`). structural-v3 adds the `services.exe` parent check (B1) and, where install records exist, service-install corroboration (B2). These run on data already seen during development, so they show what each mode does, not how it generalises; VM2 is the test. Pre-registered in [design/package-v3-and-vm2.md](design/package-v3-and-vm2.md).
+
+execution `package-v3-dev-20261024T203752Z`
+
+| | package-v2 (current) | research-v3 | structural-v3 |
+|---|---|---|---|
+| corpus-v3 grouped-CV F1 | 0.684 | 0.993 | 0.734 |
+| corpus-v3 benign units with a service flag | 12 | 1 | 1 |
+| vm-live-v1 runs, consistent | 15/50 | 20/50 | 15/50 |
+| vm-live-v1 false-alarm processes | 4 | 0 | 0 |
+| EVTX-ATTACK-SAMPLES files detected | 9 | — | 5 |
+
+research-v3 equals the research rules per process: corpus-v3 **True**, vm-live-v1 **True**. B1 loses the service signal on 4 EVTX files (`EfsPotato_sysmon_17_18_privesc_seimpersonate_to_system.evtx`, `PrivEsc_Imperson_NetSvc_to_Sys_Decoder_Sysmon_1_17_18.evtx`, `RogueWinRM.evtx`, `privesc_roguepotato_sysmon_17_18.evtx`). B2 alone on vm-live-v1: service runs 10/10, false-alarm processes 0.
+
 ## Reading these results
 
 See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.

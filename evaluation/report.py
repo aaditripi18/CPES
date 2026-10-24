@@ -282,6 +282,32 @@ def _vm_live_section() -> list[str]:
     return out
 
 
+def _package_v3_section() -> list[str]:
+    record = _load("package-v3-dev")
+    out = ["", "## 14. Package v3 modes — development checks (seen data)", "",
+           "research-v3 replicates the published research rules inside the package, including their two name rules (`mavinject.exe`, `atomicservice`). "
+           "structural-v3 adds the `services.exe` parent check (B1) and, where install records exist, service-install corroboration (B2). "
+           "These run on data already seen during development, so they show what each mode does, not how it generalises; VM2 is the test. "
+           "Pre-registered in [design/package-v3-and-vm2.md](design/package-v3-and-vm2.md).", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    lab, vm, ev = r["corpus_v3"], r["vm_live_v1"], r["evtx_attack_samples"]
+    grouped = _load("package-grouped")
+    current_f1 = f"{grouped['result']['detectors']['cpes']['fold_mean']['f1']:.3f}" if grouped else "—"
+    out += [f"execution `{record['id']}`", "", "| | package-v2 (current) | research-v3 | structural-v3 |", "|---|---|---|---|",
+            f"| corpus-v3 grouped-CV F1 | {current_f1} | {lab['research-v3']['cv']['f1_mean']:.3f} | {lab['structural-v3']['cv']['f1_mean']:.3f} |",
+            f"| corpus-v3 benign units with a service flag | {lab['package-v2_benign_units_with_service_flag']} | {lab['research-v3']['benign_units_with_service_flag']} | {lab['structural-v3']['benign_units_with_service_flag']} |"]
+    rl = vm["run_level"]
+    out.append("| vm-live-v1 runs, consistent | " + " | ".join(f"{rl[m]['runs_consistent']}/{rl[m]['runs']}" for m in ("package-v2", "research-v3", "structural-v3")) + " |")
+    out.append("| vm-live-v1 false-alarm processes | " + " | ".join(str(rl[m]["false_alarm_processes"]) for m in ("package-v2", "research-v3", "structural-v3")) + " |")
+    out.append(f"| EVTX-ATTACK-SAMPLES files detected | {ev['package-v2']['files_detected']} | — | {ev['structural-v3']['files_detected']} |")
+    out += ["", f"research-v3 equals the research rules per process: corpus-v3 **{lab['research_identical']}**, vm-live-v1 **{vm['research_identical']}**. "
+            f"B1 loses the service signal on {len(ev['service_files_lost_by_B1'])} EVTX files ({', '.join(f'`{f}`' for f in ev['service_files_lost_by_B1'])}). "
+            f"B2 alone on vm-live-v1: service runs {vm['service']['service-install-only']['service_runs_detected']}/10, false-alarm processes {vm['service']['service-install-only']['false_alarm_processes']}."]
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -323,7 +349,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section() + _package_v3_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 
