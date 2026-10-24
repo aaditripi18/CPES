@@ -1,0 +1,49 @@
+# v2 (2026-10-24): v1 plus the parent image (process.parent.executable), used by
+# the research-v3 and structural-v3 modes (docs/design/package-v3-and-vm2.md).
+# Declarative source-to-canonical mapping for the C5 retrieval adapter.
+# Values are copied directly; no transformations, normalization, or enrichment occur.
+#
+# Reconciled 2026-08-23 against real Winlogbeat 9.4.3 Sysmon-module output on the
+# CPES VM: the module normalizes Sysmon events into ECS, so process identity /
+# command line / image live under ECS `process.*` fields rather than raw
+# `winlog.event_data.*`. `process.entity_id` equals the Sysmon ProcessGuid.
+# registry_object and module_path are provisional pending an EID 12/13 and EID 7
+# sample; both are optional and only appear on those event types.
+version: elastic-sysmon-field-mapping-v2
+fields:
+  - source_field: "@timestamp"
+    destination_field: source_timestamp
+    optional: false
+  - source_field: winlog.record_id
+    destination_field: source_event_id
+    optional: false
+  - source_field: event.code
+    destination_field: event_code
+    optional: true
+  - source_field: process.entity_id
+    destination_field: process_guid
+    optional: true
+  - source_field: process.parent.entity_id
+    destination_field: parent_process_guid
+    optional: true
+  - source_field: process.pid
+    destination_field: process_id
+    optional: true
+  - source_field: winlog.event_data.IntegrityLevel
+    destination_field: integrity_level
+    optional: true
+  - source_field: process.command_line
+    destination_field: command_line
+    optional: true
+  - source_field: registry.path
+    destination_field: registry_object
+    optional: true
+  - source_field: process.executable
+    destination_field: image_path
+    optional: true
+  - source_field: dll.path
+    destination_field: module_path
+    optional: true
+  - source_field: process.parent.executable
+    destination_field: parent_image_path
+    optional: true

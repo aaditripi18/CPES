@@ -7,7 +7,9 @@ Assignment rules (see docs/design/evidence-channels-and-package-evaluation.md):
 * pipe *connect* evidence → windows of the chain containing the connecting
   process, when its time lies in the window;
 * pipe *create* evidence with the same pipe name as an attached connect, from
-  any chain, when its time lies in the same window.
+  any chain, when its time lies in the same window;
+* service-install evidence (not tied to a process) → every window whose time
+  range contains it.
 
 The window is the only temporal scope; nothing outside it is associated.
 """
@@ -17,7 +19,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import replace
 
-from cpes.context.models import PipeEvidence, RemoteThreadEvidence
+from cpes.context.models import PipeEvidence, RemoteThreadEvidence, ServiceInstallEvidence
 
 from .models import DetectionWindow
 
@@ -33,6 +35,7 @@ class EvidenceWindowAttacher:
         threads = [item for item in items if isinstance(item.evidence, RemoteThreadEvidence)]
         connects = [item for item in items if isinstance(item.evidence, PipeEvidence) and item.evidence.action == "connect"]
         creates = [item for item in items if isinstance(item.evidence, PipeEvidence) and item.evidence.action == "create"]
+        installs = [item for item in items if isinstance(item.evidence, ServiceInstallEvidence)]
         out: list[DetectionWindow] = []
         for window in windows:
             members = chain_members.get(window.event_group.lineage_chain_id, frozenset())
@@ -42,8 +45,9 @@ class EvidenceWindowAttacher:
             pipe_names = {c.evidence.pipe_name for c in window_connects}
             window_creates = [c for c in creates if c.evidence.pipe_name in pipe_names and inside(c)]
             pipes = tuple(item.evidence for item in sorted(window_creates + window_connects, key=lambda item: (item.occurred_at, item.evidence.event_id)))
-            if not window_threads and not pipes:
+            window_installs = tuple(i.evidence for i in installs if inside(i))
+            if not window_threads and not pipes and not window_installs:
                 out.append(window)
                 continue
-            out.append(replace(window, event_group=replace(window.event_group, pipe_evidence=pipes, remote_thread_evidence=window_threads)))
+            out.append(replace(window, event_group=replace(window.event_group, pipe_evidence=pipes, remote_thread_evidence=window_threads, service_install_evidence=window_installs)))
         return tuple(out)

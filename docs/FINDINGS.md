@@ -135,6 +135,24 @@ Defender left on, System 7045 and Security 4697 collected alongside Sysmon.
 The session ran with one guest freeze and recovery, recorded in
 [../lab/vm-session/SESSION-NOTES.md](../lab/vm-session/SESSION-NOTES.md).
 
+## 11. The packaged engine can now reproduce the published figures
+
+The dashboard engine (`cpes` package) has an opt-in **research-v3** mode that
+applies the published research rules, including their two name rules
+(`mavinject.exe`, `atomicservice`), which are labelled as such. It flags exactly
+the same processes as the research scripts on corpus-v3 and on the live VM corpus,
+and its grouped-CV F1 is **0.993** instead of 0.684. The gap was never a scoring
+difference: it came from those name rules, a registry requirement, and a missing
+parent check.
+
+A structural alternative, **structural-v3**, adds the `services.exe` parent check
+and service-install corroboration. On data already seen during development it
+removed the recurring Defender false alarm (lab 12 → 1 benign service flags; VM 4 → 0)
+but lost the service signal on 4 of 5 Potato-style public samples. The
+service-install check alone kept those samples and removed the VM false alarms. Both
+variants are tested on a second VM before either becomes a default
+([design](design/package-v3-and-vm2.md)).
+
 ## What would change these conclusions
 
 - A further, independently collected corpus on a different Windows build,

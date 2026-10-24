@@ -11,6 +11,8 @@ from .models import CanonicalEvent, FieldMapping, MappingConfiguration
 
 _CANONICAL_DESTINATIONS = frozenset(CanonicalEvent.__dataclass_fields__)
 _REQUIRED_DESTINATIONS = frozenset({"source_timestamp", "source_event_id"})
+# Destinations added after v1 mappings existed; a mapping may leave them out.
+_OMITTABLE_DESTINATIONS = frozenset({"parent_image_path"})
 
 
 class CanonicalEventMapper:
@@ -53,7 +55,7 @@ class CanonicalEventMapper:
         unknown_destinations = set(destinations) - _CANONICAL_DESTINATIONS
         if unknown_destinations:
             raise ValueError("mapping contains an unknown canonical destination.")
-        missing_destinations = _CANONICAL_DESTINATIONS - set(destinations)
+        missing_destinations = _CANONICAL_DESTINATIONS - _OMITTABLE_DESTINATIONS - set(destinations)
         if missing_destinations:
             raise ValueError("mapping must declare every canonical destination.")
         optional_required = [

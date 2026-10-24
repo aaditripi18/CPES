@@ -44,16 +44,40 @@ EVIDENCE_SETTINGS = {
 }
 MAPPING = ROOT / "configs" / "elastic-sysmon-field-mapping-v1.yaml"
 EVIDENCE_MAPPING = ROOT / "configs" / "elastic-sysmon-evidence-mapping-v1.yaml"
+MAPPING_V2 = ROOT / "configs" / "elastic-sysmon-field-mapping-v2.yaml"
+EVIDENCE_MAPPING_V2 = ROOT / "configs" / "elastic-sysmon-evidence-mapping-v2.yaml"
+SERVICE_INSTALL_CODES = ("7045", "4697")
+
+# Resolver variants (docs/design/package-v3-and-vm2.md). "package-v2" is the
+# package as every earlier result used it.
+MODES = {
+    "package-v2": {},
+    # Replication of the published research rules, including their two NAME RULES
+    # (mavinject.exe for injection, "atomicservice" for service).
+    "research-v3": {
+        "uac_requires_hijack_write": False,
+        "service_parent_images": ("services.exe",),
+        "service_image_tokens": ("atomicservice",),
+        "injection_images": ("mavinject.exe",),
+        "remote_thread_source_images": ("mavinject.exe",),
+        "token_first_creator_only": True,
+    },
+    # Structural fixes B1 (+ B2 when the data has service-install records).
+    "structural-v3": {"service_parent_images": ("services.exe",), "require_service_install": True},
+}
 MODEL = ROOT / "dashboard" / "models" / "research-v3-full-table.json"
 
 
-def make_resolver(validly_signed_process_guids: frozenset[str] = frozenset()) -> ContextResolver:
+def make_resolver(validly_signed_process_guids: frozenset[str] = frozenset(), mode: str = "package-v2", *, has_service_installs: bool = False) -> ContextResolver:
     s = RESOLVER_SETTINGS
+    options = dict(MODES[mode])
+    if options.get("require_service_install") and not has_service_installs:
+        options["require_service_install"] = False  # B2 applies only to telemetry that records installs
     return ContextResolver(
         s["integrity_order"], s["auto_elevating_images"], s["hijack_registry_tokens"],
         elevated_levels=s["elevated_levels"], system_path_tokens=s["system_path_tokens"],
         service_registry_tokens=s["service_registry_tokens"], interactive_shell_images=s["interactive_shell_images"],
-        validly_signed_process_guids=validly_signed_process_guids,
+        validly_signed_process_guids=validly_signed_process_guids, **options,
     )
 
 
@@ -67,23 +91,33 @@ def frozen_model() -> EvidenceModel:
     return EvidenceModel(Decimal(model["prior_applied"]), tuple(EvidenceTerm(s, terms[s]) for s in SIGNALS))
 
 
-def build_evidence(docs) -> tuple:
-    mapper = EvidenceRecordMapper(load_evidence_mapping(EVIDENCE_MAPPING))
-    return EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(mapper.map_document(d) for d in docs)
+def build_evidence(docs, *, v2: bool = False) -> tuple:
+    mapper = EvidenceRecordMapper(load_evidence_mapping(EVIDENCE_MAPPING_V2 if v2 else EVIDENCE_MAPPING))
+    settings = {**EVIDENCE_SETTINGS, "service_install_codes": SERVICE_INSTALL_CODES} if v2 else EVIDENCE_SETTINGS
+    return EvidenceChannelBuilder(**settings).build(mapper.map_document(d) for d in docs)
 
 
 def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 150.0, docs=None, generic: bool = False,
-                bounds: tuple[datetime, datetime] | None = None) -> dict:
-    """``bounds`` fixes the window grid (start, end); by default it spans the documents."""
+                bounds: tuple[datetime, datetime] | None = None, mode: str = "package-v2") -> dict:
+    """``bounds`` fixes the window grid (start, end); by default it spans the documents.
+
+    ``mode`` other than "package-v2" uses the v2 mappings (parent image, service installs).
+    Service-install records (System/Security) feed only the evidence channel.
+    """
 
     docs = documents() if docs is None else docs
-    mapper = CanonicalEventMapper(load_mapping_configuration(MAPPING))
-    events = [mapper.map_document(d) for d in docs]
+    v2 = mode != "package-v2"
+    mapper = CanonicalEventMapper(load_mapping_configuration(MAPPING_V2 if v2 else MAPPING))
+    install_codes = set(SERVICE_INSTALL_CODES)
+    # Service-install records (System/Security) are not process events in any mode.
+    process_docs = [d for d in docs if str((d.get("event") or {}).get("code")) not in install_codes]
+    events = [mapper.map_document(d) for d in process_docs]
     stamps = [datetime.fromisoformat(e.source_timestamp.replace("Z", "+00:00")) for e in events]
     start, end = bounds if bounds else (min(stamps), max(stamps) + timedelta(seconds=span))
     params = SlidingWindowParameters(start, end, span, advance)
-    configuration = PipelineConfiguration(params, frozen_model(), Decimal("0.5"), make_generator(make_resolver()))
-    channels = build_evidence(docs) if with_evidence else None
+    channels = build_evidence(docs, v2=v2) if with_evidence else None
+    resolver = make_resolver(mode=mode, has_service_installs=bool(channels and channels.service_installs))
+    configuration = PipelineConfiguration(params, frozen_model(), Decimal("0.5"), make_generator(resolver))
     context = CpesPipeline().run(events, configuration, evidence=channels.items if channels else ())
 
     flags: dict[str, set[str]] = defaultdict(set)
@@ -98,7 +132,7 @@ def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 15
     if generic:
         from cpes.detection.generic import GenericEscalationObservationGenerator
 
-        detector = GenericEscalationObservationGenerator("unexplained_privilege_gain", INTEGRITY_ORDER, make_resolver())
+        detector = GenericEscalationObservationGenerator("unexplained_privilege_gain", INTEGRITY_ORDER, resolver)
         generic_flags = {
             reference.process_guid
             for window in context.detection_windows
@@ -118,7 +152,9 @@ def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 15
         "evidence": None if channels is None else {
             "pipes": len(channels.pipes),
             "remote_threads": len(channels.remote_threads),
+            "service_installs": len(channels.service_installs),
             "skipped": dict(channels.skipped),
         },
-        "settings": {"span_seconds": span, "advance_seconds": advance, "resolver": {k: list(v) for k, v in RESOLVER_SETTINGS.items()}, "evidence": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()} if with_evidence else None},
+        "settings": {"span_seconds": span, "advance_seconds": advance, "mode": mode, "mode_options": {k: (list(v) if isinstance(v, tuple) else v) for k, v in MODES[mode].items()},
+                     "resolver": {k: list(v) for k, v in RESOLVER_SETTINGS.items()}, "evidence": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()} if with_evidence else None},
     }
