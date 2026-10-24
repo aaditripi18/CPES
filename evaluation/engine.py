@@ -109,7 +109,8 @@ def run_package(*, with_evidence: bool, span: float = 300.0, advance: float = 15
     v2 = mode != "package-v2"
     mapper = CanonicalEventMapper(load_mapping_configuration(MAPPING_V2 if v2 else MAPPING))
     install_codes = set(SERVICE_INSTALL_CODES)
-    process_docs = [d for d in docs if not (v2 and str((d.get("event") or {}).get("code")) in install_codes)]
+    # Service-install records (System/Security) are not process events in any mode.
+    process_docs = [d for d in docs if str((d.get("event") or {}).get("code")) not in install_codes]
     events = [mapper.map_document(d) for d in process_docs]
     stamps = [datetime.fromisoformat(e.source_timestamp.replace("Z", "+00:00")) for e in events]
     start, end = bounds if bounds else (min(stamps), max(stamps) + timedelta(seconds=span))
