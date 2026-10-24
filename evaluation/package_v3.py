@@ -71,7 +71,9 @@ def _vm_docs() -> tuple[list, list]:
                 package.append(d)
             elif channel == vm_live.SYSMON and code in vm_live.REGISTRY_CODES and any(t in (vm_live._get(d, "registry", "path") or "").lower() for t in tokens):
                 package.append(d)
-    return vm_live._sorted(process), vm_live._sorted(package)
+    # System/Security record ids are strings, Sysmon's are integers: order on both as text.
+    key = lambda d: (d["@timestamp"], vm_live._get(d, "winlog", "channel") or "", str(vm_live._get(d, "winlog", "record_id")))  # noqa: E731
+    return sorted(process, key=key), sorted(package, key=key)
 
 
 def vm() -> dict:
