@@ -33,6 +33,10 @@ A4. Boot and install **Windows Server 2022 Standard Evaluation (Desktop Experien
     then choose Custom install on the empty disk. Set the built-in Administrator password.
     (Server Core lacks the GUI binaries the UAC tests rely on.)
 
+A5. **Guest Additions** (needed for the shared folder in B4; vm-live-v1 had them too):
+    VM window ▸ Devices ▸ **Insert Guest Additions CD image**, run
+    `VBoxWindowsAdditions.exe` from the CD drive, reboot.
+
 ## Phase B: configure Windows (inside the VM)
 
 B1. **Session user.** As Administrator, in an elevated PowerShell:
