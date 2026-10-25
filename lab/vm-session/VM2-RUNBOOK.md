@@ -53,37 +53,55 @@ B3. **Audit policy** (Security 4697 service installs), elevated:
     auditpol /set /subcategory:"Security System Extension" /success:enable
     ```
 
-B4. **Copy the vm-live-v1 configuration across.** The pre-registration says "same Sysmon
-    configuration, Winlogbeat channels and index layout", so copy these from the
-    vm-live-v1 Windows 11 VM rather than retyping them:
-    - the Sysmon config it runs (or `configs/sysmon-config-v2.xml` from this repo,
-      which logs named pipes);
-    - `C:\Elastic\...\winlogbeat.yml`;
-    - `C:\Elastic\elasticsearch\elasticsearch-9.4.3\config\elasticsearch.yml` and
-      `config\jvm.options.d\heap.options` (the 2 GB heap cap).
+B4. **Setup kit.** The vm-live-v1 configuration was copied out of that VM on
+    2026-10-25 (it runs Sysmon 15.21 with `C:\CPES\sysmon-config-v2.xml`, config hash
+    `SHA256=B58F8F5B...E2C8`; Winlogbeat 9.4.3 with Sysmon, System 7045, Security 4697).
+    The host's git-ignored `lab-data\vm2\setup\` holds what VM2 needs:
+    - `sysmon-config-v2.xml`: byte-identical to the file vm-live-v1 ran (the repo's
+      `configs/sysmon-config-v2.xml` differs from it in one comment line, so use this one);
+    - `winlogbeat.yml`: vm-live-v1's, with `cpes-live-v1` changed to `cpes-live-vm2` and
+      the password replaced by a placeholder;
+    - `heap.options`: the 2 GB Elasticsearch heap cap (`-Xms2g` / `-Xmx2g`), added during
+      vm-live-v1 after its snapshot, so it is not in the copied VM;
+    - `benign-period.ps1`, `run-attacks.ps1`, `preflight.ps1`.
 
-    Easiest: add a temporary VirtualBox shared folder to each VM, copy the files, and
-    **remove the shared folder again** before phase C.
-
-B5. **Sysmon.** Download Sysinternals Sysmon, then, elevated:
+    Claude attaches the kit to VM2 as a temporary shared folder `\\VBoxSvr\vm2setup`.
+    In the VM, copy it to `C:\CPES-session\`:
     ```powershell
-    .\Sysmon64.exe -accepteula -i sysmon-config-v2.xml
+    New-Item -ItemType Directory -Force C:\CPES-session | Out-Null
+    Copy-Item \\VBoxSvr\vm2setup\* C:\CPES-session\ -Force
     ```
-    Record the Sysmon version (`.\Sysmon64.exe -h | Select-Object -First 3`).
+    The shared folder is removed again in phase C. `elasticsearch.yml` is *not* copied:
+    Elasticsearch writes its own on first start (it names the host).
+
+B5. **Sysmon 15.21** (or the current Sysinternals release; record it). Elevated:
+    ```powershell
+    .\Sysmon64.exe -accepteula -i C:\CPES-session\sysmon-config-v2.xml
+    .\Sysmon64.exe -c | Select-String "Config hash"
+    ```
+    The hash must read `SHA256=B58F8F5B8947588E3BDEFD93905927D496790B07E7B458BE6EF268BD2373E2C8`.
 
 B6. **Elasticsearch 9.4.3** into `C:\Elastic\elasticsearch\elasticsearch-9.4.3`, as on
-    vm-live-v1. Put the copied `heap.options` in `config\jvm.options.d\`. On the first start
-    (`bin\elasticsearch.bat`) note the generated `elastic` password; then install it as a
-    service (`bin\elasticsearch-service.bat install`, then `start`). Allow the host to reach it:
+    vm-live-v1. Copy `C:\CPES-session\heap.options` into `config\jvm.options.d\`. On the first
+    start (`bin\elasticsearch.bat`) note the generated `elastic` password, stop it with Ctrl+C,
+    then install it as a service (`bin\elasticsearch-service.bat install`, then `start`).
+    Allow the host to reach it:
     ```powershell
     New-NetFirewallRule -DisplayName "Elasticsearch 9200" -Direction Inbound -Protocol TCP -LocalPort 9200 -Action Allow
     ```
 
-B7. **Winlogbeat 9.4.3** into `C:\Elastic\`. Use the copied `winlogbeat.yml` with **one**
-    change: the index name `cpes-live-v1` becomes `cpes-live-vm2` (the index setting and
-    any template name/pattern that mention it). Channels stay: Sysmon Operational,
-    System 7045, Security 4697. Install and start the service
-    (`.\install-service-winlogbeat.ps1`, then `Start-Service winlogbeat`).
+B7. **Winlogbeat 9.4.3** into `C:\Elastic\winlogbeat-9.4.3-windows-x86_64`. Copy
+    `C:\CPES-session\winlogbeat.yml` over the default one and put the `elastic` password from
+    B6 in place of `PASTE-VM2-ELASTIC-PASSWORD-HERE`. The config sends events through the
+    `winlogbeat-9.4.3-routing` ingest pipeline, so load the pipelines and template once,
+    then install and start the service:
+    ```powershell
+    cd C:\Elastic\winlogbeat-9.4.3-windows-x86_64
+    .\winlogbeat.exe test config -c winlogbeat.yml
+    .\winlogbeat.exe setup --pipelines --index-management -c winlogbeat.yml
+    .\install-service-winlogbeat.ps1
+    Start-Service winlogbeat
+    ```
 
 B8. **Atomic Red Team**, elevated, with NAT on. Defender quarantines the atomics folder
     unless it is excluded, so exclude it first and record that you did:
@@ -98,9 +116,8 @@ B8. **Atomic Red Team**, elevated, with NAT on. Defender quarantines the atomics
     foreach ($t in "T1548.002","T1543.003","T1055.001","T1134.001","T1134.002") { Invoke-AtomicTest $t -GetPrereqs }
     ```
 
-B9. **Copy the session scripts** from this repo's `lab/vm-session/` to `C:\CPES-session\`
-    in the VM: `benign-period.ps1`, `run-attacks.ps1`, `preflight.ps1`. They must be the
-    committed versions, unchanged.
+B9. **Session scripts** are already in `C:\CPES-session\` from the kit (B4). They must be
+    the committed versions, unchanged.
 
 B10. **Preflight**, elevated, as cpeslab:
      ```powershell
