@@ -28,14 +28,18 @@ A3. VM ▸ **Settings** before first boot:
       (`192.168.56.0/24`). Adapter 2 = **NAT**, for setup only.
     - General ▸ Advanced: shared clipboard **Disabled**, drag'n'drop **Disabled**.
     - No shared folder yet (B4 adds a temporary one).
+    - Leave USB off and the mouse on PS/2. With the USB tablet (xHCI) on, the VM hung in
+      the firmware on every guest-initiated restart during setup (2026-10-28).
 
 A4. Boot and install **Windows Server 2022 Standard Evaluation (Desktop Experience)**,
     then choose Custom install on the empty disk. Set the built-in Administrator password.
     (Server Core lacks the GUI binaries the UAC tests rely on.)
 
-A5. **Guest Additions** (needed for the shared folder in B4; vm-live-v1 had them too):
-    VM window ▸ Devices ▸ **Insert Guest Additions CD image**, run
-    `VBoxWindowsAdditions.exe` from the CD drive, reboot.
+A5. **Guest Additions** (needed for the shared folder in B4 and for a free mouse;
+    vm-live-v1 had them too): VM window ▸ Devices ▸ **Insert Guest Additions CD image**,
+    then run it silently from Win+R (elevated as the built-in Administrator):
+    `powershell -NoProfile -Command "$d=(Get-Volume | Where-Object FileSystemLabel -like 'VBox*').DriveLetter; Start-Process ($d+':\VBoxWindowsAdditions.exe') -ArgumentList '/S' -Wait; Restart-Computer -Force"`.
+    VM2 got Guest Additions 7.2.12 this way.
 
 ## Phase B: configure Windows (inside the VM)
 
