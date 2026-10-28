@@ -51,3 +51,15 @@ tests), except:
 - Defender: real-time protection and behaviour monitoring on (turned off only before the attacks).
 - From the host, port 9200 on `192.168.56.102` is unreachable while Proton VPN is connected on
   the host; inside the VM Elasticsearch listens on all addresses and the firewall rule allows 9200.
+
+## Freeze, 2026-10-29 (Phase C)
+
+- Windows Update: up to date at build **20348.5622** (KB5122881, KB5122882, KB5127687).
+- NAT adapter removed, shared folder `vm2setup` removed, Guest Additions CD ejected;
+  clipboard and drag-and-drop disabled. Only the host-only adapter remains.
+- Final preflight (02:38): 26 checks OK, including "no internet route"; the only failure is
+  `sdclt.exe` absent (Amendment 2).
+- Host health check (`lab/check_lab.py`, index `cpes-live-vm2`, Proton VPN disconnected on the
+  host for the check): all OK, "Lab is ready for live CPES".
+- Snapshot **`vm2-ready`** taken with the VM powered off (UUID `01f3fe1f-19a9-4f1d-b1ee-a59da5e6cb80`).
+  Defender real-time protection is on in the snapshot.
