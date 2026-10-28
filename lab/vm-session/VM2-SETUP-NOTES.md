@@ -63,3 +63,23 @@ tests), except:
   host for the check): all OK, "Lab is ready for live CPES".
 - Snapshot **`vm2-ready`** taken with the VM powered off (UUID `01f3fe1f-19a9-4f1d-b1ee-a59da5e6cb80`).
   Defender real-time protection is on in the snapshot.
+
+## Session, 2026-10-29 (Phase D)
+
+Operational events, recorded as they happened. None changes the pre-registered procedure.
+
+- 03:21 VM2 started from `vm2-ready`; `cpeslab` signed in at the console.
+- **Benign period** 03:24:03–03:54:32 (`benign-period.csv`). The script's service lifecycle and Defender
+  quick scan ran; the ordinary use was driven from the host with VirtualBox keyboard input: File Explorer
+  (twice), Notepad, Settings, Task Manager, and two "Run as administrator" PowerShell windows approved at
+  the UAC prompt and closed. No Atomic test ran.
+- 03:56–04:01 Defender real-time protection turned off (`Set-MpPreference -DisableRealtimeMonitoring 1`);
+  state exported to `defender-state-before-attacks.csv` (RealTimeProtectionEnabled and
+  BehaviorMonitorEnabled False, AntivirusEnabled True, IsTamperProtected False). Typed input from the host
+  dropped or shifted characters on long lines; commands were retyped slowly and checked on screen before
+  Enter. One stray empty file (`C:\CPES-session\de`) from a truncated line was deleted.
+- 04:02:25 **Part 1 (uac)** started in a non-administrator PowerShell window. The Event Viewer, Fodhelper and
+  ComputerDefaults runs each opened an elevated `cmd.exe` without a UAC prompt.
+- During part 1, on the host only: `service-install-only` became a named engine mode (`evaluation/engine.py`),
+  identical to the definition `evaluation/package_v3.py` already registered; the dashboard gained a mode
+  selector. No detector or protocol definition changed.
