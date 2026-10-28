@@ -164,3 +164,36 @@ def test_evidence_channels_make_token_impersonation_detectable(client):
     resolved = client.get(f"/api/runs/{on['id']}/windows/{window['window_index']}").json()["audit"]["resolved"][0]
     assert (resolved["anchor_kind"], resolved["anchor_process_guid"], resolved["actor_process_guid"]) == ("token_impersonation", "{SHELL}", "{USER}")
     assert set(resolved["evidence_event_ids"]) == {"4", "5"}
+
+
+def test_resolver_modes_are_listed_with_a_default(client):
+    body = client.get("/api/resolver-modes").json()
+    ids = [m["id"] for m in body["modes"]]
+    assert body["default"] in ids
+    assert {"package-v2", "research-v3", "structural-v3", "service-install-only"} <= set(ids)
+    assert [m["id"] for m in body["modes"] if m["name_rules"]] == ["research-v3"]
+
+
+def test_default_mode_is_recorded_and_unchanged(client, uac_documents):
+    dataset = upload(client, "uac.jsonl", jsonl(uac_documents)).json()
+    run = start(client, dataset["id"], span_seconds=60, advance_seconds=30)
+    config = client.get(f"/api/runs/{run['id']}").json()["config"]
+    assert config["resolver_mode"]["id"] == "package-v2"
+    assert config["resolver_mode"]["field_mapping_used"] == "elastic-sysmon-field-mapping-v1"
+
+
+def test_research_mode_reads_the_parent_image_and_is_recorded(client, uac_documents):
+    dataset = upload(client, "uac.jsonl", jsonl(uac_documents)).json()
+    run = start(client, dataset["id"], span_seconds=60, advance_seconds=30, resolver_mode="research-v3")
+    status = client.get(f"/api/runs/{run['id']}").json()
+    assert status["state"] == "completed", status.get("traceback")
+    mode = status["config"]["resolver_mode"]
+    assert mode["id"] == "research-v3" and mode["name_rules"] is True
+    assert mode["field_mapping_used"] == "elastic-sysmon-field-mapping-v2"
+    assert mode["options"]["uac_requires_hijack_write"] is False
+
+
+def test_unknown_mode_is_rejected(client, uac_documents):
+    dataset = upload(client, "uac.jsonl", jsonl(uac_documents)).json()
+    response = client.post("/api/runs", json={"dataset_id": dataset["id"], "resolver_mode": "made-up"})
+    assert response.status_code >= 400

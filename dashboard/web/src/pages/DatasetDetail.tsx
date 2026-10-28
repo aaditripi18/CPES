@@ -6,7 +6,7 @@ import { BarList } from "../components/charts";
 import { CategoryBadge, Empty, ErrorBox, Hash, KV, Loading, Notice, PageHeader, Panel, Pill, StatusPill, Tabs } from "../components/ui";
 import { bytes, duration, eventCodeLabel, int, time } from "../lib/format";
 import { useApi } from "../lib/hooks";
-import type { DatasetDetail as Detail, EvidenceModelInfo, MappingField, MappingSpec, RunStatus, SchemaEntry, ValidationReport } from "../types";
+import type { DatasetDetail as Detail, EvidenceModelInfo, MappingField, MappingSpec, ResolverModeInfo, RunStatus, SchemaEntry, ValidationReport } from "../types";
 import { useWorkspace } from "../Workspace";
 
 const CANONICAL_HELP: Record<string, string> = {
@@ -477,6 +477,10 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
   const [threshold, setThreshold] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [evidenceChannels, setEvidenceChannels] = useState(true);
+  const modes = useApi<{ default: string; modes: ResolverModeInfo[] }>("/api/resolver-modes");
+  const [modeChoice, setModeChoice] = useState<string | null>(null);
+  const mode = modeChoice ?? modes.data?.default ?? "package-v2";
+  const modeInfo = modes.data?.modes.find((m) => m.id === mode);
   const sigmaInfo = useApi<{ available: boolean; pack: string | null; how: string | null }>("/api/sigma");
   const [sigma, setSigma] = useState(true);
   const sigmaPresets = ["elastic-sysmon-field-mapping-v1", "evtx-sysmon-field-mapping-v1"];
@@ -488,7 +492,7 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
     setBusy(true);
     setError(null);
     try {
-      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note, evidence_channels: evidenceChannels, sigma: sigma && sigmaPossible });
+      const run = await post<RunStatus>("/api/runs", { dataset_id: datasetId, mapping: spec, span_seconds: Number(span), advance_seconds: Number(advance), threshold: threshold ?? model?.default_threshold, evidence_model_id: model?.id, note, evidence_channels: evidenceChannels, sigma: sigma && sigmaPossible, resolver_mode: mode });
       setRunId(run.id);
       navigate(`/runs/${run.id}`);
     } catch (reason) {
@@ -526,6 +530,22 @@ function RunLauncher({ datasetId, report, spec }: { datasetId: string; report: V
           <input className="input w-full mt-1" value={note} onChange={(event) => setNote(event.target.value)} placeholder="optional" />
         </label>
       </div>
+      <label className="block mt-3">
+        <span className="eyebrow">resolver mode</span>
+        <select className="input w-full mt-1" value={mode} onChange={(event) => setModeChoice(event.target.value)}>
+          {(modes.data?.modes ?? []).map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.title}{m.id === modes.data?.default ? " (default)" : ""}
+            </option>
+          ))}
+        </select>
+        {modeInfo && (
+          <span className={`block text-2xs mt-1 leading-relaxed ${modeInfo.name_rules ? "text-detect" : "text-muted"}`}>
+            {modeInfo.name_rules ? "Contains name rules: alerts may rest on an image name, not a mechanism. " : ""}
+            {modeInfo.description}
+          </span>
+        )}
+      </label>
       <label className="flex items-start gap-2 text-[13px] mt-3">
         <input type="checkbox" className="mt-0.5 accent-accent" checked={evidenceChannels} onChange={(event) => setEvidenceChannels(event.target.checked)} />
         <span>

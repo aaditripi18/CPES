@@ -64,6 +64,8 @@ MODES = {
     },
     # Structural fixes B1 (+ B2 when the data has service-install records).
     "structural-v3": {"service_parent_images": ("services.exe",), "require_service_install": True},
+    # B2 alone (Amendment 1): service-install corroboration without the parent check.
+    "service-install-only": {"require_service_install": True},
 }
 MODEL = ROOT / "dashboard" / "models" / "research-v3-full-table.json"
 

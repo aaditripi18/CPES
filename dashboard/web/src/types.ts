@@ -219,6 +219,19 @@ export interface RunStatus {
   config?: RunConfig | null;
 }
 
+export interface ResolverModeInfo {
+  id: string;
+  title: string;
+  description: string;
+  name_rules: boolean;
+}
+
+export interface ResolverModeRecord extends ResolverModeInfo {
+  options: Record<string, unknown>;
+  field_mapping_used: string | null;
+  service_install_check_active: boolean;
+}
+
 export interface EvidenceModelInfo {
   id: string;
   title: string;
@@ -249,11 +262,12 @@ export interface RunConfig {
   window: { span_seconds: number; advance_seconds: number; start_at: string; horizon_end_at: string; rule: string };
   threshold: string;
   evidence_model: EvidenceModelInfo;
+  resolver_mode?: ResolverModeRecord;
   signals: Record<string, SignalWiring>;
   resolver: Record<string, string[]>;
   versions: Record<string, string | boolean | null>;
   engine: string;
-  evidence_channels?: { enabled: boolean; reason?: string; mapping?: string; pipe_evidence?: number; remote_thread_evidence?: number; skipped?: Record<string, number>; records_not_mappable?: number; attachment_rule?: string };
+  evidence_channels?: { enabled: boolean; reason?: string; mapping?: string; pipe_evidence?: number; remote_thread_evidence?: number; service_install_evidence?: number; skipped?: Record<string, number>; records_not_mappable?: number; attachment_rule?: string };
 }
 
 export interface WindowRow {

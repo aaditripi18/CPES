@@ -104,8 +104,15 @@ def derive_research_model(path: Path = LABEL_TABLE) -> dict[str, Any]:
     }
 
 
+# The adopted model. cpes-v2 stays available but was not adopted (held-out test, RESULTS §10).
+DEFAULT_MODEL_ID = "research-v3-full-table"
+
+
 def available_models() -> list[dict[str, Any]]:
-    return [json.loads(path.read_text(encoding="utf-8")) for path in sorted(MODELS.glob("*.json"))]
+    """All models, the adopted one first (the run form uses the first entry)."""
+
+    models = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(MODELS.glob("*.json"))]
+    return sorted(models, key=lambda model: model["id"] != DEFAULT_MODEL_ID)
 
 
 def load_model(model_id: str) -> dict[str, Any]:
