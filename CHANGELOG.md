@@ -12,6 +12,14 @@ generated into [docs/RESULTS.md](docs/RESULTS.md).
   the package); `structural-v3` adds the `services.exe` parent check and
   service-install corroboration (System 7045 / Security 4697 evidence channel).
   Field mappings v2 add the parent image. Development checks: RESULTS §14.
+  `service-install-only` (B2 alone) is a named mode as well.
+
+- **Dashboard**: the run form selects the resolver mode; each run records the mode, the
+  field mapping it used (v1 presets are read with v2 for the parent image) and whether
+  service-install corroboration was active, and research-v3 is marked as containing name
+  rules. **Fix:** the run form used the first evidence model alphabetically, `cpes-v2`
+  (not adopted, RESULTS §10), instead of `research-v3-full-table`; the adopted model is
+  now listed first.
 
 - **Live VM evaluation** (`vm-live-v1`, pre-registered in
   [docs/design/vm-live-v1.md](docs/design/vm-live-v1.md)): a second corpus of 50
