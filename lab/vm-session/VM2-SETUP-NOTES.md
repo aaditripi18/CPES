@@ -83,3 +83,7 @@ Operational events, recorded as they happened. None changes the pre-registered p
 - During part 1, on the host only: `service-install-only` became a named engine mode (`evaluation/engine.py`),
   identical to the definition `evaluation/package_v3.py` already registered; the dashboard gained a mode
   selector. No detector or protocol definition changed.
+- 05:02:33 Part 1 finished: 20 runs logged. Every Event Viewer, Fodhelper and ComputerDefaults run left an elevated
+  `cmd.exe` window open; they were closed between the parts (`Get-Process cmd | Stop-Process`, ~05:04, more than
+  150 s after the last part-1 run and before the first part-2 run).
+- 05:05:13 **Part 2 (admin)** started in an administrator PowerShell window.
