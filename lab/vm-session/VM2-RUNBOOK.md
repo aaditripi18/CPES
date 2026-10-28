@@ -194,7 +194,8 @@ D5. **Part 2: admin.** In an **elevated** window:
 
 D6. **Wait 10 minutes** after the last run (the corpus ends 10 min after it). Then, elevated:
     ```powershell
-    Get-MpThreatDetection | Export-Csv C:\CPES-session\defender-detections.csv -NoTypeInformation
+    Get-MpThreatDetection | Select-Object @{n='InitialDetectionTimeUtc';e={$_.InitialDetectionTime.ToUniversalTime().ToString('o')}}, ThreatID, ProcessName, Resources, ActionSuccess |
+        Export-Csv C:\CPES-session\defender-detections.csv -NoTypeInformation
     Get-MpThreat          | Export-Csv C:\CPES-session\defender-threats.csv -NoTypeInformation
     ```
 
