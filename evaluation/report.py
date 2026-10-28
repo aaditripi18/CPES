@@ -273,7 +273,7 @@ def _vm_live_section() -> list[str]:
             f"named by R {n['R']}, P {n['P']}, Sigma {n['Sigma']}. R or Sigma, any flag: {r['r_or_sigma_runs_any']}/{runs['total']}. "
             f"Excluding the {runs['defender_detected']} runs with a Defender detection, R detects {excl['runs_consistent']}/{excl['runs']} consistently.", "",
             "Service-install corroboration (S2): " + "; ".join(f"{k} service runs {v['s0_service_runs_detected']} → {v['s2_service_runs_detected']}, false-alarm processes {v['s0_false_alarm_processes']} → {v['s2_false_alarm_processes']}" for k, v in s2["by_engine"].items())
-            + f". Adoption criteria **{'met' if s2['adopted'] else 'not met'}**" + (" — to become an optional package setting, off by default; not yet implemented in `cpes`." if s2["adopted"] else "."), "",
+            + f". Adoption criteria **{'met' if s2['adopted'] else 'not met'}**" + (" — packaged as the opt-in resolver modes `service-install-only` (B2) and `structural-v3` (§14–15)." if s2["adopted"] else "."), "",
             "| | Expectation | Observed | Verdict |", "|---|---|---|---|"]
     for key, h in r["hypotheses"].items():
         observed = h["observed"] if not isinstance(h["observed"], dict) else ", ".join(f"{k} {v}" for k, v in h["observed"].items())
@@ -305,6 +305,45 @@ def _package_v3_section() -> list[str]:
     out += ["", f"research-v3 equals the research rules per process: corpus-v3 **{lab['research_identical']}**, vm-live-v1 **{vm['research_identical']}**. "
             f"B1 loses the service signal on {len(ev['service_files_lost_by_B1'])} EVTX files ({', '.join(f'`{f}`' for f in ev['service_files_lost_by_B1'])}). "
             f"B2 alone on vm-live-v1: service runs {vm['service']['service-install-only']['service_runs_detected']}/10, false-alarm processes {vm['service']['service-install-only']['false_alarm_processes']}."]
+    return out
+
+
+def _vm2_section() -> list[str]:
+    record = _load("vm2")
+    out = ["", "## 15. VM2 — a different Windows edition, Defender real-time protection off", "",
+           "Windows Server 2022 VM with every detector frozen: 30 min benign use, then the same ten Atomic tests × 5 (50 runs). "
+           "Defender real-time protection off during the attack runs, so the signals are tested rather than Defender. "
+           "`sdclt.exe` does not exist on Windows Server 2022, so the five T1548.002 #7 runs are kept in every primary denominator and reported as binary absent. "
+           "Pre-registered in [design/package-v3-and-vm2.md](design/package-v3-and-vm2.md) (Amendment 2); setup and session in "
+           "[../lab/vm-session/VM2-SETUP-NOTES.md](../lab/vm-session/VM2-SETUP-NOTES.md). The corpus holds host and account identifiers and is not published.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    c, runs = r["corpus"], r["runs"]
+    out += [f"execution `{record['id']}` · {c['unique']:,} documents ({c['duplicates_removed']} duplicates) · {runs['total']} runs · "
+            f"escalation completed in {runs['escalation_completed']} ({', '.join(f'{t} {x}' for t, x in runs['escalation_completed_by_technique'].items())}) · "
+            f"binary absent {runs['binary_absent']} · Defender detections in {runs['defender_detected']} runs", ""]
+    for subset, title in (("all_runs", "All 50 runs (primary)"), ("excluding_binary_absent", "Without the binary-absent runs"), ("escalation_completed", "Runs where the escalation completed")):
+        out += [f"**{title}**", "", "| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |", "|---|---|---|---|---|"]
+        for name, v in r["detectors"][subset].items():
+            by = ", ".join(f"{t} {x}" for t, x in v.get("by_technique_consistent", {}).items()) or "—"
+            out.append(f"| {name} | {v['runs_any']}/{v['runs']} | {v['runs_consistent']}/{v['runs']} | {v['false_alarm_processes']} | {by} |")
+        out.append("")
+    sg, n = r["sigma_core_high"], r["outcome_process_named"]
+    out += [f"SigmaHQ core, high/critical: {sg['runs_any']}/{sg['runs']} runs (any), {sg['runs_consistent']}/{sg['runs']} consistent, {sg['outside_runs']['processes']} processes alerted outside runs. "
+            f"R or Sigma, any flag: {r['r_or_sigma_runs_any']}/{runs['total']}.", "",
+            f"Runs whose privileged process actually appeared: {n['runs_with_outcome_process']}; named by R {n['R']}, Sigma {n['Sigma']}, "
+            + ", ".join(f"{m} {n[m]}" for m in ("package-v2", "research-v3", "structural-v3", "service-install-only")) + ".", "",
+            "Service signal by mode: " + "; ".join(f"`{m}` service runs {v['service_runs_detected']}, false-alarm processes {v['false_alarm_processes']}"
+                                                 + (f" ({', '.join(f'{k} {x}' for k, x in v['false_alarm_images'].items())})" if v["false_alarm_images"] else "")
+                                                 for m, v in r["service_by_mode"].items()) + ".", "",
+            "| | Expectation | Observed | Verdict |", "|---|---|---|---|"]
+    for key, h in r["hypotheses"].items():
+        observed = h["observed"] if not isinstance(h["observed"], dict) else ", ".join(f"{k} {v}" for k, v in h["observed"].items())
+        verdict = "untestable" if h["supported"] is None else ("supported" if h["supported"] else "**not supported**")
+        out.append(f"| {key} | {h['expected']} | {observed} | {verdict} |")
+    a = r["adoption"]
+    out += ["", f"Adoption (pre-registered rule): dashboard default **{a['dashboard_default']}**; recommended structural setting **{a['recommended_structural_setting']}**."]
     return out
 
 
@@ -349,7 +388,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section() + _package_v3_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section() + _package_v3_section() + _vm2_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 
