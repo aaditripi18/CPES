@@ -99,3 +99,43 @@ VM3 changes **no** default on its own. It is a replication and the first token-s
 holds (research-v3 == R with no benign-pipe false alarm on this corpus too), that is recorded as
 added evidence for the labelled `research-v3` mode but does not by itself flip the dashboard default,
 which the VM2 pre-registration already settled. Any outcome is reported as-is.
+
+## Amendment 2026-10-29 — pilot outcome (committed before the recorded session)
+
+The pilot (one round, Defender off, `pilot-atomic-log.csv`, a 185,176-document slice) ran all ten
+tests; `python -m evaluation.vm3 --pilot` reports an escalation **completed** for seven and **not**
+for three. Per the pilot clause above, each non-escalation is resolved here, before the first Atomic
+test of the recorded session. None is "fixed" by changing a test, a detector or a weight — that is
+forbidden, and VM2 did not hack `sdclt.exe` to work either. All three are therefore declared
+**"cannot complete here"**, kept in the procedure for comparability, and reported separately.
+Evidence is the pilot transcript (`lab-data/vm3/pilot-master-log.txt`) and the pilot corpus.
+
+1. **T1548.002 #1 — Bypass UAC using Event Viewer (mscfile).** Its two commands ran at Medium
+   integrity (`cmd /c reg add HKCU\…\mscfile\shell\open\command …`, then `cmd /c eventvwr.msc`), but
+   **no process reached High or System** in the ±150 s window — no elevated `eventvwr.exe`/`mmc.exe`
+   child appears at all. The mscfile-association hijack is patched on Windows 11 build 26200.9711; it
+   no longer elevates. (The other three UAC bypasses — fodhelper #3, ComputerDefaults #5, and
+   **sdclt #7**, the binary absent on VM2's Server — all completed here.)
+
+2. **T1134.001 #2 — `SeDebugPrivilege` token duplication.** The atomic's own token primitive failed:
+   `OpenProcessToken` / `DuplicateToken` / `SetThreadToken` each returned `Win32Exception (0x80004005)`.
+   The test impersonates in-thread and never spawns a process, so it yields no process-tree escalation
+   even in principle, and here the primitive did not succeed. No SYSTEM process with a shell parent,
+   and no SYSTEM-made named pipe, is present in the window.
+
+3. **T1134.002 #1 — Access Token Manipulation (create process from a parent token).** The atomic
+   calls `CreateProcessFromParent` against `lsass` and received **"Access is denied"** — lsass runs as
+   a protected process (PPL) on build 26200.9711 — so no child was created and no escalation completed.
+
+This does not affect the VM3 goal. The offline token shim is proven by **T1134.001 #1** (named-pipe
+client impersonation), which served the pinned local `Get-System.ps1`, reached `WORKGROUP\SYSTEM`,
+and **completed an escalation** — the first time the token signal is exercised on a completed run
+(W3). The recorded session thus has **seven** escalation-completing tests and **three** "cannot
+complete here"; the three pre-registered denominators (all 50, excluding cannot-complete,
+completed-only) already cover this, and the headline detection rate is reported over the
+escalation-completing runs. The pilot changed no detector, weight or hypothesis.
+
+Setup note (also before the session): a pending Windows feature update applied during setup, so the
+frozen build is **26200.9711**, and the Hyper-V paravirtual timer was replaced with `minimal` to stop
+a guest hang. The recorded session starts from snapshot **`vm3-ready-postupdate`** rather than
+`vm3-ready`. No test, detector or weight changed.

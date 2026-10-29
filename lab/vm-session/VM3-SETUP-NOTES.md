@@ -32,9 +32,21 @@ proceeds; empty until then.
 
 ## Pilot (throwaway)
 
-- One round of ten tests, Defender off, `pilot-atomic-log.csv`. `python -m evaluation.vm3 --pilot` result: _TBD_.
-- Any test that did not escalate, and what was done about it (amendment / fixed and re-piloted): _TBD_.
-- Reverted to `vm3-ready` after the pilot: _TBD_.
+- One round of ten tests, Defender off, `pilot-atomic-log.csv` (ten rows, all ExitCode 0). Slice exported to
+  `pilot-corpus.ndjson` (**185,176** documents). `python -m evaluation.vm3 --pilot` result: **7 escalated, 3 did not.**
+  Escalated: T1543.003 #2/#3, T1055.001 #1, **T1134.001 #1** (offline token shim → `WORKGROUP\SYSTEM`, W3's first
+  completed token run), T1548.002 #3/#5/**#7 (sdclt)**. Did not: T1548.002 #1, T1134.001 #2, T1134.002 #1.
+- Resolution — all three declared **"cannot complete here"** by the dated amendment in
+  [`docs/design/vm3-session.md`](../../docs/design/vm3-session.md) (committed before the recorded session); none
+  fixed by changing a test/detector/weight. Evidence in `pilot-master-log.txt`:
+  - **T1548.002 #1 (eventvwr/mscfile):** commands ran at Medium; no High/System process in ±150 s — bypass patched
+    on build 26200.9711.
+  - **T1134.001 #2 (SeDebugPrivilege dup):** `OpenProcessToken`/`DuplicateToken`/`SetThreadToken` →
+    `Win32Exception (0x80004005)`; in-thread, spawns no process.
+  - **T1134.002 #1 (CreateProcessFromParent off lsass):** **"Access is denied"** — lsass is PPL on 26200.9711.
+- Pilot environment fixes recorded as setup amendments: frozen build **26200.9711** (feature update applied during
+  setup), `--paravirtprovider minimal` (guest-hang fix), recorded session starts from **`vm3-ready-postupdate`**.
+- Revert to `vm3-ready-postupdate` before the recorded session: _pending (VM-side, before the real run)_.
 
 ## Recorded session
 
