@@ -94,3 +94,6 @@ Operational events, recorded as they happened. None changes the pre-registered p
   reports "No Preqs Defined" for this test, so the preflight could not catch it. The procedure is not changed
   mid-session; these runs stay in the denominators and count as escalation not completed. vm-live-v1 was also
   isolated, which very likely explains why its 15 token runs never reached SYSTEM.
+- ~06:12 T1134.001 #2 (`SeDebugPrivilege` token duplication) fails the same way: it fetches the same
+  `Get-System.ps1` at run time. So 2 of the 3 token tests (10 runs) cannot attempt impersonation on an isolated
+  machine; T1134.002 #1 (Access Token Manipulation) runs locally.
