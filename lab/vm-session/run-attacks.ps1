@@ -7,7 +7,8 @@
 param(
     [Parameter(Mandatory)][ValidateSet("uac", "admin")][string]$Part,
     [int]$Rounds = 5,
-    [int]$GapSeconds = 180
+    [int]$GapSeconds = 180,
+    [string]$LogName = "atomic-log.csv"   # VM3 pilot uses -Rounds 1 -LogName pilot-atomic-log.csv
 )
 
 $ErrorActionPreference = "Continue"
@@ -21,7 +22,7 @@ $tests = @{
 }[$Part]
 
 Import-Module "C:\AtomicRedTeam\invoke-atomicredteam\Invoke-AtomicRedTeam.psd1" -Force
-$log = "C:\CPES-session\atomic-log.csv"
+$log = "C:\CPES-session\$LogName"
 $total = $Rounds * $tests.Count
 $n = 0
 for ($round = 1; $round -le $Rounds; $round++) {

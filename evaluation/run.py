@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from . import data, engine, protocols
 
 RESULTS = data.ROOT / "results"
-PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2", "incidents-lab-v3", "service-signature-v1", "vm-live-v1", "package-v3-dev", "vm2")
+PROTOCOLS = ("research-grouped", "package-grouped", "package-grouped-noevidence", "ea-chain-grouped", "ec-ledger-time", "ext-evtx-privesc", "evasion-v3", "stream-replay-v3", "sigma-lab-v3", "sigma-ext-evtx", "sigma-evasion", "heldout-otrf-v2", "incidents-lab-v3", "service-signature-v1", "vm-live-v1", "package-v3-dev", "vm2", "vm3")
 
 
 def _code_fingerprint() -> str:
@@ -150,6 +150,10 @@ def run_protocol(name: str) -> dict:
         from . import vm2
 
         return vm2.run()
+    if name == "vm3":
+        from . import vm3
+
+        return vm3.run()
     if name == "stream-replay-v3":
         from . import streaming_eval
 
@@ -188,6 +192,10 @@ def main() -> None:
             from . import external, vm2
 
             inputs = vm2.inputs_manifest() + external.verify_manifest()
+        elif name == "vm3":
+            from . import external, vm3
+
+            inputs = vm3.inputs_manifest() + external.verify_manifest()
         else:
             inputs = data.inputs_manifest()
         started = time.perf_counter()

@@ -7,6 +7,13 @@ generated into [docs/RESULTS.md](docs/RESULTS.md).
 
 ## Unreleased
 
+- **VM3 prepared** (pre-registered in [docs/design/vm3-session.md](docs/design/vm3-session.md), session not yet
+  run): a third live corpus on Windows 11 with Defender real-time protection off and the token tests made to run
+  offline (a pinned local `Get-System.ps1` served to the one run-time download), so almost every run contains a
+  completed escalation and the token signal is tested for the first time. Analysis protocol `evaluation/vm3.py`
+  (+ tests) with hypotheses W1–W6 and a `--pilot` dry-run mode, written before the session; RESULTS §16 generator;
+  lab tooling in `lab/vm-session/` (runbook, token-offline profile shim, reusable attack/pilot script).
+
 ## 0.3.0 — 2026-10-29
 
 - **VM2 evaluation** (`vm2`, pre-registered with two amendments in

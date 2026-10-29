@@ -353,6 +353,12 @@ Service signal by mode: `package-v2` service runs 10, false-alarm processes 0; `
 
 Adoption (pre-registered rule): dashboard default **unchanged (package-v2)**; recommended structural setting **service-install-only (B2 alone)**.
 
+## 16. VM3 — Windows 11, Defender off, token tests made to run offline
+
+A third live corpus built to remove the setup problems that left half the runs un-escalated in VM1 and VM2: Windows 11 (every UAC binary present), Defender real-time protection off during the attacks, and the token tests' run-time script download served from a pinned local copy so the token technique runs on the isolated VM. This is the first test of the token signal on completed escalations. Pre-registered in [design/vm3-session.md](design/vm3-session.md); setup and session in [../lab/vm-session/VM3-SETUP-NOTES.md](../lab/vm-session/VM3-SETUP-NOTES.md). The corpus is not published.
+
+_Not run yet._
+
 ## Reading these results
 
 See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.

@@ -62,17 +62,18 @@ def inputs_manifest() -> list[dict]:
     return out
 
 
-def _defender_times() -> list[datetime]:
-    """Detection times from the export in VM2-RUNBOOK D6 (UTC, ISO 8601)."""
+def _defender_times(path=None) -> list[datetime]:
+    """Detection times from the export in the runbook's export step (UTC, ISO 8601)."""
 
-    with DEFENDER_DETECTIONS.open(encoding="utf-8-sig", newline="") as handle:
+    path = path or DEFENDER_DETECTIONS  # resolve at call time so monkeypatching the module attr works
+    with path.open(encoding="utf-8-sig", newline="") as handle:
         return [vm_live._ts(row["InitialDetectionTimeUtc"]) for row in csv.DictReader(handle) if row.get("InitialDetectionTimeUtc")]
 
 
-def runs() -> tuple[vm_live.Run, ...]:
-    detections = _defender_times()
+def runs(atomic_log=None, defender=None) -> tuple[vm_live.Run, ...]:
+    detections = _defender_times(defender)
     out = []
-    with ATOMIC_LOG.open(encoding="utf-8-sig", newline="") as handle:
+    with (atomic_log or ATOMIC_LOG).open(encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
             at = vm_live._ts(row["Execution Time (UTC)"])
             out.append(vm_live.Run(row["Technique"].split()[0].upper(), row["Test Number"], at, row["ExitCode"],
@@ -90,16 +91,17 @@ def _key(d: dict):
     return (d["@timestamp"], vm_live._get(d, "winlog", "channel") or "", str(vm_live._get(d, "winlog", "record_id")))
 
 
-def load(ruleset: RuleSet, window: tuple[datetime, datetime]) -> dict:
+def load(ruleset: RuleSet, window: tuple[datetime, datetime], corpus=None) -> dict:
     """One streaming pass: de-duplicate on (channel, record id), keep what each detector reads, match Sigma."""
 
+    corpus = corpus or CORPUS  # resolve at call time so monkeypatching the module attr works
     seen: set[tuple[str, str]] = set()
     duplicates: Counter = Counter()
     process_docs, package_docs, slice_docs, installs, alerts, system_pipes = [], [], [], [], [], []
     tokens = tuple(t.lower() for t in (*engine.RESOLVER_SETTINGS["hijack_registry_tokens"], *engine.RESOLVER_SETTINGS["service_registry_tokens"]))
     rules_for: dict[str, list] = {}
     total = 0
-    with CORPUS.open(encoding="utf-8") as handle:
+    with corpus.open(encoding="utf-8") as handle:
         for line in handle:
             total += 1
             d = json.loads(line)
