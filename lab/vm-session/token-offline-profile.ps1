@@ -19,7 +19,9 @@ $script:CPES_TokenScriptSha256 = 'SET-DURING-SETUP'               # pinned SHA-2
 
 function CPES-TokenScriptOk {
     if (-not (Test-Path $script:CPES_TokenScriptPath)) { return $false }
-    if ($script:CPES_TokenScriptSha256 -eq 'SET-DURING-SETUP') { return $false }
+    # A real SHA-256 is 64 hex chars; the unset sentinel is shorter. (Do not compare against the
+    # sentinel literal here: setup rewrites every copy of it, which would invert this guard.)
+    if ($script:CPES_TokenScriptSha256.Length -ne 64) { return $false }
     return (Get-FileHash $script:CPES_TokenScriptPath -Algorithm SHA256).Hash -eq $script:CPES_TokenScriptSha256
 }
 
@@ -39,4 +41,5 @@ function Invoke-WebRequest {
     }
     Microsoft.PowerShell.Utility\Invoke-WebRequest @PSBoundParameters
 }
-Set-Alias -Name iwr -Value Invoke-WebRequest -Scope Global -Force
+# `iwr` is a built-in AllScope alias for Invoke-WebRequest; it resolves to the function above at
+# call time, so no alias change is needed (and iwr's AllScope option cannot be reassigned anyway).
