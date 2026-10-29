@@ -41,7 +41,7 @@ BENIGN_LOG = LAB / "benign-period.csv"
 DEFENDER_DETECTIONS = LAB / "defender-detections.csv"
 DEFENDER_THREATS = LAB / "defender-threats.csv"
 # Recorded in lab/vm-session/VM2-SETUP-NOTES.md at export; None until the session has run.
-CORPUS_SHA256: str | None = None
+CORPUS_SHA256: str | None = "2ff842a7944455cd879f73ddaae303f4501342c6bd0ba4f72f88e16bdee95427"
 ABSENT_TESTS = {("T1548.002", "7")}  # sdclt.exe is not present on Windows Server 2022
 SHELLS = ("powershell.exe", "cmd.exe", "pwsh.exe")
 MODES = ("package-v2", "research-v3", "structural-v3", package_v3.VM_EXTRA_MODE)

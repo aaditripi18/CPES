@@ -97,3 +97,15 @@ Operational events, recorded as they happened. None changes the pre-registered p
 - ~06:12 T1134.001 #2 (`SeDebugPrivilege` token duplication) fails the same way: it fetches the same
   `Get-System.ps1` at run time. So 2 of the 3 token tests (10 runs) cannot attempt impersonation on an isolated
   machine; T1134.002 #1 (Access Token Manipulation) runs locally.
+- 06:35:29 Part 2 finished: 30 runs logged. All 50 runs have exit code 0. 06:44 Defender history exported:
+  **no detections** in the whole session (both CSVs empty). Session files copied to the host through a
+  temporary shared folder (the first transient share returned "network name no longer available"; a re-added
+  share with a drive letter worked).
+- ~06:59 A live snapshot `vm2-after` failed ("VERR_VM_UNEXPECTED_UNSTABLE_STATE") and left the VM frozen (guest
+  clock stopped at 07:51; scancodes refused). The VM process was ended (state "aborted") and the VM booted
+  again at ~10:46, headless, with no change to its disk. Elasticsearch came back with the data; the session had
+  ended well before the freeze.
+- **Export** (host, Proton VPN disconnected): `lab/export_live.py --name vm2 --start 2026-10-28T21:54:03Z
+  --end 2026-10-29T01:12:30Z` (benign start to last run + 10 min) wrote **374,676** documents to the git-ignored
+  `lab-data/vm2/corpus.ndjson`, SHA-256 `2ff842a7944455cd879f73ddaae303f4501342c6bd0ba4f72f88e16bdee95427`
+  (System 7045: 12, Security 4697: 12, Sysmon EID 1: 2,184, EID 8: 0).
