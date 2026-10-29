@@ -91,7 +91,8 @@ D5. If any test shows `DID NOT escalate`: fix the cause (e.g. extend the token s
 
 ## Phase E: the recorded session
 
-Exactly VM2 Phase D, from `vm3-ready`: 30-min benign period (Defender on) → Defender real-time
+Exactly VM2 Phase D, from `vm3-ready-postupdate` (see the 2026-10-29 amendment; build 26200.9711,
+paravirt minimal): 30-min benign period (Defender on) → Defender real-time
 protection off, state exported → part 1 (20 UAC runs, non-admin) → part 2 (30 runs, elevated) →
 wait 10 min → export Defender history → export the corpus:
 ```powershell
