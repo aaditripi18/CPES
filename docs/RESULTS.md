@@ -269,7 +269,7 @@ execution `vm-live-v1-20261023T191744Z` · 1,426,509 documents (0 duplicates) ·
 
 Runs whose privileged process actually appeared (elevated auto-elevating binary, SYSTEM service binary): 15; named by R 15, P 15, Sigma 0. R or Sigma, any flag: 35/50. Excluding the 20 runs with a Defender detection, R detects 15/30 consistently.
 
-Service-install corroboration (S2): R service runs 10 → 10, false-alarm processes 0 → 0; P service runs 10 → 10, false-alarm processes 4 → 0. Adoption criteria **met** — to become an optional package setting, off by default; not yet implemented in `cpes`.
+Service-install corroboration (S2): R service runs 10 → 10, false-alarm processes 0 → 0; P service runs 10 → 10, false-alarm processes 4 → 0. Adoption criteria **met** — packaged as the opt-in resolver modes `service-install-only` (B2) and `structural-v3` (§14–15).
 
 | | Expectation | Observed | Verdict |
 |---|---|---|---|
@@ -298,6 +298,60 @@ execution `package-v3-dev-20261024T203752Z`
 | EVTX-ATTACK-SAMPLES files detected | 9 | — | 5 |
 
 research-v3 equals the research rules per process: corpus-v3 **True**, vm-live-v1 **True**. B1 loses the service signal on 4 EVTX files (`EfsPotato_sysmon_17_18_privesc_seimpersonate_to_system.evtx`, `PrivEsc_Imperson_NetSvc_to_Sys_Decoder_Sysmon_1_17_18.evtx`, `RogueWinRM.evtx`, `privesc_roguepotato_sysmon_17_18.evtx`). B2 alone on vm-live-v1: service runs 10/10, false-alarm processes 0.
+
+## 15. VM2 — a different Windows edition, Defender real-time protection off
+
+Windows Server 2022 VM with every detector frozen: 30 min benign use, then the same ten Atomic tests × 5 (50 runs). Defender real-time protection off during the attack runs, so the signals are tested rather than Defender. `sdclt.exe` does not exist on Windows Server 2022, so the five T1548.002 #7 runs are kept in every primary denominator and reported as binary absent. Pre-registered in [design/package-v3-and-vm2.md](design/package-v3-and-vm2.md) (Amendment 2); setup and session in [../lab/vm-session/VM2-SETUP-NOTES.md](../lab/vm-session/VM2-SETUP-NOTES.md). The corpus holds host and account identifiers and is not published.
+
+execution `vm2-20261029T053201Z` · 374,676 documents (0 duplicates) · 50 runs · escalation completed in 25 (T1055.001 5/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20) · binary absent 5 · Defender detections in 0 runs
+
+**All 50 runs (primary)**
+
+| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |
+|---|---|---|---|---|
+| R_research_signals | 25/50 | 25/50 | 1 | T1055.001 5/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20 |
+| P_package-v2 | 20/50 | 20/50 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20 |
+| P_research-v3 | 25/50 | 25/50 | 0 | T1055.001 5/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20 |
+| P_structural-v3 | 20/50 | 20/50 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20 |
+| P_service-install-only | 20/50 | 20/50 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/20 |
+
+**Without the binary-absent runs**
+
+| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |
+|---|---|---|---|---|
+| R_research_signals | 25/45 | 25/45 | 1 | T1055.001 5/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/15 |
+| P_package-v2 | 20/45 | 20/45 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/15 |
+| P_research-v3 | 25/45 | 25/45 | 0 | T1055.001 5/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/15 |
+| P_structural-v3 | 20/45 | 20/45 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/15 |
+| P_service-install-only | 20/45 | 20/45 | 0 | T1055.001 0/5, T1134.001 0/10, T1134.002 0/5, T1543.003 10/10, T1548.002 10/15 |
+
+**Runs where the escalation completed**
+
+| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |
+|---|---|---|---|---|
+| R_research_signals | 25/25 | 25/25 | 1 | T1055.001 5/5, T1543.003 10/10, T1548.002 10/10 |
+| P_package-v2 | 20/25 | 20/25 | 0 | T1055.001 0/5, T1543.003 10/10, T1548.002 10/10 |
+| P_research-v3 | 25/25 | 25/25 | 0 | T1055.001 5/5, T1543.003 10/10, T1548.002 10/10 |
+| P_structural-v3 | 20/25 | 20/25 | 0 | T1055.001 0/5, T1543.003 10/10, T1548.002 10/10 |
+| P_service-install-only | 20/25 | 20/25 | 0 | T1055.001 0/5, T1543.003 10/10, T1548.002 10/10 |
+
+SigmaHQ core, high/critical: 35/50 runs (any), 20/50 consistent, 1 processes alerted outside runs. R or Sigma, any flag: 40/50.
+
+Runs whose privileged process actually appeared: 20; named by R 20, Sigma 0, package-v2 20, research-v3 20, structural-v3 20, service-install-only 20.
+
+Service signal by mode: `package-v2` service runs 10, false-alarm processes 0; `research-v3` service runs 10, false-alarm processes 0; `structural-v3` service runs 10, false-alarm processes 0; `service-install-only` service runs 10, false-alarm processes 0.
+
+| | Expectation | Observed | Verdict |
+|---|---|---|---|
+| V1 | R detects >= 70% of the 50 runs consistently | 25/50 | **not supported** |
+| V2 | research-v3 flags exactly the processes R flags | token_impersonation: research only 1 | **not supported** |
+| V3 | structural-v3 detects >= 90% of the service runs package-v2 detects | 10/10 | supported |
+| V4 | structural-v3 raises no more false-alarm processes than package-v2 | 0 vs 0 | supported |
+| V3b | B2 alone detects >= 90% of the service runs package-v2 detects | 10/10 | supported |
+| V4b | B2 alone raises no more false-alarm processes than package-v2 | 0 vs 0 | supported |
+| V5 | R or Sigma (any flag) detects more runs than Sigma alone | 40 vs 35 | supported |
+
+Adoption (pre-registered rule): dashboard default **unchanged (package-v2)**; recommended structural setting **service-install-only (B2 alone)**.
 
 ## Reading these results
 

@@ -43,7 +43,10 @@ from evaluation.engine import EVIDENCE_MAPPING, EVIDENCE_MAPPING_V2, EVIDENCE_SE
 
 # Resolver modes (docs/design/package-v3-and-vm2.md). The default is the package as every
 # earlier run used it; the other modes need the parent image, so v1 presets are read with v2.
+# VM2 (RESULTS §15): V2 failed, so the default stays package-v2; V3b/V4b held, so B2 alone is
+# the recommended structural setting for telemetry with System 7045 / Security 4697.
 DEFAULT_MODE = "package-v2"
+RECOMMENDED_STRUCTURAL_MODE = "service-install-only"
 RESOLVER_MODES = (
     {"id": "package-v2", "title": "Structural (package v2)", "name_rules": False,
      "description": "Mechanism signals only: hijack write + auto-elevating binary, SYSTEM binary outside system directories, real remote threads, SYSTEM pipe impersonation."},
@@ -51,8 +54,8 @@ RESOLVER_MODES = (
      "description": "The published research rules exactly, including two NAME RULES: mavinject.exe (injection) and image names containing 'atomicservice' (service). UAC needs no hijack write; service needs parent services.exe."},
     {"id": "structural-v3", "title": "Structural v3 (B1 + B2)", "name_rules": False,
      "description": "Package v2 plus the services.exe parent check (B1) and, when the data holds System 7045 / Security 4697 records, service-install corroboration (B2)."},
-    {"id": "service-install-only", "title": "Service-install check only (B2)", "name_rules": False,
-     "description": "Package v2 plus service-install corroboration (B2) when the data holds System 7045 / Security 4697 records; no parent check."},
+    {"id": "service-install-only", "title": "Service-install check only (B2) — recommended with install events", "name_rules": False,
+     "description": "Package v2 plus service-install corroboration (B2) when the data holds System 7045 / Security 4697 records; no parent check. Recommended structural setting after VM2 (RESULTS §15): kept every service detection, removed the vendor false alarms on vm-live-v1, and keeps the Potato detections the parent check loses."},
 )
 V2_PRESETS = {"elastic-sysmon-field-mapping-v1": "elastic-sysmon-field-mapping-v2", "evtx-sysmon-field-mapping-v1": "evtx-sysmon-field-mapping-v2"}
 ELASTIC_PRESETS = ("elastic-sysmon-field-mapping-v1", "elastic-sysmon-field-mapping-v2")

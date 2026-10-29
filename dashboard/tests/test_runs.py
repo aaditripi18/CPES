@@ -172,6 +172,9 @@ def test_resolver_modes_are_listed_with_a_default(client):
     assert body["default"] in ids
     assert {"package-v2", "research-v3", "structural-v3", "service-install-only"} <= set(ids)
     assert [m["id"] for m in body["modes"] if m["name_rules"]] == ["research-v3"]
+    # VM2 adoption (RESULTS §15): default unchanged, B2 alone recommended for telemetry with install events.
+    assert body["default"] == "package-v2"
+    assert body["recommended_structural"] == "service-install-only"
 
 
 def test_default_mode_is_recorded_and_unchanged(client, uac_documents):

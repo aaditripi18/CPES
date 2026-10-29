@@ -30,7 +30,7 @@ from .ingest import (
     resolve_mapping,
 )
 from .paths import REPO_ROOT, WEB_DIST, data_root
-from .runner import DEFAULT_MODE, RESOLVER_MODES, RESOLVER_SETTINGS, SIGNAL_IDS, SIGNAL_WIRING, RunStore, cpes_version, git_state
+from .runner import DEFAULT_MODE, RECOMMENDED_STRUCTURAL_MODE, RESOLVER_MODES, RESOLVER_SETTINGS, SIGNAL_IDS, SIGNAL_WIRING, RunStore, cpes_version, git_state
 from .storage import ARTIFACTS, DatasetStore
 
 app = FastAPI(title="CPES research dashboard", version=__version__)
@@ -285,7 +285,7 @@ def evidence_models() -> list[dict[str, Any]]:
 
 @app.get("/api/resolver-modes")
 def resolver_modes() -> dict[str, Any]:
-    return {"default": DEFAULT_MODE, "modes": list(RESOLVER_MODES)}
+    return {"default": DEFAULT_MODE, "recommended_structural": RECOMMENDED_STRUCTURAL_MODE, "modes": list(RESOLVER_MODES)}
 
 
 @app.post("/api/runs")

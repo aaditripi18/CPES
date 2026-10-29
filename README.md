@@ -51,6 +51,7 @@ the right technique in **98 of 126** runs with one false alarm.
 | 21 held-out OTRF captures | 6/13 escalation captures; injection **4/4** | SigmaHQ core injection 2/4 |
 | 100 unused OTRF captures, service rule | 7 alerts, all on Azure vendor agents | — |
 | Live VM session, 50 runs, detectors frozen, Defender on | **20/50** (15/30 without the 20 runs Defender intervened in); **0** false alarms; named the privileged process in **15/15** runs where it appeared | SigmaHQ core 30/50, named 0/15; both together 35/50 |
+| Second VM (Windows Server 2022), 50 runs, Defender real-time protection off | **25/50**: **all 25** runs where an escalation happened (the other 25 contained none); named the privileged process in **20/20** | SigmaHQ core 35/50, named 0/20; both together **40/50** |
 
 | | Pre-registered expectation | Verdict |
 |---|---|---|
@@ -65,7 +66,11 @@ the right technique in **98 of 126** runs with one false alarm.
 | S1 | A signature suppressor removes the service rule's vendor false alarms | **not supported** (0 of 7 removed); not adopted |
 | L1 | On a second, live corpus CPES detects ≥ 70% of runs | **not supported** (20/50; Defender intervened in all 20 UAC runs) |
 | L7 | CPES and Sigma together detect more runs than Sigma alone | **supported** (35 vs 30) |
-| S2 | Requiring a service-install event removes the service rule's false alarms | **supported** (4 → 0, service runs kept 20/20); not yet a package setting |
+| S2 | Requiring a service-install event removes the service rule's false alarms | **supported** (4 → 0, service runs kept 20/20); now the opt-in `service-install-only` mode |
+| V1 | On a second VM (Server 2022) CPES detects ≥ 70% of runs | **not supported** (25/50; the 25 runs with an escalation: 25/25) |
+| V2 | The packaged research-v3 mode flags exactly what the research rules flag | **not supported** (one difference: the research rule's anonymous-pipe false alarm) |
+| V3b–V4b | Service-install corroboration keeps service detections without adding false alarms | **supported** (10/10, 0 vs 0); recommended structural setting |
+| V5 | CPES and Sigma together detect more runs than Sigma alone (second VM) | **supported** (40 vs 35) |
 
 ## How it relates to existing tools
 
@@ -75,7 +80,7 @@ SigmaHQ's core rules detect 42 of 53 to CPES's 26. What CPES adds:
 
 - **The outcome, not just the actor.** Sigma alerts on the tool the attacker ran
   (`reg.exe`, `sc.exe`); CPES names the process that ended up elevated and the
-  evidence chain linking it to the actor.
+  evidence chain linking it to the actor (Server 2022 session: 20/20 vs Sigma 0/20).
 - **An explanation for every score**: signals, signed weights, threshold and the
   exact records, down to the raw event.
 - **A generic "unexplained privilege gain" test** for elevation through binaries
@@ -110,6 +115,10 @@ docker run --rm -p 127.0.0.1:8790:8790 -v "${PWD}/external:/app/external:ro" cpe
 | Live | Replay a dataset as a stream, or poll an Elasticsearch index |
 | Evaluation | Every protocol below, with recorded provenance |
 
+Each run picks a resolver mode: `package-v2` (structural, the default), `research-v3` (the published research
+rules, including two labelled name rules), `structural-v3`, or `service-install-only`, the recommended structural
+setting when the telemetry has System 7045 / Security 4697. The run records which mode and field mapping it used.
+
 The package itself (`cpes/`) has no I/O and no hidden defaults: mapping
 (`cpes.adapters`), process tree (`cpes.lineage`), re-association
 (`cpes.context`), windows (`cpes.windowing`), signals and score
@@ -118,12 +127,14 @@ incident correlation (`cpes.correlation`). Component contracts: [docs/](docs).
 
 ## Limitations
 
-- One lab endpoint and one VM session; no multi-host or enterprise traffic.
-- On the live session the token-theft tests never reached SYSTEM and Defender stopped 15 of 20 UAC escalations, so the token signal went untested and the UAC signal was tested on only 5 runs.
+- One lab endpoint and two VM sessions (Windows 11, Windows Server 2022), each a single machine; no multi-host or enterprise traffic.
+- The token signal is untested on live data: in both VM sessions the token tests never reached SYSTEM. Two of the three Atomic token tests download their attack script at run time and cannot run on an isolated VM.
+- On the Windows 11 session Defender stopped 15 of 20 UAC escalations; on Server 2022, with Defender's real-time protection off, 10 of 20 UAC runs escalated (Event Viewer never did, `sdclt.exe` does not exist there) and all 10 were flagged.
 - Four mechanisms; techniques without a signal are not detected.
 - The auto-elevation signal names four binaries and does not generalise to other UAC methods.
 - On the lab corpus the injection signal is effectively an image-name rule.
-- The service rule raises false alarms on vendor agents installed outside `Program Files`. With service-install events (System 7045 / Security 4697) a fix removed them on the live session (S2), but it is tested on one machine and not yet in the package ([analysis](docs/design/service-rule-feasibility.md)).
+- The service rule raises false alarms on vendor agents installed outside `Program Files`. With service-install events (System 7045 / Security 4697) the opt-in `service-install-only` mode removed them on the Windows 11 session and kept every service detection on both sessions; the false-alarm side is tested on one machine ([analysis](docs/design/service-rule-feasibility.md)).
+- On every lab and VM corpus `mavinject.exe` leaves no remote-thread record, so injection is found only by the labelled name rule (research-v3); the structural default finds none of them there.
 - The lab corpora are private (they contain host and account identifiers); lab protocols cannot be re-run from a clone.
 
 ## Reproduce

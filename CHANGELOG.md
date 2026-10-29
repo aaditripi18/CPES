@@ -7,6 +7,20 @@ generated into [docs/RESULTS.md](docs/RESULTS.md).
 
 ## Unreleased
 
+## 0.3.0 — 2026-10-29
+
+- **VM2 evaluation** (`vm2`, pre-registered with two amendments in
+  [docs/design/package-v3-and-vm2.md](docs/design/package-v3-and-vm2.md)): a third corpus on Windows Server 2022,
+  detectors frozen, Defender real-time protection off during the attacks, analysis code committed before the session.
+  25 of 50 runs contained an escalation and CPES flagged all 25 (V1 ≥ 70% of all runs: 25/50, not supported);
+  research-v3 matched the research rules except for one false alarm of the latter (V2 not supported); the
+  service-install fixes kept every service detection (V3/V4, V3b/V4b supported); CPES ∪ Sigma 40/50 vs Sigma 35/50
+  (V5 supported); CPES named the escalated process in 20/20 runs, Sigma in 0/20. Two of the three Atomic token tests
+  download their script at run time and cannot run on an isolated VM. RESULTS §15, FINDINGS §12; lab tooling in
+  `lab/vm-session/` (runbook, read-only preflight, setup and session notes).
+- **Adoption** (pre-registered rule): the default stays `package-v2`; `service-install-only` is the recommended
+  structural setting for telemetry with service-install events, and the dashboard labels it.
+
 - **Package v3 modes** (opt-in, defaults unchanged): `research-v3` reproduces the
   published research rules exactly, with name rules labelled (corpus-v3 F1 0.993 in
   the package); `structural-v3` adds the `services.exe` parent check and

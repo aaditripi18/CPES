@@ -130,7 +130,8 @@ and the session may be screen-recorded for a demo.
 
 Recorded at commit `9c0b259` (clean tree) as `results/vm-live-v1.json`; tables in
 [../RESULTS.md](../RESULTS.md) §13. L1 and L2 **not supported** (20/50; UAC 5/20).
-L3–L7 supported. S2a and S2b supported, so S2 met its adoption criteria. It still has
+L3–L7 supported. S2a and S2b supported, so S2 met its adoption criteria (packaged on 2026-10-28 as the opt-in
+`service-install-only` mode; see package-v3-and-vm2.md). It still has
 to be implemented as an optional package setting before it can be used.
 
 Defender reported a successful detection in all 20 UAC runs and none of the

@@ -130,7 +130,7 @@ Defender left on, System 7045 and Security 4697 collected alongside Sysmon.
   when a service-install record names the same binary removed all **4** false
   alarms of the package engine (Defender's `MpCmdRun.exe`) and kept all 20
   service detections. The adoption criteria were met. The evidence is small: 4
-  false alarms, one image, one machine. S2 is not yet a setting in the package.
+  false alarms, one image, one machine. S2 is now the opt-in `service-install-only` resolver mode (section 12).
 
 The session ran with one guest freeze and recovery, recorded in
 [../lab/vm-session/SESSION-NOTES.md](../lab/vm-session/SESSION-NOTES.md).
@@ -150,13 +150,37 @@ and service-install corroboration. On data already seen during development it
 removed the recurring Defender false alarm (lab 12 → 1 benign service flags; VM 4 → 0)
 but lost the service signal on 4 of 5 Potato-style public samples. The
 service-install check alone kept those samples and removed the VM false alarms. Both
-variants are tested on a second VM before either becomes a default
-([design](design/package-v3-and-vm2.md)).
+variants were then tested on a second VM (section 12).
+
+## 12. A different Windows edition: every escalation that happened was caught
+
+VM2 repeated the live session on Windows Server 2022 with every detector frozen and Defender's real-time
+protection off during the attacks, so the signals rather than Defender were tested
+([design](design/package-v3-and-vm2.md), RESULTS §15).
+
+- **Detected 25 of 50 runs** against an expected ≥ 70% (V1 not supported), but **25 of 50 runs contained no
+  escalation**: the token tests never reached SYSTEM (two of the three download their attack script at run time and
+  cannot run on an isolated VM, which very likely also explains vm-live-v1's 0/15), Event Viewer never elevated on
+  Server 2022, and `sdclt.exe` does not exist there. **Of the 25 runs where an escalation happened, the research
+  signals flagged all 25** (UAC 10/10, service 10/10, injection 5/5), and the packaged research-v3 mode did the same
+  with **no false alarm**.
+- **The UAC signal replicated once Defender was out of the way**: Fodhelper 5/5 and ComputerDefaults 5/5 elevated
+  and were flagged. On vm-live-v1 Defender had stopped them.
+- **Injection is a name rule here too**: no remote-thread record exists (EID 8: 0), so only the `mavinject.exe` rule
+  finds the five injections; the structural package (package-v2) finds none.
+- **Next to SigmaHQ**: Sigma flagged more runs (35/50) but named the escalated process in **0 of 20** runs where it
+  appeared; CPES named it in **20 of 20**. Together they cover **40/50** (V5 supported).
+- **One false alarm, explained**: the research token rule treats every anonymous pipe as one pipe, so a benign SYSTEM
+  `cmd.exe` connecting to `<Anonymous Pipe>` looked like impersonation. The packaged mode scopes pipes to their window
+  and did not fire; this is V2's only difference (V2 not supported, so the dashboard default stays unchanged).
+- **The service-rule fixes held** (V3/V4, V3b/V4b): every service detection kept. The test was weak, because without
+  Defender's real-time protection its recurring false alarm never appeared. B2 alone (`service-install-only`) is now
+  the recommended structural setting for telemetry with service-install events.
 
 ## What would change these conclusions
 
-- A further, independently collected corpus on a different Windows build,
-  ideally with Defender's UAC protection accounted for in advance, so that the
-  UAC signal is tested on escalations that actually complete.
+- Token-theft tests that run offline (bundling `Get-System.ps1` as a prerequisite), so the token signal is finally
+  tested on escalations that complete; neither live session could.
+- More hosts and techniques: every corpus so far is one machine at a time.
 - Recording an actor for service escalations, so correlation can cross the
   `services.exe` boundary (section 9).

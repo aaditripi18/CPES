@@ -142,3 +142,41 @@ only; a VPN on the host must allow that network (infrastructure only).
 **Correction to vm-live-v1's record.** Its pre-registration says the shared clipboard was off; the
 VM's settings and its `vm-live-v1-ready` snapshot show it was on (bidirectional). No data crossed it
 as far as the session notes record; reported here so the published setup is accurate.
+
+## Outcome (2026-10-29, after the session)
+
+Recorded as `results/vm2.json` (execution `vm2-20261029T053201Z`, commit `2c0b0af`, clean tree); tables in
+[../RESULTS.md](../RESULTS.md) §15. The first execution (`1e5bdbb`) counted any SYSTEM pipe connection as a completed
+token escalation, against the wording above ("from the test's shell"); the corrected rule changes only the
+descriptive escalation-completed subset (40 → 25 runs), no verdict. Both executions are in the ledger and the
+correction is described in the setup notes.
+
+| | Expectation | Observed | Verdict |
+|---|---|---|---|
+| V1 | R detects ≥ 70% of the 50 runs consistently | 25/50 | **not supported** |
+| V2 | research-v3 flags exactly the processes R flags | one difference | **not supported** |
+| V3 | structural-v3 keeps ≥ 90% of package-v2's service detections | 10/10 | supported |
+| V4 | structural-v3 raises no more false-alarm processes | 0 vs 0 | supported |
+| V3b | B2 alone keeps ≥ 90% of package-v2's service detections | 10/10 | supported |
+| V4b | B2 alone raises no more false-alarm processes | 0 vs 0 | supported |
+| V5 | R ∪ Sigma detects more runs than Sigma alone | 40 vs 35 | supported |
+
+V1 failed because half the runs contained no escalation, not because escalations were missed: 25 of 50 runs
+completed one (UAC 10/20, service 10/10, injection 5/5, token 0/15), and R flagged all 25 consistently with no
+false alarm on them. Two of the three token tests download their attack script at run time and cannot work on an
+isolated VM; this very likely also explains vm-live-v1's 0/15. Event Viewer never elevated on Server 2022 (0/5) and
+`sdclt.exe` is absent (5 runs).
+
+V2's single difference is R's only false alarm: during the benign period a SYSTEM `cmd.exe` (parent `svchost.exe`)
+connected to an anonymous pipe, and the research rule, which keys pipes by name, treats every `<Anonymous Pipe>` as
+one pipe whose first creator was not SYSTEM. research-v3 scopes pipe evidence to its window and does not match.
+Reported, not patched.
+
+V3/V4 and V3b/V4b held, but as weak tests: with Defender's real-time protection off, the recurring vendor false
+alarm (`MpCmdRun.exe`) never occurred, so there was nothing for the service fixes to remove; they kept all ten
+service detections.
+
+**Adoption, by the rule fixed above.** The dashboard default stays `package-v2` (V2 not supported). B2 alone
+(`service-install-only`) becomes the recommended structural setting for telemetry with System 7045 / Security 4697
+(V3b and V4b held; Amendment 1), and the dashboard labels it so. research-v3 remains available as a labelled mode;
+on this corpus it detected what R detected without R's false alarm.
