@@ -5,4 +5,4 @@ call ``cpes.orchestration.CpesPipeline``; research experiments run the scripts i
 ``analysis/`` unchanged and record their output.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

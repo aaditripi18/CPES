@@ -39,7 +39,33 @@ from .storage import DatasetStore, new_id, now, read_json, write_json
 
 # Resolver discriminators and evidence-channel settings have one source of truth,
 # shared with the versioned evaluation (evaluation/engine.py).
-from evaluation.engine import EVIDENCE_MAPPING, EVIDENCE_SETTINGS, RESOLVER_SETTINGS, make_generator, make_resolver  # noqa: E402
+from evaluation.engine import EVIDENCE_MAPPING, EVIDENCE_MAPPING_V2, EVIDENCE_SETTINGS, MODES, RESOLVER_SETTINGS, SERVICE_INSTALL_CODES, make_generator, make_resolver  # noqa: E402
+
+# Resolver modes (docs/design/package-v3-and-vm2.md). The default is the package as every
+# earlier run used it; the other modes need the parent image, so v1 presets are read with v2.
+# VM2 (RESULTS §15): V2 failed, so the default stays package-v2; V3b/V4b held, so B2 alone is
+# the recommended structural setting for telemetry with System 7045 / Security 4697.
+DEFAULT_MODE = "package-v2"
+RECOMMENDED_STRUCTURAL_MODE = "service-install-only"
+RESOLVER_MODES = (
+    {"id": "package-v2", "title": "Structural (package v2)", "name_rules": False,
+     "description": "Mechanism signals only: hijack write + auto-elevating binary, SYSTEM binary outside system directories, real remote threads, SYSTEM pipe impersonation."},
+    {"id": "research-v3", "title": "Research rules v3 (includes name rules)", "name_rules": True,
+     "description": "The published research rules exactly, including two NAME RULES: mavinject.exe (injection) and image names containing 'atomicservice' (service). UAC needs no hijack write; service needs parent services.exe."},
+    {"id": "structural-v3", "title": "Structural v3 (B1 + B2)", "name_rules": False,
+     "description": "Package v2 plus the services.exe parent check (B1) and, when the data holds System 7045 / Security 4697 records, service-install corroboration (B2)."},
+    {"id": "service-install-only", "title": "Service-install check only (B2) — recommended with install events", "name_rules": False,
+     "description": "Package v2 plus service-install corroboration (B2) when the data holds System 7045 / Security 4697 records; no parent check. Recommended structural setting after VM2 (RESULTS §15): kept every service detection, removed the vendor false alarms on vm-live-v1, and keeps the Potato detections the parent check loses."},
+)
+V2_PRESETS = {"elastic-sysmon-field-mapping-v1": "elastic-sysmon-field-mapping-v2", "evtx-sysmon-field-mapping-v1": "evtx-sysmon-field-mapping-v2"}
+ELASTIC_PRESETS = ("elastic-sysmon-field-mapping-v1", "elastic-sysmon-field-mapping-v2")
+EVTX_PRESETS = ("evtx-sysmon-field-mapping-v1", "evtx-sysmon-field-mapping-v2")
+
+def _install_record(document: dict) -> bool:
+    event = document.get("event") or {}
+    channel = (document.get("winlog") or {}).get("channel")
+    return str(event.get("code")) in SERVICE_INSTALL_CODES and channel in ("System", "Security")
+
 
 SIGNAL_IDS = ("autoelevation_lolbin", "service_dropped_binary", "remote_thread_injection", "token_impersonation")
 
@@ -138,7 +164,15 @@ class RunStore:
             raise ValueError("advance must not exceed span, otherwise events between windows are never scored.")
         model = load_model(request.get("evidence_model_id", "research-v3-full-table"))
         threshold = _decimal(request.get("threshold", model["default_threshold"]), "threshold")
+        mode = request.get("resolver_mode") or DEFAULT_MODE
+        if mode not in MODES:
+            raise ValueError(f"unknown resolver mode '{mode}'; choose from {', '.join(MODES)}.")
         configuration, normalised = resolve_mapping(request.get("mapping"))
+        mapping_for_mode = None
+        if mode != DEFAULT_MODE and normalised.get("preset") in V2_PRESETS:
+            # Same fields plus the optional parent image; overrides still apply.
+            mapping_for_mode = V2_PRESETS[normalised["preset"]]
+            configuration, _ = resolve_mapping({**normalised, "preset": mapping_for_mode})
         run_id = new_id("run")
         status = {
             "id": run_id,
@@ -155,7 +189,8 @@ class RunStore:
         }
         directory = self.root / run_id
         write_json(directory / "status.json", status)
-        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration, "evidence_channels": bool(request.get("evidence_channels", True)), "sigma": bool(request.get("sigma", False))}
+        params = {"span": span, "advance": advance, "threshold": threshold, "model": model, "mapping_spec": normalised, "mapping": configuration, "evidence_channels": bool(request.get("evidence_channels", True)), "sigma": bool(request.get("sigma", False)),
+                  "mode": mode, "mapping_for_mode": mapping_for_mode}
         if background:
             threading.Thread(target=self._execute, args=(run_id, params), daemon=True).start()
         else:
@@ -210,10 +245,10 @@ class RunStore:
         start_at = min(stamps)
         horizon_end_at = max(stamps) + timedelta(seconds=params["span"])
         window_parameters = SlidingWindowParameters(start_at, horizon_end_at, params["span"], params["advance"])
-        resolver = make_resolver()
+        evidence_items, evidence_report = self._evidence(parsed, mapped.record_indices, params)
+        resolver = make_resolver(mode=params["mode"], has_service_installs=bool(evidence_report.get("service_install_evidence")))
         evidence_model = to_evidence_model(params["model"], SIGNAL_IDS)
         configuration = PipelineConfiguration(window_parameters, evidence_model, params["threshold"], make_generator(resolver))
-        evidence_items, evidence_report = self._evidence(parsed, mapped.record_indices, params)
 
         config = {
             "run_id": run_id,
@@ -244,6 +279,10 @@ class RunStore:
             "evidence_channels": evidence_report,
             "sigma": {"requested": params["sigma"], "result": "recorded in incidents.json (rules, levels, alerts)"},
             "resolver": {key: list(value) for key, value in RESOLVER_SETTINGS.items()},
+            "resolver_mode": {**next(m for m in RESOLVER_MODES if m["id"] == params["mode"]),
+                              "options": {k: (list(v) if isinstance(v, tuple) else v) for k, v in MODES[params["mode"]].items()},
+                              "field_mapping_used": params["mapping_for_mode"] or params["mapping_spec"].get("preset"),
+                              "service_install_check_active": bool(MODES[params["mode"]].get("require_service_install") and evidence_report.get("service_install_evidence"))},
             "versions": {"cpes": cpes_version(), "dashboard": __version__, "python": platform.python_version(), **git_state()},
             "engine": "cpes.orchestration.CpesPipeline (unchanged package code)",
         }
@@ -328,11 +367,17 @@ class RunStore:
         if not params["evidence_channels"]:
             return (), {"enabled": False, "reason": "turned off for this run"}
         spec = params["mapping_spec"]
-        if spec.get("preset") == "evtx-sysmon-field-mapping-v1":
+        if spec.get("preset") in EVTX_PRESETS:
             return RunStore._evtx_evidence(parsed, record_indices)
-        if spec.get("preset") != "elastic-sysmon-field-mapping-v1":
+        if spec.get("preset") not in ELASTIC_PRESETS:
             return (), {"enabled": False, "reason": "evidence mapping is defined for the Winlogbeat/ECS and raw EVTX presets only"}
-        configuration = load_evidence_mapping(EVIDENCE_MAPPING)
+        installs = params.get("mode", DEFAULT_MODE) != DEFAULT_MODE
+        configuration = load_evidence_mapping(EVIDENCE_MAPPING_V2 if installs else EVIDENCE_MAPPING)
+        if installs:
+            # Service-install records (System 7045 / Security 4697) are not process events, so the field
+            # mapping rejects them; the evidence channel reads them from every record in the file.
+            accepted = set(record_indices)
+            record_indices = list(record_indices) + [i for i in range(len(parsed)) if i not in accepted and _install_record(parsed.document(i))]
         from_position = spec["event_id_from_position"]
         if from_position:
             fields = tuple(FieldMapping(POSITION_KEY, f.destination_field, False) if f.destination_field == "source_event_id" else f for f in configuration.fields)
@@ -344,13 +389,15 @@ class RunStore:
                 records.append(mapper.map_document(mapped_document(parsed.document(index), index, from_position)))
             except (ValueError, TypeError):
                 unmapped += 1
-        channels = EvidenceChannelBuilder(**EVIDENCE_SETTINGS).build(records)
+        settings = {**EVIDENCE_SETTINGS, "service_install_codes": SERVICE_INSTALL_CODES} if installs else EVIDENCE_SETTINGS
+        channels = EvidenceChannelBuilder(**settings).build(records)
         return channels.items, {
             "enabled": True,
             "mapping": configuration.version,
-            "settings": {k: list(v) for k, v in EVIDENCE_SETTINGS.items()},
+            "settings": {k: list(v) for k, v in settings.items()},
             "pipe_evidence": len(channels.pipes),
             "remote_thread_evidence": len(channels.remote_threads),
+            "service_install_evidence": len(channels.service_installs),
             "skipped": dict(channels.skipped),
             "records_not_mappable": unmapped,
             "attachment_rule": "remote thread → chain of its source; pipe connect → chain of the connecting process; pipe create with the same name in the same window, from any chain",

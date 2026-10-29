@@ -7,11 +7,33 @@ generated into [docs/RESULTS.md](docs/RESULTS.md).
 
 ## Unreleased
 
+## 0.3.0 — 2026-10-29
+
+- **VM2 evaluation** (`vm2`, pre-registered with two amendments in
+  [docs/design/package-v3-and-vm2.md](docs/design/package-v3-and-vm2.md)): a third corpus on Windows Server 2022,
+  detectors frozen, Defender real-time protection off during the attacks, analysis code committed before the session.
+  25 of 50 runs contained an escalation and CPES flagged all 25 (V1 ≥ 70% of all runs: 25/50, not supported);
+  research-v3 matched the research rules except for one false alarm of the latter (V2 not supported); the
+  service-install fixes kept every service detection (V3/V4, V3b/V4b supported); CPES ∪ Sigma 40/50 vs Sigma 35/50
+  (V5 supported); CPES named the escalated process in 20/20 runs, Sigma in 0/20. Two of the three Atomic token tests
+  download their script at run time and cannot run on an isolated VM. RESULTS §15, FINDINGS §12; lab tooling in
+  `lab/vm-session/` (runbook, read-only preflight, setup and session notes).
+- **Adoption** (pre-registered rule): the default stays `package-v2`; `service-install-only` is the recommended
+  structural setting for telemetry with service-install events, and the dashboard labels it.
+
 - **Package v3 modes** (opt-in, defaults unchanged): `research-v3` reproduces the
   published research rules exactly, with name rules labelled (corpus-v3 F1 0.993 in
   the package); `structural-v3` adds the `services.exe` parent check and
   service-install corroboration (System 7045 / Security 4697 evidence channel).
   Field mappings v2 add the parent image. Development checks: RESULTS §14.
+  `service-install-only` (B2 alone) is a named mode as well.
+
+- **Dashboard**: the run form selects the resolver mode; each run records the mode, the
+  field mapping it used (v1 presets are read with v2 for the parent image) and whether
+  service-install corroboration was active, and research-v3 is marked as containing name
+  rules. **Fix:** the run form used the first evidence model alphabetically, `cpes-v2`
+  (not adopted, RESULTS §10), instead of `research-v3-full-table`; the adopted model is
+  now listed first.
 
 - **Live VM evaluation** (`vm-live-v1`, pre-registered in
   [docs/design/vm-live-v1.md](docs/design/vm-live-v1.md)): a second corpus of 50

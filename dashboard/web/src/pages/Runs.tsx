@@ -157,10 +157,24 @@ export function RunDetail() {
                 ["window", <span className="font-mono text-2xs">span {config.window.span_seconds}s · advance {config.window.advance_seconds}s · {time(config.window.start_at)} → {time(config.window.horizon_end_at)}</span>],
                 ["threshold", <span className="font-mono">{config.threshold}</span>],
                 [
+                  "resolver mode",
+                  config.resolver_mode ? (
+                    <span className="text-2xs">
+                      <span className="font-mono">{config.resolver_mode.id}</span>
+                      {config.resolver_mode.name_rules && <span className="text-detect"> · contains name rules</span>}
+                      {config.resolver_mode.service_install_check_active && <span className="text-muted"> · service-install check active</span>}
+                      <span className="text-muted"> · fields {config.resolver_mode.field_mapping_used ?? "custom"}</span>
+                    </span>
+                  ) : (
+                    <span className="text-2xs text-muted">package-v2 (run predates resolver modes)</span>
+                  ),
+                ],
+                [
                   "evidence channels",
                   config.evidence_channels?.enabled ? (
                     <span className="font-mono text-2xs">
-                      on · {config.evidence_channels.pipe_evidence} pipe, {config.evidence_channels.remote_thread_evidence} remote-thread records · {config.evidence_channels.mapping}
+                      on · {config.evidence_channels.pipe_evidence} pipe, {config.evidence_channels.remote_thread_evidence} remote-thread
+                      {config.evidence_channels.service_install_evidence !== undefined ? `, ${config.evidence_channels.service_install_evidence} service-install` : ""} records · {config.evidence_channels.mapping}
                     </span>
                   ) : (
                     <span className="text-2xs text-muted">off{config.evidence_channels?.reason ? ` — ${config.evidence_channels.reason}` : " (run predates evidence channels)"}</span>

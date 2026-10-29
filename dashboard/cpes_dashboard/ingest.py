@@ -49,6 +49,9 @@ KNOWN_INTEGRITY_LEVELS = ("Untrusted", "Low", "Medium", "High", "System")
 MAPPING_PRESETS = {
     "elastic-sysmon-field-mapping-v1": CONFIGS / "elastic-sysmon-field-mapping-v1.yaml",
     "evtx-sysmon-field-mapping-v1": CONFIGS / "evtx-sysmon-field-mapping-v1.yaml",
+    # v2 = v1 plus the optional parent image, used by the v3 resolver modes.
+    "elastic-sysmon-field-mapping-v2": CONFIGS / "elastic-sysmon-field-mapping-v2.yaml",
+    "evtx-sysmon-field-mapping-v2": CONFIGS / "evtx-sysmon-field-mapping-v2.yaml",
 }
 # The mapping a freshly uploaded file of each format is validated with first.
 DEFAULT_PRESET_BY_FORMAT = {"evtx": "evtx-sysmon-field-mapping-v1"}

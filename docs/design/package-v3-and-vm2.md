@@ -107,3 +107,76 @@ Because of the B1 cost above, VM2 also evaluates **B2 alone** (`service-install-
 with the same criteria as V3 and V4 (V3b, V4b). If structural-v3 and B2 alone both
 hold, B2 alone is recommended: on the development data it keeps the Potato detections
 that B1 loses.
+
+## Amendment 2 (2026-10-29, after setup, before the benign period and any attack run)
+
+The VM2 build and its preflight are recorded in
+[../../lab/vm-session/VM2-SETUP-NOTES.md](../../lab/vm-session/VM2-SETUP-NOTES.md); the procedure
+is [../../lab/vm-session/VM2-RUNBOOK.md](../../lab/vm-session/VM2-RUNBOOK.md) phases C–D, with
+`benign-period.ps1` and `run-attacks.ps1` unchanged at this commit.
+
+**Setup as built.** Windows Server 2022 Standard Evaluation (Desktop Experience), build 20348 with
+the 2026-09 cumulative update (KB5122882); session user `cpeslab`, an ordinary administrator,
+because the built-in Administrator runs without UAC admin approval. Sysmon **15.22** (vm-live-v1:
+15.21) with the identical configuration file (SHA-256 `B58F8F5B…2373E2C8`). Elasticsearch and
+Winlogbeat 9.4.3, same channels; index `cpes-live-vm2`; the Elasticsearch password sits in
+Winlogbeat's keystore instead of `winlogbeat.yml`. Atomic Red Team installed from master on
+2026-10-28, prerequisites met for all ten tests. Defender exclusion `C:\AtomicRedTeam`, as on
+vm-live-v1.
+
+**`sdclt.exe` is absent on Windows Server 2022**, so T1548.002 #7 cannot elevate. The test is still
+run five times, as fixed; those runs stay in every primary denominator (so at most 45 of the 50 runs
+can contain an escalation) and are also reported separately as "binary absent". No test is
+substituted. Consequence stated in advance: the one UAC method that completed on vm-live-v1 is not
+tested here; UAC is tested through eventvwr, fodhelper and ComputerDefaults with Defender's real-time
+protection off.
+
+**Defender.** Real-time protection stays on during the benign period (including its quick scan) and
+is turned off with `Set-MpPreference -DisableRealtimeMonitoring $true` immediately before part 1;
+its state is exported before the attacks and its detection history after the session.
+
+**Isolation.** Before the benign period: NAT adapter disabled, shared folder removed, clipboard and
+drag-and-drop disabled, snapshot `vm2-ready`. The host reads Elasticsearch over the host-only network
+only; a VPN on the host must allow that network (infrastructure only).
+
+**Correction to vm-live-v1's record.** Its pre-registration says the shared clipboard was off; the
+VM's settings and its `vm-live-v1-ready` snapshot show it was on (bidirectional). No data crossed it
+as far as the session notes record; reported here so the published setup is accurate.
+
+## Outcome (2026-10-29, after the session)
+
+Recorded as `results/vm2.json` (execution `vm2-20261029T053201Z`, commit `2c0b0af`, clean tree); tables in
+[../RESULTS.md](../RESULTS.md) §15. The first execution (`1e5bdbb`) counted any SYSTEM pipe connection as a completed
+token escalation, against the wording above ("from the test's shell"); the corrected rule changes only the
+descriptive escalation-completed subset (40 → 25 runs), no verdict. Both executions are in the ledger and the
+correction is described in the setup notes.
+
+| | Expectation | Observed | Verdict |
+|---|---|---|---|
+| V1 | R detects ≥ 70% of the 50 runs consistently | 25/50 | **not supported** |
+| V2 | research-v3 flags exactly the processes R flags | one difference | **not supported** |
+| V3 | structural-v3 keeps ≥ 90% of package-v2's service detections | 10/10 | supported |
+| V4 | structural-v3 raises no more false-alarm processes | 0 vs 0 | supported |
+| V3b | B2 alone keeps ≥ 90% of package-v2's service detections | 10/10 | supported |
+| V4b | B2 alone raises no more false-alarm processes | 0 vs 0 | supported |
+| V5 | R ∪ Sigma detects more runs than Sigma alone | 40 vs 35 | supported |
+
+V1 failed because half the runs contained no escalation, not because escalations were missed: 25 of 50 runs
+completed one (UAC 10/20, service 10/10, injection 5/5, token 0/15), and R flagged all 25 consistently with no
+false alarm on them. Two of the three token tests download their attack script at run time and cannot work on an
+isolated VM; this very likely also explains vm-live-v1's 0/15. Event Viewer never elevated on Server 2022 (0/5) and
+`sdclt.exe` is absent (5 runs).
+
+V2's single difference is R's only false alarm: during the benign period a SYSTEM `cmd.exe` (parent `svchost.exe`)
+connected to an anonymous pipe, and the research rule, which keys pipes by name, treats every `<Anonymous Pipe>` as
+one pipe whose first creator was not SYSTEM. research-v3 scopes pipe evidence to its window and does not match.
+Reported, not patched.
+
+V3/V4 and V3b/V4b held, but as weak tests: with Defender's real-time protection off, the recurring vendor false
+alarm (`MpCmdRun.exe`) never occurred, so there was nothing for the service fixes to remove; they kept all ten
+service detections.
+
+**Adoption, by the rule fixed above.** The dashboard default stays `package-v2` (V2 not supported). B2 alone
+(`service-install-only`) becomes the recommended structural setting for telemetry with System 7045 / Security 4697
+(V3b and V4b held; Amendment 1), and the dashboard labels it so. research-v3 remains available as a labelled mode;
+on this corpus it detected what R detected without R's false alarm.

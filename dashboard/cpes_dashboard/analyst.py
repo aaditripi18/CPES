@@ -68,13 +68,14 @@ def run_sigma(parsed, record_indices: list[int], preset: str | None) -> tuple[li
 
     if not SIGMA_CORE.exists():
         return [], {"enabled": False, "reason": sigma_available()["how"]}
-    if preset == "elastic-sysmon-field-mapping-v1":
+    ecs = preset in ("elastic-sysmon-field-mapping-v1", "elastic-sysmon-field-mapping-v2")
+    if ecs:
         view, timestamp = ecs_view, lambda d: d.get("@timestamp")
-    elif preset == "evtx-sysmon-field-mapping-v1":
+    elif preset in ("evtx-sysmon-field-mapping-v1", "evtx-sysmon-field-mapping-v2"):
         view, timestamp = evtx_view, lambda d: d["Event"]["System"]["TimeCreated"]["#attributes"]["SystemTime"]
     else:
         return [], {"enabled": False, "reason": "Sigma field views exist for the Winlogbeat/ECS and raw EVTX presets only."}
-    ruleset = _sigma_rules(preset == "elastic-sysmon-field-mapping-v1")
+    ruleset = _sigma_rules(ecs)
     documents, views = [], []
     for index in record_indices:
         document = parsed.document(index)

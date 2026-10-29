@@ -91,3 +91,9 @@ def test_canonical_experiment_reproduces_the_documented_figures(data_root):
     assert detectors["CPES (context WoE)"]["f1"] == 0.993
     assert detectors["Single-event (integrity)"]["f1"] == 0.551
     assert detectors["IOC / signature"]["f1"] == 0.705
+
+
+def test_the_adopted_model_is_listed_first(client):
+    # The run form starts runs with the first model; cpes-v2 was not adopted (RESULTS §10).
+    models = client.get("/api/evidence-models").json()
+    assert models[0]["id"] == "research-v3-full-table"
