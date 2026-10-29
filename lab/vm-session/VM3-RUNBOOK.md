@@ -108,7 +108,11 @@ new contributions.
 
 ## Operational reminders (from VM1/VM2)
 
-- Proton VPN on the host blocks the host-only network — disconnect it for host checks and the export.
+- **Restoring `vm3-ready-postupdate` resets `--paravirtprovider` to hyperv** (the snapshot stores the
+  hyperv config). Re-apply **`VBoxManage modifyvm "CPES-Windows11-VM3" --paravirtprovider minimal`**
+  after every restore and before starting, or the guest hangs mid-session (frozen clock, no disk I/O).
+  Verify with `showvminfo --machinereadable | grep paravirt` → both nominal and effective `minimal`.
+- Proton VPN and McAfee VPN on the host block the host-only network — disconnect for host checks and the export.
 - Never take a **live** snapshot; power off first.
 - Host key is Left Ctrl + Left Alt. Start the VM so its window can close without stopping it
   (`--type separate` or headless) only if you are comfortable with that; otherwise a normal window is fine.
