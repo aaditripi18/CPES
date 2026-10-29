@@ -109,3 +109,21 @@ Operational events, recorded as they happened. None changes the pre-registered p
   --end 2026-10-29T01:12:30Z` (benign start to last run + 10 min) wrote **374,676** documents to the git-ignored
   `lab-data/vm2/corpus.ndjson`, SHA-256 `2ff842a7944455cd879f73ddaae303f4501342c6bd0ba4f72f88e16bdee95427`
   (System 7045: 12, Security 4697: 12, Sysmon EID 1: 2,184, EID 8: 0).
+
+## Analysis notes (after the first execution of `vm2`)
+
+- **Correction, disclosed.** The first execution (`vm2-20261029T052829Z`, commit `1e5bdbb`) counted a token run as
+  "escalation completed" on *any* named-pipe connection made as SYSTEM within ±150 s. The pre-registration says
+  "a SYSTEM-integrity process or SYSTEM pipe connection *from the test's shell*". The ~2,800 SYSTEM pipe
+  connections in the corpus come from `ngen.exe` (1,421) and `VBoxService.exe` (790) and so marked all 15 token runs
+  completed. The code now requires the connecting process to be the shell (powershell/cmd), as worded; with it,
+  0 of 15 token runs completed (no SYSTEM child of a shell, no SYSTEM pipe connection by a shell). This changes only
+  the descriptive "escalation completed" subset; no hypothesis uses it. Both executions are in the ledger.
+- **V2 difference, cause.** The research rules flag one process the packaged research-v3 does not: a SYSTEM
+  `cmd.exe` started by `svchost.exe` at 22:06:36Z, inside the benign period, connecting to an *anonymous* pipe. The
+  research token rule keys pipes by name, and every anonymous pipe is named `<Anonymous Pipe>`, so a SYSTEM connection
+  to any anonymous pipe whose first creator (anywhere earlier) was not SYSTEM counts as impersonation. The package
+  scopes pipe evidence to the window and does not make that match. It is R's only false-alarm process. Reported,
+  not patched (pre-registration, development check A).
+- UAC escalations by test: Fodhelper 5/5 and ComputerDefaults 5/5 (the auto-elevating binary ran at High); Event
+  Viewer 0/5; sdclt absent (0/5).

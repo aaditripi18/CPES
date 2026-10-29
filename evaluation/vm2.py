@@ -15,7 +15,9 @@ Fixed in advance:
 * "Escalation completed" per run, mechanically: UAC = an auto-elevating binary at
   High/System; service = a SYSTEM child of ``services.exe`` (not svchost); token = a
   SYSTEM-integrity process started by the test's shell (powershell/cmd) or a named-pipe
-  connection made as SYSTEM; injection = ``mavinject.exe`` ran. All within ±150 s.
+  connection made as SYSTEM by that shell; injection = ``mavinject.exe`` ran. All within ±150 s.
+  (The first execution counted any SYSTEM pipe connection, against the pre-registered wording;
+  corrected and disclosed in lab/vm-session/VM2-SETUP-NOTES.md.)
 * T1548.002 #7 runs are "binary absent" (``sdclt.exe`` is not on Windows Server 2022,
   Amendment 2): kept in every primary denominator and also reported separately.
 * The registry pre-filter for the package engine is checked, as on vm-live-v1, on the
@@ -119,7 +121,7 @@ def load(ruleset: RuleSet, window: tuple[datetime, datetime]) -> dict:
                 process_docs.append(d)
                 package_docs.append(d)
                 if code == "18" and vm_live._get(d, "user", "name") == "SYSTEM":
-                    system_pipes.append(vm_live._ts(d["@timestamp"]))
+                    system_pipes.append((vm_live._ts(d["@timestamp"]), vm_live._bn(vm_live._get(d, "process", "executable"))))
             elif code in vm_live.REGISTRY_CODES and any(t in (vm_live._get(d, "registry", "path") or "").lower() for t in tokens):
                 package_docs.append(d)
             eid, view = ecs_view(d)
@@ -134,7 +136,9 @@ def load(ruleset: RuleSet, window: tuple[datetime, datetime]) -> dict:
             "alerts": alerts, "system_pipes": system_pipes}
 
 
-def escalation_completed(run: vm_live.Run, nodes: dict, created: dict[str, datetime], system_pipes: list[datetime]) -> bool:
+def escalation_completed(run: vm_live.Run, nodes: dict, created: dict[str, datetime], system_pipes: list[tuple[datetime, str]]) -> bool:
+    """``system_pipes``: (time, image basename) of named-pipe connections made as SYSTEM."""
+
     near = lambda t: abs((t - run.at).total_seconds()) <= TOLERANCE_SECONDS  # noqa: E731
     close = [nodes[g] for g, t in created.items() if near(t) and g in nodes]
     if run.technique == "T1548.002":
@@ -142,7 +146,9 @@ def escalation_completed(run: vm_live.Run, nodes: dict, created: dict[str, datet
     if run.technique == "T1543.003":
         return any(n.parent_image == "services.exe" and n.image != "svchost.exe" and n.integrity == "system" for n in close)
     if run.technique.startswith("T1134"):
-        return any(n.integrity == "system" and n.parent_image in SHELLS for n in close) or any(near(t) for t in system_pipes)
+        # "from the test's shell" applies to both: the pipe connection must be made by a shell as SYSTEM
+        # (corrected 2026-10-29 after the first execution, which counted any SYSTEM pipe connection).
+        return any(n.integrity == "system" and n.parent_image in SHELLS for n in close) or any(near(t) and image in SHELLS for t, image in system_pipes)
     if run.technique == "T1055.001":
         return any(n.image == "mavinject.exe" for n in close)
     return False

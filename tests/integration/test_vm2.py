@@ -40,8 +40,10 @@ def test_token_completes_on_a_system_shell_child_or_a_system_pipe_connection():
     run = Run("T1134.001", "1", T0, "0", False)
     assert _completed(run, [_create("t", "cmd.exe", parent_image="powershell.exe", integrity="System")])
     assert not _completed(run, [_create("t", "cmd.exe", parent_image="powershell.exe", integrity="High")])
-    assert _completed(run, [], pipes=[T0 + timedelta(seconds=60)])
-    assert not _completed(run, [], pipes=[T0 + timedelta(seconds=400)])
+    assert _completed(run, [], pipes=[(T0 + timedelta(seconds=60), "powershell.exe")])
+    assert not _completed(run, [], pipes=[(T0 + timedelta(seconds=400), "powershell.exe")])
+    # A SYSTEM pipe connection by an unrelated process is not the test's shell.
+    assert not _completed(run, [], pipes=[(T0 + timedelta(seconds=60), "ngen.exe")])
 
 
 def test_injection_completes_when_mavinject_runs():
