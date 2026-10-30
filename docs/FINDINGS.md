@@ -177,10 +177,30 @@ protection off during the attacks, so the signals rather than Defender were test
   Defender's real-time protection its recurring false alarm never appeared. B2 alone (`service-install-only`) is now
   the recommended structural setting for telemetry with service-install events.
 
+## 13. Token tests made to run offline: the token signal is confirmed on completed escalations
+
+VM3 repeated the live session on Windows 11 with every detector frozen, Defender's real-time protection off, and
+the token technique's run-time script download served from a pinned local `Get-System.ps1`, so the token tests
+finally reach SYSTEM on an isolated VM ([design](design/vm3-session.md), RESULTS §16). All six pre-registered
+hypotheses (W1–W6) are supported.
+
+- **Every escalation that completed was caught**: 35 of 50 runs reached SYSTEM/High, and the research signals flagged
+  **all 35** (UAC 15/15, service 10/10, injection 5/5, token 5/5), consistently and with **no false alarm** (W1). The
+  other 15 are the three tests pre-registered as "cannot complete here" on this host — Event Viewer's mscfile hijack is
+  patched on build 26200.9711, the `SeDebugPrivilege` duplication primitive fails, and `lsass` is a protected process
+  (PPL) so the parent-token test is denied. Over all 50 runs that is 35/50 = 70%, so the headline rate W1/W2 missed on
+  VM1 and VM2 (because escalations failed for setup reasons) is now met (W2).
+- **The token signal is confirmed on its first real test**: the offline shim let T1134.001 #1 impersonate a
+  named-pipe client up to `WORKGROUP\SYSTEM`, and the `token_impersonation` signal flagged the SYSTEM process in
+  **5 of 5** completed token runs (W3) — the first time that signal was exercised on a completed escalation.
+- **The packaged research-v3 mode matched the research rules exactly** (W4): no benign-pipe false alarm this time.
+- **Next to SigmaHQ**: Sigma flagged 35/50 but named the escalated process in **0 of 25** runs where it appeared;
+  CPES named it in **25 of 25**. Together they cover **45/50** vs Sigma's 35 (W5).
+- **The service-install setting held again** (W6): every service detection kept, no extra false alarm — still a weak
+  test with Defender's real-time protection off, as pre-registered.
+
 ## What would change these conclusions
 
-- Token-theft tests that run offline (bundling `Get-System.ps1` as a prerequisite), so the token signal is finally
-  tested on escalations that complete; neither live session could.
 - More hosts and techniques: every corpus so far is one machine at a time.
 - Recording an actor for service escalations, so correlation can cross the
   `services.exe` boundary (section 9).

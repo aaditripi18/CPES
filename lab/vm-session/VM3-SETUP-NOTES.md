@@ -50,12 +50,31 @@ proceeds; empty until then.
 
 ## Recorded session
 
-- Benign period: _TBD_. Defender off at: _TBD_ (state in `defender-state-before-attacks.csv`).
-- Part 1 (uac) / Part 2 (admin): _TBD_. Exit codes: _TBD_. Defender detections: _TBD_.
-- Export: `lab/export_live.py --name vm3 --start … --end …` → _N_ documents, SHA-256 _TBD_
-  (set `vm3.CORPUS_SHA256`).
+Ran 2026-10-29 / 2026-10-30 (the session spanned a **~6 h idle pause** between Part 1 and Part 2 —
+the operator stepped away after the UAC part; the pause is benign idle time outside every test
+window and does not affect the per-test analysis, only the corpus size).
+
+- Benign period: **2026-10-29T17:48:20Z → 18:18:31Z** (30 min, Defender on), `benign-period.csv`.
+- Defender real-time protection off at ~18:20Z: `RealTimeProtectionEnabled=False`, AntivirusEnabled
+  True, BehaviorMonitor False, TamperProtected False (`defender-state-before-attacks.csv`). Re-verified
+  **still False** after the 6 h pause, before Part 2.
+- Part 1 (uac, non-admin): 20 runs, T1548.002 ×20, first run **2026-10-29T18:23:01Z**. No UAC consent
+  dialog appeared (bypasses elevated silently or ran at Medium). Part 2 (admin, elevated): 30 runs —
+  T1543.003 ×10, T1134.001 ×10, T1055.001 ×5, T1134.002 ×5; last run **2026-10-30T03:37:24Z**.
+  **All 50 runs ExitCode 0.** Defender detections/threats: **none** (`defender-detections.csv` /
+  `defender-threats.csv` both empty — RT was off, so Defender caught nothing).
+- Export: `lab/export_live.py --name vm3 --start 2026-10-29T17:48:20Z --end 2026-10-30T03:47:24Z`
+  (last run + 10 min) → **1,128,188 documents**, SHA-256
+  **`964bdb6ed7315a0caf94b5826930be69d8296eb16a0872d49b29feccf79ce3b7`** (`vm3.CORPUS_SHA256` set).
+  Event mix: EID 10 ProcessAccess 539,837; EID 12/13 registry 471,868; EID 1 ProcessCreate 1,020;
+  EID 7 ImageLoad 38,751; EID 11 FileCreate 72,367; EID 8 CreateRemoteThread 3; EID 17/18 pipes 3,323;
+  Security 4697 / System 7045 service installs 16 each.
 
 ## Analysis
 
-- `python -m evaluation.run vm3` execution id, commit, verdicts: _TBD_.
-- Any disclosed correction: _TBD_.
+- `python -m evaluation.run vm3`: execution `vm3-20261030T041508Z`. All six hypotheses **supported**
+  (W1 35/35, W2 35/50, W3 5/5 completed token runs, W4 no differences, W5 45 vs 35, W6 10/10 & 0 FA).
+  RESULTS §16, FINDINGS §13, CHANGELOG 0.4.0.
+- Any disclosed correction: none — no test, detector, weight or hypothesis changed after the
+  pre-registration. The ~6 h idle pause between Part 1 and Part 2 is disclosed above; it is benign time
+  outside every test window and does not affect the per-test analysis, only the corpus size.

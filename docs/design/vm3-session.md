@@ -139,3 +139,25 @@ Setup note (also before the session): a pending Windows feature update applied d
 frozen build is **26200.9711**, and the Hyper-V paravirtual timer was replaced with `minimal` to stop
 a guest hang. The recorded session starts from snapshot **`vm3-ready-postupdate`** rather than
 `vm3-ready`. No test, detector or weight changed.
+
+## Outcome 2026-10-30 — recorded session (after the session)
+
+The recorded session ran 2026-10-29/30 (a ~6 h idle pause separated the UAC and admin parts — benign
+time outside every test window, which only enlarges the corpus). 50 runs, all ExitCode 0, Defender
+detections in 0 runs. An escalation completed in **35**, exactly the seven escalation-completing
+tests × 5 the pilot predicted (T1543.003 10/10, T1055.001 5/5, T1548.002 15/20, T1134.001 5/10,
+T1134.002 0/5); the three "cannot complete here" tests behaved as declared. Corpus **1,128,188**
+documents, SHA-256 `964bdb6ed7315a0caf94b5826930be69d8296eb16a0872d49b29feccf79ce3b7`.
+
+All six hypotheses are **supported** (execution `vm3-20261030T041508Z`, RESULTS §16):
+
+| | Observed | Verdict |
+|---|---|---|
+| W1 | R flags 35/35 completed-escalation runs consistently, 0 false alarm | supported |
+| W2 | R detects 35/50 of all runs (>= 70%) | supported |
+| W3 | token signal flags SYSTEM in 5/5 completed token runs | supported |
+| W4 | research-v3 flags exactly the processes R flags (no differences) | supported |
+| W5 | R or Sigma 45 vs Sigma 35 | supported |
+| W6 | service-install-only keeps 10/10 service detections, 0 vs 0 false alarm | supported |
+
+No test, detector, weight or hypothesis was changed after the pre-registration.

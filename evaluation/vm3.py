@@ -31,7 +31,7 @@ DEFENDER_THREATS = LAB / "defender-threats.csv"
 PILOT_CORPUS = LAB / "pilot-corpus.ndjson"
 PILOT_ATOMIC_LOG = LAB / "pilot-atomic-log.csv"
 # Recorded in lab/vm-session/VM3-SETUP-NOTES.md at export; None until the session has run.
-CORPUS_SHA256: str | None = None
+CORPUS_SHA256: str | None = "964bdb6ed7315a0caf94b5826930be69d8296eb16a0872d49b29feccf79ce3b7"
 # Windows 11 has every UAC binary; nothing is "binary absent" unless an amendment adds it.
 ABSENT_TESTS: set[tuple[str, str]] = set()
 MODES = vm2.MODES
