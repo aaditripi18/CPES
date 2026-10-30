@@ -72,6 +72,12 @@ the right technique in **98 of 126** runs with one false alarm.
 | V2 | The packaged research-v3 mode flags exactly what the research rules flag | **not supported** (one difference: the research rule's anonymous-pipe false alarm) |
 | V3b–V4b | Service-install corroboration keeps service detections without adding false alarms | **supported** (10/10, 0 vs 0); recommended structural setting |
 | V5 | CPES and Sigma together detect more runs than Sigma alone (second VM) | **supported** (40 vs 35) |
+| W1 | On a third VM (Windows 11, token tests made to run offline) CPES flags ≥ 95% of completed-escalation runs | **supported** (35/35) |
+| W2 | On the third VM CPES detects ≥ 70% of **all 50** runs | **supported** (35/50) |
+| W3 | The token signal flags SYSTEM in ≥ 1 completed token run — its first real test on live data | **supported** (5/5 completed token runs) |
+| W4 | The packaged research-v3 mode flags exactly what the research rules flag (third VM) | **supported** (no differences) |
+| W5 | CPES and Sigma together detect more runs than Sigma alone (third VM) | **supported** (45 vs 35) |
+| W6 | Service-install corroboration keeps service detections without adding false alarms (third VM) | **supported** (10/10, 0 vs 0) |
 
 ## How it relates to existing tools
 
@@ -128,13 +134,13 @@ incident correlation (`cpes.correlation`). Component contracts: [docs/](docs).
 
 ## Limitations
 
-- One lab endpoint and two VM sessions (Windows 11, Windows Server 2022), each a single machine; no multi-host or enterprise traffic.
-- The token signal is untested on live data: in both VM sessions the token tests never reached SYSTEM. Two of the three Atomic token tests download their attack script at run time and cannot run on an isolated VM.
-- On the Windows 11 session Defender stopped 15 of 20 UAC escalations; on Server 2022, with Defender's real-time protection off, 10 of 20 UAC runs escalated (Event Viewer never did, `sdclt.exe` does not exist there) and all 10 were flagged.
+- One lab endpoint and three VM sessions (two Windows 11, one Windows Server 2022), each a single machine; no multi-host or enterprise traffic.
+- The token signal was first tested on live data in the third VM session: with the token technique's run-time script download served from a pinned local copy, T1134.001 #1 reached SYSTEM and the token signal flagged it in **5/5** completed token runs. The other two Atomic token-test variants still cannot complete on an isolated, patched host (a failed `SeDebugPrivilege` duplication, PPL-protected `lsass`), so live token coverage is one completed technique on one host.
+- On the first Windows 11 session (vm-live-v1) Defender stopped 15 of 20 UAC escalations; with Defender's real-time protection off, 10 of 20 UAC runs escalated on Server 2022 (Event Viewer never did, `sdclt.exe` does not exist there) and 15 of 20 on the third VM (Windows 11), all flagged.
 - Four mechanisms; techniques without a signal are not detected.
 - The auto-elevation signal names four binaries and does not generalise to other UAC methods.
 - On the lab corpus the injection signal is effectively an image-name rule.
-- The service rule raises false alarms on vendor agents installed outside `Program Files`. With service-install events (System 7045 / Security 4697) the opt-in `service-install-only` mode removed them on the Windows 11 session and kept every service detection on both sessions; the false-alarm side is tested on one machine ([analysis](docs/design/service-rule-feasibility.md)).
+- The service rule raises false alarms on vendor agents installed outside `Program Files`. With service-install events (System 7045 / Security 4697) the opt-in `service-install-only` mode removed them on the first Windows 11 session (vm-live-v1) and kept every service detection on all three sessions; the false-alarm side is tested on one machine ([analysis](docs/design/service-rule-feasibility.md)).
 - On every lab and VM corpus `mavinject.exe` leaves no remote-thread record, so injection is found only by the labelled name rule (research-v3); the structural default finds none of them there.
 - The lab corpora are private (they contain host and account identifiers); lab protocols cannot be re-run from a clone.
 
