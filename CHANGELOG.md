@@ -5,7 +5,20 @@ release may change signals, weights and report fields. Every evaluation and its
 expected outcome are pre-registered in [docs/design/](docs/design); results are
 generated into [docs/RESULTS.md](docs/RESULTS.md).
 
-## Unreleased
+## 0.4.0 — 2026-10-30
+
+- **VM3 evaluation** (`vm3`, pre-registered in [docs/design/vm3-session.md](docs/design/vm3-session.md) with a pilot
+  amendment): a third live corpus on Windows 11 with every detector frozen, Defender real-time protection off during
+  the attacks, and the token tests made to run offline (a pinned local `Get-System.ps1` served to the one run-time
+  download). 50 runs; an escalation completed in 35 (the other 15 are three tests pre-registered as "cannot complete
+  here" on build 26200.9711 — the patched mscfile UAC hijack, a failed `SeDebugPrivilege` duplication, and PPL-protected
+  `lsass`). **All six hypotheses W1–W6 supported**: the research signals flagged all 35 completed-escalation runs
+  consistently with no false alarm (W1) and 35/50 of all runs (W2, the headline rate VM1/VM2 missed); the token signal
+  flagged the SYSTEM process in 5/5 completed token runs — its first real test (W3); research-v3 matched the research
+  rules exactly (W4); CPES ∪ Sigma 45/50 vs Sigma 35/50 (W5); service-install-only kept every service detection with no
+  extra false alarm (W6). CPES named the escalated process in 25/25 runs where it appeared, Sigma in 0/25. The recorded
+  session spanned a ~6 h idle pause between the UAC and admin parts (benign time outside every test window; disclosed in
+  the setup notes). Corpus 1,128,188 documents, not published. RESULTS §16, FINDINGS §13.
 
 ## 0.3.0 — 2026-10-29
 

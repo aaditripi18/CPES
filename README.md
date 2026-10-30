@@ -52,6 +52,7 @@ the right technique in **98 of 126** runs with one false alarm.
 | 100 unused OTRF captures, service rule | 7 alerts, all on Azure vendor agents | — |
 | Live VM session, 50 runs, detectors frozen, Defender on | **20/50** (15/30 without the 20 runs Defender intervened in); **0** false alarms; named the privileged process in **15/15** runs where it appeared | SigmaHQ core 30/50, named 0/15; both together 35/50 |
 | Second VM (Windows Server 2022), 50 runs, Defender real-time protection off | **25/50**: **all 25** runs where an escalation happened (the other 25 contained none); named the privileged process in **20/20** | SigmaHQ core 35/50, named 0/20; both together **40/50** |
+| Third VM (Windows 11), 50 runs, Defender off, token tests made to run offline | **35/50**: **all 35** runs where an escalation happened (the other 15 are the three tests that cannot complete on an isolated Win11 host); named the privileged process in **25/25**; token signal flagged SYSTEM in **5/5** completed token runs | SigmaHQ core 35/50, named 0/25; both together **45/50** |
 
 | | Pre-registered expectation | Verdict |
 |---|---|---|

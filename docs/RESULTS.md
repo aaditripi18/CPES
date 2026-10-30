@@ -353,6 +353,47 @@ Service signal by mode: `package-v2` service runs 10, false-alarm processes 0; `
 
 Adoption (pre-registered rule): dashboard default **unchanged (package-v2)**; recommended structural setting **service-install-only (B2 alone)**.
 
+## 16. VM3 — Windows 11, Defender off, token tests made to run offline
+
+A third live corpus built to remove the setup problems that left half the runs un-escalated in VM1 and VM2: Windows 11 (every UAC binary present), Defender real-time protection off during the attacks, and the token tests' run-time script download served from a pinned local copy so the token technique runs on the isolated VM. This is the first test of the token signal on completed escalations. Pre-registered in [design/vm3-session.md](design/vm3-session.md); setup and session in [../lab/vm-session/VM3-SETUP-NOTES.md](../lab/vm-session/VM3-SETUP-NOTES.md). The corpus is not published.
+
+execution `vm3-20261030T041508Z` · 1,128,188 documents · 50 runs · escalation completed in 35 (T1055.001 5/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20) · Defender detections in 0 runs
+
+**All 50 runs**
+
+| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |
+|---|---|---|---|---|
+| R_research_signals | 35/50 | 35/50 | 0 | T1055.001 5/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20 |
+| P_package-v2 | 32/50 | 31/50 | 0 | T1055.001 1/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20 |
+| P_research-v3 | 35/50 | 35/50 | 0 | T1055.001 5/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20 |
+| P_structural-v3 | 31/50 | 31/50 | 0 | T1055.001 1/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20 |
+| P_service-install-only | 31/50 | 31/50 | 0 | T1055.001 1/5, T1134.001 5/10, T1134.002 0/5, T1543.003 10/10, T1548.002 15/20 |
+
+**Runs where the escalation completed**
+
+| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |
+|---|---|---|---|---|
+| R_research_signals | 35/35 | 35/35 | 0 | T1055.001 5/5, T1134.001 5/5, T1543.003 10/10, T1548.002 15/15 |
+| P_package-v2 | 31/35 | 31/35 | 0 | T1055.001 1/5, T1134.001 5/5, T1543.003 10/10, T1548.002 15/15 |
+| P_research-v3 | 35/35 | 35/35 | 0 | T1055.001 5/5, T1134.001 5/5, T1543.003 10/10, T1548.002 15/15 |
+| P_structural-v3 | 31/35 | 31/35 | 0 | T1055.001 1/5, T1134.001 5/5, T1543.003 10/10, T1548.002 15/15 |
+| P_service-install-only | 31/35 | 31/35 | 0 | T1055.001 1/5, T1134.001 5/5, T1543.003 10/10, T1548.002 15/15 |
+
+SigmaHQ core, high/critical: 35/50 runs (any), 25/50 consistent. R or Sigma, any flag: 45/50.
+
+**Token signal, first test:** flagged the SYSTEM process in 5 of 5 completed token runs.
+
+Runs whose privileged process actually appeared: 25; named by R 25, Sigma 0.
+
+| | Expectation | Observed | Verdict |
+|---|---|---|---|
+| W1 | On completed-escalation runs, R flags >= 95% consistently | 35/35 | supported |
+| W2 | R detects >= 70% of all 50 runs consistently | 35/50 | supported |
+| W3 | The token signal flags the SYSTEM process in >= 1 completed token run | 5/5 completed token runs | supported |
+| W4 | research-v3 flags exactly the processes R flags | no differences | supported |
+| W5 | R or Sigma (any flag) detects more runs than Sigma alone | 45 vs 35 | supported |
+| W6 | service-install-only keeps >= 90% of package-v2 service detections, no extra false alarm | 10/10 runs, 0 vs 0 FA | supported |
+
 ## Reading these results
 
 See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.

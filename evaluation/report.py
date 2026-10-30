@@ -347,6 +347,43 @@ def _vm2_section() -> list[str]:
     return out
 
 
+def _vm3_section() -> list[str]:
+    record = _load("vm3")
+    out = ["", "## 16. VM3 — Windows 11, Defender off, token tests made to run offline", "",
+           "A third live corpus built to remove the setup problems that left half the runs un-escalated in VM1 and VM2: "
+           "Windows 11 (every UAC binary present), Defender real-time protection off during the attacks, and the token tests' "
+           "run-time script download served from a pinned local copy so the token technique runs on the isolated VM. "
+           "This is the first test of the token signal on completed escalations. Pre-registered in "
+           "[design/vm3-session.md](design/vm3-session.md); setup and session in "
+           "[../lab/vm-session/VM3-SETUP-NOTES.md](../lab/vm-session/VM3-SETUP-NOTES.md). The corpus is not published.", ""]
+    if not record:
+        return out + ["_Not run yet._"]
+    r = record["result"]
+    c, runs = r["corpus"], r["runs"]
+    out += [f"execution `{record['id']}` · {c['unique']:,} documents · {runs['total']} runs · "
+            f"escalation completed in {runs['escalation_completed']} ({', '.join(f'{t} {x}' for t, x in runs['escalation_completed_by_technique'].items())}) · "
+            f"Defender detections in {runs['defender_detected']} runs", ""]
+    subsets = [("all_runs", "All 50 runs"), ("escalation_completed", "Runs where the escalation completed")]
+    if runs.get("binary_absent"):
+        subsets.insert(1, ("excluding_binary_absent", "Without any binary-absent runs"))
+    for subset, title in subsets:
+        out += [f"**{title}**", "", "| Detector | Runs, any flag | Runs, consistent | False-alarm processes | Consistent by technique |", "|---|---|---|---|---|"]
+        for name, v in r["detectors"][subset].items():
+            by = ", ".join(f"{t} {x}" for t, x in v.get("by_technique_consistent", {}).items()) or "—"
+            out.append(f"| {name} | {v['runs_any']}/{v['runs']} | {v['runs_consistent']}/{v['runs']} | {v['false_alarm_processes']} | {by} |")
+        out.append("")
+    sg, n, tok = r["sigma_core_high"], r["outcome_process_named"], r["token_signal_first_test"]
+    out += [f"SigmaHQ core, high/critical: {sg['runs_any']}/{sg['runs']} runs (any), {sg['runs_consistent']}/{sg['runs']} consistent. "
+            f"R or Sigma, any flag: {r['r_or_sigma_runs_any']}/{runs['total']}.", "",
+            f"**Token signal, first test:** flagged the SYSTEM process in {tok['flagged_by_token_signal']} of {tok['completed_token_runs']} completed token runs.", "",
+            f"Runs whose privileged process actually appeared: {n['runs_with_outcome_process']}; named by R {n['R']}, Sigma {n['Sigma']}.", "",
+            "| | Expectation | Observed | Verdict |", "|---|---|---|---|"]
+    for key, h in r["hypotheses"].items():
+        verdict = "untestable" if h["supported"] is None else ("supported" if h["supported"] else "**not supported**")
+        out.append(f"| {key} | {h['expected']} | {h['observed']} | {verdict} |")
+    return out
+
+
 def build() -> str:
     out = [
         "# CPES results (generated)",
@@ -388,7 +425,7 @@ def build() -> str:
             out.append(f"| {NAMES.get(name, name)} | {v['modelled_runs_detected_any']} | {v['modelled_runs_detected_consistent'] or '—'} | {v['flagged_processes']} | {alarms} | {by} |")
     else:
         out.append("_Not run yet._")
-    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section() + _package_v3_section() + _vm2_section()
+    out += _external_section() + _evasion_section() + _streaming_section() + _sigma_section() + _heldout_section() + _incidents_section() + _service_signature_section() + _vm_live_section() + _package_v3_section() + _vm2_section() + _vm3_section()
     out += ["", "## Reading these results", "", "See [dashboard/EVALUATION-NOTES.md](dashboard/EVALUATION-NOTES.md) for interpretation and open decisions.", ""]
     return "\n".join(out)
 
